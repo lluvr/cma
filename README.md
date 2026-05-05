@@ -94,11 +94,15 @@ cma sits alongside three reference artifacts published by Clarethium:
 
 cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here.
 
+## Architecture
+
+cma's action-time injection layer follows a five-stage architecture (interception, context extraction, query, injection, logging). The pattern, reference implementations, data contracts, and validation framework are specified in [ARCHITECTURE.md](ARCHITECTURE.md). Read it before writing a new integration; conform to its contracts so downstream analysis tooling stays consistent.
+
 ## Roadmap
 
-The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection is implemented for Claude Code (see [Action-time injection](#action-time-injection-claude-code) above).
+The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection is implemented for Claude Code (see [Action-time injection](#action-time-injection-claude-code) above), with a shell wrapper integration in development per the architecture in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Beyond 1.0: generic CLI wrapper (for environments other than Claude Code), texture preservation on misses (conversation excerpt, intended action, corrected action), counterfactual capture, per-project data scoping. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
+Beyond 1.0: shell wrapper (zsh, bash with bash-preexec) for non-AI-client operators, counterfactual capture analysis tooling, per-project data scoping, recency-weighted surface ranking. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
 
 ## License
 
