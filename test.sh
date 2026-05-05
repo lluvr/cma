@@ -189,6 +189,54 @@ else
     fail=$((fail + 1))
 fi
 
+# Decision applies-when matching (the decision-surfacing closure)
+reset
+"$CMA" decision "AUTH: validate JWT" --surface infra --applies-when auth >/dev/null
+"$CMA" decision "DB: use migrations" --surface infra --applies-when "db migration" >/dev/null
+"$CMA" decision "STYLE: early returns" --surface general >/dev/null
+"$CMA" miss "auth check missed" --surface auth >/dev/null
+
+# Surface filter on auth: matches AUTH decision (via applies-when) and miss (via surface field)
+output=$("$CMA" surface --surface auth 2>&1)
+if [[ "$output" == *"AUTH: validate JWT"* ]]; then
+    printf "PASS  %s\n" "decision surfaces by applies-when keyword"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "decision surfaces by applies-when keyword" "$output"
+    fail=$((fail + 1))
+fi
+
+# Multi-keyword applies-when: db decision matches both "db" and "migration"
+output=$("$CMA" surface --surface migration 2>&1)
+if [[ "$output" == *"DB: use migrations"* ]]; then
+    printf "PASS  %s\n" "decision applies-when matches any of multiple keywords"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "decision applies-when matches any of multiple keywords" "$output"
+    fail=$((fail + 1))
+fi
+
+# Decision without applies-when only matches by stored surface
+output=$("$CMA" surface --surface infra 2>&1)
+if [[ "$output" == *"AUTH: validate JWT"* && "$output" == *"DB: use migrations"* && "$output" != *"STYLE: early returns"* ]]; then
+    printf "PASS  %s\n" "decision without applies-when matches only by stored surface"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "decision without applies-when matches only by stored surface"
+    fail=$((fail + 1))
+fi
+
+# Misses do NOT get applies-when matching (only their surface field matters)
+# A miss with surface="auth" should not match --surface=migration even if a decision with applies-when does
+output=$("$CMA" surface --surface migration --type miss 2>&1)
+if [[ "$output" == *"No captures match"* ]]; then
+    printf "PASS  %s\n" "misses do not surface via applies-when (decision-specific)"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "misses do not surface via applies-when (decision-specific)" "$output"
+    fail=$((fail + 1))
+fi
+
 # ---------------------------------------------------------------------------
 # Distill (default mode + --review/--retire stubs)
 # ---------------------------------------------------------------------------

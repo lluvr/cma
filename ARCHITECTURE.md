@@ -77,6 +77,8 @@ Query result limit: a small number (default 3). The point is to surface the most
 
 The query is read-only from the operator's perspective. Logging happens as a side effect of `cma surface`, not as additional work for the integration.
 
+For decisions, `cma surface` additionally matches the decision's `applies_when` field against the context keywords. A decision with `applies_when="auth"` surfaces when the context contains "auth" (in surface or file), even if the decision's stored surface is something else. This closes the decision-surfacing loop: decisions surface at the moment their conditions match, not only when explicitly queried by stored surface. `applies_when` matching is decision-specific; misses, rejections, and preventions match only by their surface and file fields.
+
 ### 2.4 Injection
 
 The fourth stage delivers surfaced captures to the operator's context. The injection channel is environment-specific:

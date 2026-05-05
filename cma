@@ -51,6 +51,11 @@ cma decision <description> [--surface <s>] [--applies-when <predicate>]
 
 Capture an architectural or strategic choice. Format the description as
 "TOPIC: choice (rationale)".
+
+The --applies-when predicate is matched against context at action time:
+when surface or file context contains any keyword in applies-when, the
+decision surfaces alongside other captures. Decisions thus apply when their
+conditions are met, not only when explicitly queried.
 EOF
             ;;
         reject)
@@ -243,6 +248,23 @@ for path in sorted(glob(os.path.join(data_dir, "*.jsonl"))):
 def matches(rec):
     if type_filter and rec.get("type") != type_filter:
         return False
+
+    # Decisions: applies-when matches against context keywords. A decision
+    # with applies-when="auth db" surfaces whenever surface or file context
+    # contains "auth" or "db", even if the decision's own surface differs.
+    # This closes the decision-surfacing loop (decisions surface at action
+    # time when conditions match, not just by stored surface field).
+    if rec.get("type") == "decision":
+        applies_when = (rec.get("applies_when") or "").lower()
+        if applies_when:
+            keywords = [k for k in applies_when.replace(",", " ").split() if k]
+            context_parts = []
+            if surface_filter: context_parts.append(surface_filter.lower())
+            if file_filter: context_parts.append(file_filter.lower())
+            context_str = " ".join(context_parts)
+            if context_str and any(kw in context_str for kw in keywords):
+                return True
+
     if surface_filter and rec.get("surface") != surface_filter:
         return False
     if file_filter:
