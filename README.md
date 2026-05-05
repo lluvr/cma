@@ -28,20 +28,22 @@ Capture a failure:
 
 ```bash
 cma miss "fix removed the error message instead of addressing the defect" \
-    --surface infra --fm speed-over-understanding
+    --surface infra --fm <failure-shape>
 ```
 
 For richer capture (texture preservation), add the situational fields:
 
 ```bash
-cma miss "missed JWT expiration in middleware" \
-    --surface auth --fm assumption-over-verification \
+cma miss "missed validation in middleware" \
+    --surface auth --fm <failure-shape> \
     --intended "patch only the failing test" \
     --corrected "trace upstream defect, fix at root" \
     --excerpt-from /tmp/conversation-excerpt.txt
 ```
 
 The texture fields (`--excerpt`, `--intended`, `--corrected`) preserve the conditions of the failure so future surfacing can match by situation, not just keywords.
+
+The `--fm` value is an opaque string from the operator's perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 
 Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](DATA.md).
 
@@ -138,6 +140,21 @@ cma sits alongside three reference artifacts published by Clarethium:
 - **Lodestone** orients practice.
 
 cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here.
+
+## Methodology integration
+
+cma is methodology-agnostic. The `--fm` field on captures is an opaque string; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names. The methodology owns the vocabulary and its meaning; cma owns the data substrate.
+
+For automatic classification at capture time, set `CMA_FM_CLASSIFIER` to a command that reads the description on stdin and emits the failure-mode tag on stdout:
+
+```bash
+export CMA_FM_CLASSIFIER=/path/to/your-classifier
+
+cma miss "the operator skipped verification before deploying"
+# Classifier auto-tags the --fm value based on the description.
+```
+
+The classifier is maintainer-side. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma calls it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 10](ARCHITECTURE.md) for the full integration pattern.
 
 ## Architecture
 

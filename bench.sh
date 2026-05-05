@@ -27,7 +27,7 @@ trap 'rm -rf "$CMA_DIR" "$PATH_BIN"' EXIT
 # Populate with 100 realistic captures across multiple surfaces
 echo "Populating $CMA_DIR with 100 captures..."
 surfaces=(auth payments db api ui docs test)
-fms=(speed-over-understanding assumption-over-verification basin-capture happy-path-only tunnel-vision)
+fms=(fm-1 fm-2 fm-3 fm-4 fm-5)
 for i in $(seq 1 100); do
     surface=${surfaces[$((RANDOM % ${#surfaces[@]}))]}
     fm=${fms[$((RANDOM % ${#fms[@]}))]}

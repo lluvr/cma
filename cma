@@ -166,6 +166,19 @@ cmd_miss() {
             *) echo "cma miss: unknown flag: $1" >&2; usage_for miss; exit 1 ;;
         esac
     done
+
+    # Plugin point: when --fm is not provided and CMA_FM_CLASSIFIER is set,
+    # invoke the classifier with description on stdin and use its first
+    # line of output as the fm tag. Failure-isolated: classifier errors,
+    # missing commands, or timeouts do not block the capture.
+    # See ARCHITECTURE.md Section 10 (Methodology integration).
+    if [[ -z "$fm" ]] && [[ -n "${CMA_FM_CLASSIFIER:-}" ]]; then
+        fm=$(printf '%s' "$description" | timeout 5 sh -c "$CMA_FM_CLASSIFIER" 2>/dev/null | head -1 || true)
+        # Trim leading/trailing whitespace
+        fm="${fm#"${fm%%[![:space:]]*}"}"
+        fm="${fm%"${fm##*[![:space:]]}"}"
+    fi
+
     write_capture miss misses.jsonl "$description" \
         surface "$surface" fm "$fm" files "$files" \
         excerpt "$excerpt" intended "$intended" corrected "$corrected"

@@ -35,7 +35,7 @@ cma miss <description>
 
 - `<description>` (required, positional). One-line statement of what failed. Phrased actively: "Treated X as Y without verifying" rather than "X was treated as Y."
 - `--surface` (optional). The domain area: `auth`, `db`, `docs`, `ui`, `infra`, `general`, `git`. Auto-detected from file paths when `--files` is provided.
-- `--fm` (optional). The failure shape from the Lodestone canonical catalog (e.g., `assumption-over-verification`, `basin-capture`). Auto-detected from keywords when not specified.
+- `--fm` (optional). A failure-mode tag. cma stores the value opaquely; interpretation is the methodology's responsibility. When using a methodology with a canonical catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with that methodology's canonical names. Auto-classification can be plugged in via the `CMA_FM_CLASSIFIER` env var (see ARCHITECTURE.md).
 - `--files` (optional). Files involved in the failure. Comma-separated list.
 
 **Output:** Confirmation with the captured description, surface, fm, and a unique miss ID. If a similar miss exists in the last 90 days, output flags the recurrence and indicates which warning weight has been incremented.

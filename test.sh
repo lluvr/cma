@@ -132,6 +132,52 @@ else
     fail=$((fail + 1))
 fi
 
+# CMA_FM_CLASSIFIER plugin hook
+reset
+CMA_FM_CLASSIFIER='echo from-classifier' "$CMA" miss "test description" >/dev/null
+classifier_fm=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.read().strip()).get('fm', ''))
+")
+if [[ "$classifier_fm" == "from-classifier" ]]; then
+    printf "PASS  %s\n" "classifier sets fm when --fm not provided"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (got=%q)\n" "classifier sets fm when --fm not provided" "$classifier_fm"
+    fail=$((fail + 1))
+fi
+
+reset
+CMA_FM_CLASSIFIER='echo wrong' "$CMA" miss "test" --fm explicit >/dev/null
+explicit_fm=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.read().strip()).get('fm', ''))
+")
+if [[ "$explicit_fm" == "explicit" ]]; then
+    printf "PASS  %s\n" "--fm explicit wins over classifier"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (got=%q)\n" "--fm explicit wins over classifier" "$explicit_fm"
+    fail=$((fail + 1))
+fi
+
+reset
+expect_exit "classifier failure does not block capture" 0 env CMA_FM_CLASSIFIER='exit 1' "$CMA" miss "test"
+fail_fm=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.read().strip()).get('fm', '<not set>'))
+")
+if [[ "$fail_fm" == "<not set>" ]]; then
+    printf "PASS  %s\n" "classifier failure leaves fm unset"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (got=%q)\n" "classifier failure leaves fm unset" "$fail_fm"
+    fail=$((fail + 1))
+fi
+
 # Schema versioning: every capture has schema_version field
 reset
 "$CMA" miss "v" --surface auth >/dev/null
@@ -317,9 +363,9 @@ expect_exit     "distill --bogus exits 1"        1 "$CMA" distill --bogus
 
 # Build a pattern of recurring misses and check --review surfaces it
 reset
-"$CMA" miss "first" --surface auth --fm assumption-over-verification >/dev/null
-"$CMA" miss "second" --surface auth --fm assumption-over-verification >/dev/null
-"$CMA" miss "third elsewhere" --surface ui --fm basin-capture >/dev/null
+"$CMA" miss "first" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "second" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "third elsewhere" --surface ui --fm fm-2 >/dev/null
 expect_contains "review identifies recurring pattern" "2x" "$CMA" distill --review
 expect_contains "review reports surface in pattern"   "auth" "$CMA" distill --review
 
@@ -352,20 +398,20 @@ expect_exit     "stats --bogus exits 1"          1 "$CMA" stats --bogus
 # stats --recurrence
 reset
 expect_contains "recurrence empty data"          "No misses" "$CMA" stats --recurrence
-"$CMA" miss "x" --surface auth --fm assumption-over-verification >/dev/null
+"$CMA" miss "x" --surface auth --fm fm-1 >/dev/null
 expect_contains "recurrence single miss not recurring" "no patterns are recurring" "$CMA" stats --recurrence
-"$CMA" miss "y" --surface auth --fm assumption-over-verification >/dev/null
+"$CMA" miss "y" --surface auth --fm fm-1 >/dev/null
 expect_contains "recurrence detects pattern"     "2x" "$CMA" stats --recurrence
 expect_contains "recurrence frames as not working" "not working" "$CMA" stats --recurrence
 
 # stats --leaks
 reset
 expect_contains "leaks with no events"           "No surface events" "$CMA" stats --leaks
-"$CMA" miss "old" --surface auth --fm assumption-over-verification >/dev/null
+"$CMA" miss "old" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
 expect_contains "leaks with surface but no later miss" "no leaks detected" "$CMA" stats --leaks
 sleep 1
-"$CMA" miss "new despite warning" --surface auth --fm assumption-over-verification >/dev/null
+"$CMA" miss "new despite warning" --surface auth --fm fm-1 >/dev/null
 expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stats --leaks
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
 expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log

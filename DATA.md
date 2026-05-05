@@ -44,7 +44,7 @@ Captures a failure. Written by `cma miss`.
   "timestamp": "2026-05-05T...",
   "description": "...",
   "surface": "auth",
-  "fm": "assumption-over-verification",
+  "fm": "<failure-shape>",
   "files": "src/auth/jwt.ts",
   "intended": "patch only the failing test",
   "corrected": "trace upstream defect, fix at root",

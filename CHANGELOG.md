@@ -31,6 +31,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Atomic write semantics: capture writes use a single python3 `f.write` syscall on the fully-composed JSON record. Atomic for records under PIPE_BUF (typically 4096 bytes); best-effort atomic for longer texture-bearing records. Replaces the prior bash `>>` append, which could interleave on long writes from concurrent cma processes.
 - Tolerant read: corrupted JSONL lines are skipped with a per-file stderr warning of the form `cma: skipped N corrupted line(s) in <file>`, instead of breaking the entire query. The corpus stays usable even when individual records are damaged. Implemented in `cma surface` and `cma stats --leaks`; remaining query paths (recurrence, behavior, distill --review, distill --retire) silently skip with corruption counters that will surface in Phase 2 polish.
 
+### Methodology integration (loose-coupling polish)
+
+- Documentation sanitization: removed Lodestone-coined failure-shape names from cma's docs and code examples (replaced with `<failure-shape>` placeholders or `fm-1` generic tags). Documentation now explicitly states cma is methodology-agnostic and references Lodestone as the canonical methodology when present. Protects the methodology asset by keeping the catalog where it belongs (in Lodestone), not replicated in cma's docs.
+- `CMA_FM_CLASSIFIER` plugin hook: when set and `--fm` is not provided, `cma miss` invokes the configured shell command with description on stdin and uses its first line of stdout as the failure-mode tag. Failure-isolated (5-second timeout, classifier errors do not block the capture). Maintainer-side wiring; cma ships no classifier. Documented in ARCHITECTURE.md Section 10. Enables operators to wire methodology-aware classification (Lodestone-aware or otherwise) without coupling cma to any specific methodology.
+
 ### Operator confidence (Phase 2 polish)
 
 - DATA.md: complete schema documentation for the data directory. Layout, per-record-type schemas with examples, schema versioning policy, atomicity guarantees, tolerant-read behavior, backup recommendations, and migration policy for future schema versions. The contract for the durable corpus.

@@ -166,7 +166,7 @@ Written to `$CMA_DIR/surface_events.jsonl` by `cma surface`:
       "id": "20260504-...",
       "type": "miss",
       "surface": "auth",
-      "fm": "assumption-over-verification"
+      "fm": "<failure-shape>"
     }
   ]
 }
@@ -185,7 +185,7 @@ Written to `$CMA_DIR/misses.jsonl` by `cma miss`:
   "timestamp": "2026-05-05T...",
   "description": "...",
   "surface": "auth",
-  "fm": "assumption-over-verification",
+  "fm": "<failure-shape>",
   "files": "src/auth/jwt.ts",
   "intended": "patch only the failing test",
   "corrected": "trace upstream defect, fix at root",
@@ -326,7 +326,30 @@ The architecture's contract is: integrations call `cma surface` and respect its 
 
 The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes to the contract follow the project's versioning policy (see [CHANGELOG.md](CHANGELOG.md)).
 
-## 9. References
+## 10. Methodology integration
+
+cma is methodology-agnostic. The `--fm` field on captures and any methodology-specific tags are opaque strings from cma's perspective. Semantics are owned by the methodology in use.
+
+When operators use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is the canonical operator-AI methodology under Clarethium; others may emerge), they tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
+
+The integration is by convention (shared vocabulary), not by code. cma does not depend on any methodology. Methodologies do not depend on cma. Each evolves independently. cma documentation does not replicate methodology catalogs; methodology documents own their catalogs and their meaning.
+
+### 10.1 Plugin point: classifier
+
+When the `CMA_FM_CLASSIFIER` env var is set, `cma miss` invokes the named command as a shell expression if `--fm` is not provided explicitly. The command receives the description on stdin and is expected to emit the classified failure-mode tag on its first line of stdout.
+
+Failure modes:
+
+- `--fm` provided explicitly: the classifier is not invoked. Operator override is absolute.
+- `CMA_FM_CLASSIFIER` not set: no classifier invocation; `fm` stays empty unless `--fm` was provided.
+- Classifier command not found, errors, or exits non-zero: `fm` stays empty; the capture proceeds.
+- Classifier exceeds 5 second timeout: `fm` stays empty; the capture proceeds.
+
+The plugin point exists so operators can wire methodology-aware classification (a Lodestone-aware classifier, for instance) without coupling cma to any specific methodology. Operators using a different methodology wire a different classifier. Operators not using auto-classification leave the env var unset and tag manually with `--fm`.
+
+The classifier is maintainer-side: cma ships no classifier in this repository. Methodologies that wish to provide one ship it as a separate companion tool (or document the wiring pattern in their own docs). This preserves the loose coupling.
+
+## 11. References
 
 - [DESIGN.md](DESIGN.md): the seven cma 1.0 primitives.
 - [Lodestone Section VIII](https://github.com/Clarethium/lodestone): the compound practice loop (the methodology this architecture serves).
