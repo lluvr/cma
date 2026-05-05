@@ -8,6 +8,7 @@
 set -euo pipefail
 
 VERSION="1.0.0-dev"
+SCHEMA_VERSION="1.0"
 CMA_DIR="${CMA_DIR:-$HOME/.cma}"
 
 mkdir -p "$CMA_DIR"
@@ -113,16 +114,33 @@ write_capture() {
     id=$(new_id)
     timestamp=$(iso_now)
 
-    {
-        printf '{"type":%s,"id":"%s","timestamp":"%s","description":%s' \
-            "$(json_escape "$type")" "$id" "$timestamp" "$(json_escape "$description")"
+    # Compose the entire JSON record, then append it via a single write()
+    # syscall. POSIX append (>>) is atomic for writes up to PIPE_BUF
+    # (typically 4096 bytes on Linux). Texture fields (excerpt, intended,
+    # corrected) can exceed this. Using python3's f.write of the full
+    # record is a single write() syscall, the best we can do without
+    # explicit file locking, and is atomic for the common case.
+    local record
+    record=$(
+        printf '{"schema_version":"%s","type":%s,"id":"%s","timestamp":"%s","description":%s' \
+            "$SCHEMA_VERSION" "$(json_escape "$type")" "$id" "$timestamp" "$(json_escape "$description")"
         while [[ $# -gt 1 ]]; do
             local key="$1" value="$2"
             shift 2
             [[ -n "$value" ]] && printf ',%s:%s' "$(json_escape "$key")" "$(json_escape "$value")"
         done
-        printf '}\n'
-    } >> "$CMA_DIR/$file"
+        printf '}'
+    )
+
+    # Bash command substitution strips trailing newlines; we add the JSONL
+    # record terminator inside the python writer to ensure each record is
+    # one line, atomically.
+    python3 -c '
+import sys
+path, data = sys.argv[1], sys.argv[2]
+with open(path, "ab") as f:
+    f.write((data + "\n").encode("utf-8"))
+' "$CMA_DIR/$file" "$record"
 
     echo "Captured $type $id"
 }
@@ -231,6 +249,7 @@ for path in sorted(glob(os.path.join(data_dir, "*.jsonl"))):
     # Don't include surface_events.jsonl in the captures-to-surface set
     if os.path.basename(path) == "surface_events.jsonl":
         continue
+    corrupted = 0
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -239,11 +258,14 @@ for path in sorted(glob(os.path.join(data_dir, "*.jsonl"))):
             try:
                 rec = json.loads(line)
             except json.JSONDecodeError:
+                corrupted += 1
                 continue
             # Skip retirement records when surfacing
             if rec.get("type") == "retirement":
                 continue
             captures.append(rec)
+    if corrupted:
+        print("cma: skipped {} corrupted line(s) in {}".format(corrupted, os.path.basename(path)), file=sys.stderr)
 
 def matches(rec):
     if type_filter and rec.get("type") != type_filter:
@@ -282,6 +304,7 @@ filtered = filtered[:limit]
 if should_log:
     event_id = "{}-{}".format(time.strftime("%Y%m%d-%H%M%S", time.gmtime()), os.urandom(4).hex())
     event = {
+        "schema_version": "1.0",
         "type": "surface_event",
         "id": event_id,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -351,6 +374,7 @@ groups = Counter()
 total = 0
 
 misses_path = os.path.join(data_dir, "misses.jsonl")
+corrupted = 0
 if os.path.exists(misses_path):
     with open(misses_path) as f:
         for line in f:
@@ -360,6 +384,7 @@ if os.path.exists(misses_path):
             try:
                 rec = json.loads(line)
             except json.JSONDecodeError:
+                corrupted += 1
                 continue
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1
@@ -559,6 +584,7 @@ def load_jsonl(path):
     records = []
     if not os.path.exists(path):
         return records
+    corrupted = 0
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -567,7 +593,10 @@ def load_jsonl(path):
             try:
                 records.append(json.loads(line))
             except json.JSONDecodeError:
+                corrupted += 1
                 continue
+    if corrupted:
+        print("cma: skipped {} corrupted line(s) in {}".format(corrupted, os.path.basename(path)), file=sys.stderr)
     return records
 
 misses = load_jsonl(os.path.join(data_dir, "misses.jsonl"))
@@ -629,6 +658,7 @@ groups = Counter()
 total = 0
 
 misses_path = os.path.join(data_dir, "misses.jsonl")
+corrupted = 0
 if os.path.exists(misses_path):
     with open(misses_path) as f:
         for line in f:
@@ -638,6 +668,7 @@ if os.path.exists(misses_path):
             try:
                 rec = json.loads(line)
             except json.JSONDecodeError:
+                corrupted += 1
                 continue
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1

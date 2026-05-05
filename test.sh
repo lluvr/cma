@@ -132,6 +132,58 @@ else
     fail=$((fail + 1))
 fi
 
+# Schema versioning: every capture has schema_version field
+reset
+"$CMA" miss "v" --surface auth >/dev/null
+"$CMA" decision "v" --surface infra >/dev/null
+"$CMA" reject "v" --surface ui >/dev/null
+"$CMA" prevented "v" >/dev/null
+"$CMA" distill "v" --scope project >/dev/null
+schema_ok=$(python3 -c "
+import json, glob, os
+ok = True
+for path in glob.glob('$CMA_DIR/*.jsonl'):
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line: continue
+            rec = json.loads(line)
+            if rec.get('schema_version') != '1.0':
+                ok = False
+                print('missing schema_version in', path, rec.get('type'))
+                break
+print('ok' if ok else 'fail')
+")
+if [[ "$schema_ok" == "ok" ]]; then
+    printf "PASS  %s\n" "all captures include schema_version 1.0"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "all captures include schema_version 1.0"
+    fail=$((fail + 1))
+fi
+
+# Tolerant read: corrupted JSONL line is skipped with stderr warning
+reset
+"$CMA" miss "valid" --surface auth >/dev/null
+echo "this is not valid json" >> "$CMA_DIR/misses.jsonl"
+"$CMA" miss "another valid" --surface auth >/dev/null
+output=$("$CMA" surface --surface auth 2>&1)
+err_output=$("$CMA" surface --surface auth 2>&1 >/dev/null)
+if [[ "$output" == *"valid"* ]] && [[ "$output" == *"another valid"* ]]; then
+    printf "PASS  %s\n" "tolerant read: valid records still surfaced after corruption"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "tolerant read: valid records still surfaced after corruption" "$output"
+    fail=$((fail + 1))
+fi
+if [[ "$err_output" == *"corrupted"* ]]; then
+    printf "PASS  %s\n" "tolerant read: corrupted line warned to stderr"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (err=%q)\n" "tolerant read: corrupted line warned to stderr" "$err_output"
+    fail=$((fail + 1))
+fi
+
 reset
 expect_exit "decision succeeds"                  0 "$CMA" decision "TOPIC: choice (rationale)" --surface infra
 expect_exit "decision with applies-when"         0 "$CMA" decision "X" --applies-when "surface=docs"
