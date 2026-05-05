@@ -133,10 +133,9 @@ Tests cover all capture verbs (normal and edge cases including special character
 
 ## The Clarethium body
 
-cma sits alongside three reference artifacts published by Clarethium:
+cma sits alongside two open reference artifacts published by Clarethium:
 
 - **Touchstone** validates work against quality standards.
-- **Whetstone** sharpens craft.
 - **Lodestone** orients practice.
 
 cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here.
