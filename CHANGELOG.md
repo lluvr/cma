@@ -34,7 +34,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Methodology integration (loose-coupling polish)
 
 - Documentation sanitization: removed Lodestone-coined failure-shape names from cma's docs and code examples (replaced with `<failure-shape>` placeholders or `fm-1` generic tags). Documentation now explicitly states cma is methodology-agnostic and references Lodestone as the canonical methodology when present. Protects the methodology asset by keeping the catalog where it belongs (in Lodestone), not replicated in cma's docs.
-- `CMA_FM_CLASSIFIER` plugin hook: when set and `--fm` is not provided, `cma miss` invokes the configured shell command with description on stdin and uses its first line of stdout as the failure-mode tag. Failure-isolated (5-second timeout, classifier errors do not block the capture). Maintainer-side wiring; cma ships no classifier. Documented in ARCHITECTURE.md Section 10. Enables operators to wire methodology-aware classification (Lodestone-aware or otherwise) without coupling cma to any specific methodology.
+- `CMA_FM_CLASSIFIER` plugin hook: when set and `--fm` is not provided, `cma miss` invokes the configured shell command with description on stdin and uses its first line of stdout as the failure-mode tag. Failure-isolated (5-second timeout, classifier errors do not block the capture). Maintainer-side wiring; cma ships no classifier. Documented in ARCHITECTURE.md Section 9. Enables operators to wire methodology-aware classification (Lodestone-aware or otherwise) without coupling cma to any specific methodology.
 
 ### Operator confidence (Phase 2 polish)
 

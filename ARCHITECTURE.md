@@ -326,7 +326,7 @@ The architecture's contract is: integrations call `cma surface` and respect its 
 
 The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes to the contract follow the project's versioning policy (see [CHANGELOG.md](CHANGELOG.md)).
 
-## 10. Methodology integration
+## 9. Methodology integration
 
 cma is methodology-agnostic. The `--fm` field on captures and any methodology-specific tags are opaque strings from cma's perspective. Semantics are owned by the methodology in use.
 
@@ -334,7 +334,7 @@ When operators use cma alongside a methodology that defines a canonical failure-
 
 The integration is by convention (shared vocabulary), not by code. cma does not depend on any methodology. Methodologies do not depend on cma. Each evolves independently. cma documentation does not replicate methodology catalogs; methodology documents own their catalogs and their meaning.
 
-### 10.1 Plugin point: classifier
+### 9.1 Plugin point: classifier
 
 When the `CMA_FM_CLASSIFIER` env var is set, `cma miss` invokes the named command as a shell expression if `--fm` is not provided explicitly. The command receives the description on stdin and is expected to emit the classified failure-mode tag on its first line of stdout.
 
@@ -349,7 +349,7 @@ The plugin point exists so operators can wire methodology-aware classification (
 
 The classifier is maintainer-side: cma ships no classifier in this repository. Methodologies that wish to provide one ship it as a separate companion tool (or document the wiring pattern in their own docs). This preserves the loose coupling.
 
-## 11. References
+## 10. References
 
 - [DESIGN.md](DESIGN.md): the seven cma 1.0 primitives.
 - [Lodestone Section VIII](https://github.com/Clarethium/lodestone): the compound practice loop (the methodology this architecture serves).

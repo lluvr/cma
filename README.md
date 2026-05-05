@@ -10,7 +10,7 @@ The methodology lives in Lodestone. cma is what running that methodology looks l
 
 ## Status
 
-cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. Test suite (77 cases) covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
+cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. Test suite (98 cases) covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
 
 The full surface is specified in [DESIGN.md](DESIGN.md). Additive features (action-time injection, texture preservation, counterfactual capture, recurrence detection) layer on without changing the locked surface.
 
@@ -153,7 +153,7 @@ cma miss "the operator skipped verification before deploying"
 # Classifier auto-tags the --fm value based on the description.
 ```
 
-The classifier is maintainer-side. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma calls it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 10](ARCHITECTURE.md) for the full integration pattern.
+The classifier is maintainer-side. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma calls it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](ARCHITECTURE.md) for the full integration pattern.
 
 ## Architecture
 

@@ -171,7 +171,7 @@ cmd_miss() {
     # invoke the classifier with description on stdin and use its first
     # line of output as the fm tag. Failure-isolated: classifier errors,
     # missing commands, or timeouts do not block the capture.
-    # See ARCHITECTURE.md Section 10 (Methodology integration).
+    # See ARCHITECTURE.md Section 9 (Methodology integration).
     if [[ -z "$fm" ]] && [[ -n "${CMA_FM_CLASSIFIER:-}" ]]; then
         fm=$(printf '%s' "$description" | timeout 5 sh -c "$CMA_FM_CLASSIFIER" 2>/dev/null | head -1 || true)
         # Trim leading/trailing whitespace
@@ -402,6 +402,9 @@ if os.path.exists(misses_path):
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1
             total += 1
+
+if corrupted:
+    print("cma: skipped {} corrupted line(s) in misses.jsonl".format(corrupted), file=sys.stderr)
 
 if total == 0:
     print("No misses recorded yet.")
@@ -686,6 +689,9 @@ if os.path.exists(misses_path):
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1
             total += 1
+
+if corrupted:
+    print("cma: skipped {} corrupted line(s) in misses.jsonl".format(corrupted), file=sys.stderr)
 
 if total == 0:
     print("No misses recorded yet.")
