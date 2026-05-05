@@ -447,16 +447,85 @@ PYEOF
 }
 
 cmd_stats() {
-    local view="" recurrence_mode=false leaks_mode=false
+    local view="" recurrence_mode=false leaks_mode=false behavior_mode=false
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --rejections) view="rejection"; shift ;;
             --preventions) view="prevention"; shift ;;
             --recurrence) recurrence_mode=true; shift ;;
             --leaks) leaks_mode=true; shift ;;
+            --behavior) behavior_mode=true; shift ;;
             *) echo "cma stats: unknown flag: $1" >&2; usage_for stats; exit 1 ;;
         esac
     done
+
+    if $behavior_mode; then
+        python3 - "$CMA_DIR" <<'PYEOF'
+import json, os, sys
+from collections import defaultdict
+
+data_dir = sys.argv[1]
+misses_path = os.path.join(data_dir, "misses.jsonl")
+
+if not os.path.exists(misses_path):
+    print("No misses recorded yet.")
+    sys.exit(0)
+
+with_texture = []
+total = 0
+with open(misses_path) as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        total += 1
+        if rec.get("intended") or rec.get("corrected"):
+            with_texture.append(rec)
+
+if not with_texture:
+    print("{} miss(es) recorded; none have intended/corrected texture yet.".format(total))
+    print("Capture with --intended and --corrected to enable behavior-layer analysis.")
+    sys.exit(0)
+
+groups = defaultdict(list)
+for rec in with_texture:
+    key = (rec.get("surface", ""), rec.get("fm", ""))
+    groups[key].append(rec)
+
+print("Behavior-layer signals from {} miss(es) ({} with texture):".format(total, len(with_texture)))
+print()
+
+sorted_groups = sorted(groups.items(), key=lambda x: len(x[1]), reverse=True)
+
+def truncate(text, n=70):
+    text = " ".join(text.split())
+    return text if len(text) <= n else text[:n-3] + "..."
+
+for (surface, fm), records in sorted_groups:
+    s = surface if surface else "(no surface)"
+    f = fm if fm else "(no fm)"
+    print("  surface={}  fm={}  ({} with texture)".format(s, f, len(records)))
+
+    recent = max(records, key=lambda r: r.get("timestamp", ""))
+    intended = recent.get("intended", "").strip()
+    corrected = recent.get("corrected", "").strip()
+
+    if intended:
+        print("    intended:  {}".format(truncate(intended)))
+    if corrected:
+        print("    corrected: {}".format(truncate(corrected)))
+    print()
+
+print("Behavior-layer analysis: each group shows where the operator had to pivot")
+print("from an initial impulse to a different action. Recurring pivots indicate")
+print("patterns where surfaced warnings consistently change operator behavior.")
+PYEOF
+        return 0
+    fi
 
     if $leaks_mode; then
         python3 - "$CMA_DIR" <<'PYEOF'

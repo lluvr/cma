@@ -256,6 +256,18 @@ expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stat
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
 expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log
 
+# stats --behavior
+reset
+expect_contains "behavior empty data"            "No misses" "$CMA" stats --behavior
+"$CMA" miss "no texture" --surface auth >/dev/null
+expect_contains "behavior with no texture"       "none have intended/corrected" "$CMA" stats --behavior
+"$CMA" miss "with texture" --surface auth --fm fm-1 \
+    --intended "patch the symptom" \
+    --corrected "fix the root cause" >/dev/null
+expect_contains "behavior groups by surface/fm"  "surface=auth" "$CMA" stats --behavior
+expect_contains "behavior shows intended"        "patch the symptom" "$CMA" stats --behavior
+expect_contains "behavior shows corrected"       "fix the root cause" "$CMA" stats --behavior
+
 # ---------------------------------------------------------------------------
 # Hook integration (Claude Code PreToolUse)
 # ---------------------------------------------------------------------------
