@@ -17,3 +17,20 @@ jobs:
 
       - name: Run test suite
         run: ./test.sh
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint cma and hooks
+        run: |
+          shellcheck cma
+          shellcheck test.sh
+          shellcheck bench.sh
+          shellcheck hooks/cma-pre
+          shellcheck hooks/claude-code-pre-tool-use.sh
+          shellcheck hooks/claude-code-session-start.sh
