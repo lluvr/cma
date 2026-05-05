@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# cma-pre: action-time injection wrapper for shell environments.
+#
+# Implements the five-stage architecture from ARCHITECTURE.md:
+#   1. Interception:    invoked by shell preexec hook OR operator manually
+#   2. Context extract: parses command line for trigger + surface heuristics
+#   3. Query:           calls `cma surface` with derived filters
+#   4. Injection:       writes results to stderr (visible to operator)
+#   5. Logging:         handled inside `cma surface` itself
+#
+# Usage:
+#   cma-pre <command> [args...]      Surface, then execute the command
+#   cma-pre --check "<cmdline>"      Surface only; do not execute
+#                                    (use from shell preexec hooks)
+#
+# Failure isolation: if cma is missing, errors, or times out, the wrapped
+# command still runs. The wrapper never blocks a command on its own failure.
+#
+# See ARCHITECTURE.md for the design contract this script implements.
+
+set -uo pipefail
+
+# ---------------------------------------------------------------------------
+# Mode detection
+# ---------------------------------------------------------------------------
+
+mode=execute
+if [[ "${1:-}" == "--check" ]]; then
+    mode=check
+    shift
+fi
+
+if [[ $# -eq 0 ]]; then
+    cat <<'EOF' >&2
+cma-pre: action-time injection wrapper.
+
+Usage:
+  cma-pre <command> [args...]      Surface relevant captures, then execute
+  cma-pre --check "<cmdline>"      Surface relevant captures only
+
+Shell integration (zsh):
+  preexec() { cma-pre --check "$1" }
+
+Shell integration (bash, requires bash-preexec):
+  preexec_functions+=("cma_pre_hook")
+  cma_pre_hook() { cma-pre --check "$1"; }
+
+See ARCHITECTURE.md for the design contract.
+EOF
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Stage 2: context extraction
+# ---------------------------------------------------------------------------
+
+# In --check mode, $1 is a single string with the full command line.
+# In execute mode, "$@" is properly split argv.
+if [[ "$mode" == "check" ]]; then
+    command_line="$1"
+else
+    command_line="$*"
+fi
+
+# Command name (first word, stripped of any path)
+cmd_name="${command_line%% *}"
+cmd_name="${cmd_name##*/}"
+
+# Trigger filter: which commands warrant surfacing.
+# Default list covers editors, version control, language toolchains, build tools.
+# Operators can override by setting CMA_PRE_TRIGGERS to a space-separated list.
+default_triggers="vim nvim vi nano emacs code subl micro hx helix kakoune git npm yarn pnpm cargo make gradle mvn bazel python python3 node ruby go rustc gcc clang"
+triggers="${CMA_PRE_TRIGGERS:-$default_triggers}"
+
+is_trigger=0
+for t in $triggers; do
+    if [[ "$cmd_name" == "$t" ]]; then
+        is_trigger=1
+        break
+    fi
+done
+
+# Surface detection from the full command line.
+# Same heuristics as the Claude Code PreToolUse hook for consistency.
+detect_surface() {
+    local lower
+    lower=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+    case "$lower" in
+        *auth*|*login*|*session*|*jwt*|*oauth*|*password*|*credential*) echo "auth"; return ;;
+        *payment*|*stripe*|*billing*|*checkout*) echo "payments"; return ;;
+        *schema*|*migration*|*database*|*/db/*) echo "db"; return ;;
+        *.test.*|*.spec.*|*/__tests__/*|*/tests/*|*/test/*) echo "test"; return ;;
+        *api/*|*/api*|*route*|*endpoint*|*controller*|*handler*) echo "api"; return ;;
+        *.tsx*|*.jsx*|*.vue*|*/ui/*|*component*) echo "ui"; return ;;
+        *.md*|*/docs/*|*readme*) echo "docs"; return ;;
+    esac
+    echo ""
+}
+
+surface=$(detect_surface "$command_line")
+
+# If neither a trigger command nor a detected surface, skip query.
+# (Surface alone can fire on non-trigger commands when keywords match;
+# trigger alone without surface lets editor opens of unsurfaced files pass.)
+if [[ "$is_trigger" == "0" && -z "$surface" ]]; then
+    if [[ "$mode" == "execute" ]]; then exec "$@"; fi
+    exit 0
+fi
+
+# Without a surface filter, querying is too broad. Skip in that case too.
+if [[ -z "$surface" ]]; then
+    if [[ "$mode" == "execute" ]]; then exec "$@"; fi
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Stage 3: query (failure-isolated)
+# ---------------------------------------------------------------------------
+
+if ! command -v cma >/dev/null 2>&1; then
+    # cma not installed; pass through silently
+    if [[ "$mode" == "execute" ]]; then exec "$@"; fi
+    exit 0
+fi
+
+# 5-second timeout protects against pathological cases (huge data dirs, etc.)
+output=$(timeout 5 cma surface --surface "$surface" --limit 3 2>/dev/null || true)
+
+# ---------------------------------------------------------------------------
+# Stage 4: injection (stderr, clearly attributed)
+# ---------------------------------------------------------------------------
+
+if [[ -n "$output" && "$output" != "No captures match." ]]; then
+    {
+        printf '>>> cma surfaced relevant captures for: %s\n' "$cmd_name"
+        printf '%s\n' "$output" | sed 's/^/    /'
+        printf '>>>\n'
+    } >&2
+fi
+
+# ---------------------------------------------------------------------------
+# Stage 5: logging — handled by `cma surface` invocation above.
+# ---------------------------------------------------------------------------
+
+# Execute the wrapped command (if not in check-only mode)
+if [[ "$mode" == "execute" ]]; then
+    exec "$@"
+fi
+exit 0

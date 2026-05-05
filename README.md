@@ -46,11 +46,13 @@ Captures are written to `~/.cma/` as JSON Lines files (one record per line, appe
 
 Run `cma --help` for the full command surface.
 
-## Action-time injection (Claude Code)
+## Action-time injection
 
-cma includes a PreToolUse hook for Claude Code in [`hooks/claude-code-pre-tool-use.sh`](hooks/claude-code-pre-tool-use.sh). When Claude is about to edit a file or run a command, the hook surfaces relevant prior captures automatically — the surfacing step of the compound loop without manual `cma surface` invocation.
+cma surfaces relevant prior captures automatically when an operator (or AI assistant) is about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](ARCHITECTURE.md). Two reference integrations ship in this repository.
 
-Install:
+### Claude Code
+
+`hooks/claude-code-pre-tool-use.sh` is a `PreToolUse` hook. Install:
 
 1. Ensure `cma` is on your `PATH` (see Quick start above).
 2. Add a hook entry to `~/.claude/settings.json`:
@@ -72,9 +74,38 @@ Install:
 }
 ```
 
-The hook detects the relevant surface heuristically from the file path or command (`auth`, `payments`, `db`, `api`, `ui`, `docs`, `test`), then queries `cma surface --surface <s>` for matching captures. Output goes to the assistant's context. Non-matching tool calls and tools that don't touch files are silent.
+The hook detects surface heuristically from the tool input (file path or command), queries `cma surface`, and writes results to stdout. Claude Code injects the output as additional context. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
 
-Every fire is logged as a surface event, so `cma stats --leaks` can later flag failures that occurred despite a relevant warning being surfaced — the closing step of the compound loop turning into evidence.
+### Shell (zsh, bash)
+
+`hooks/cma-pre` is a wrapper for shell environments. Surface detection uses the same heuristics as the Claude Code hook, so behavior is consistent across integrations.
+
+**zsh** (native preexec). Add to `~/.zshrc`:
+
+```bash
+preexec() { /path/to/cma/hooks/cma-pre --check "$1"; }
+```
+
+**bash** (requires [bash-preexec](https://github.com/rcaloras/bash-preexec)):
+
+```bash
+source /path/to/bash-preexec.sh
+preexec_functions+=("cma_pre_hook")
+cma_pre_hook() { /path/to/cma/hooks/cma-pre --check "$1"; }
+```
+
+**Manual wrapping**:
+
+```bash
+/path/to/cma/hooks/cma-pre git commit -m "fix auth bug"
+# Surfaces relevant captures, then runs the command
+```
+
+Triggers fire on commands likely to warrant surfacing: editors (`vim`, `nvim`, `emacs`, `code`, `subl`), version control (`git`), language toolchains (`npm`, `cargo`, `python`, `node`), and build tools (`make`, `gradle`, `mvn`). Override the trigger list with `CMA_PRE_TRIGGERS` (space-separated).
+
+Failure isolation: if cma is missing, errors, or times out (default 5 seconds), the wrapped command still runs cleanly. The wrapper never blocks an action on its own failure.
+
+Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced — the validation evidence that the loop closes.
 
 ## Testing
 

@@ -310,6 +310,82 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Shell wrapper (cma-pre)
+# ---------------------------------------------------------------------------
+
+reset
+PRE="$(cd "$(dirname "$0")" && pwd)/hooks/cma-pre"
+
+# No-args exits 1
+expect_exit "cma-pre with no args exits 1"       1 bash "$PRE"
+
+# Non-trigger command: silent, exits 0
+output=$(bash "$PRE" --check "ls /tmp" 2>&1)
+exit=$?
+if [[ -z "$output" && "$exit" == "0" ]]; then
+    printf "PASS  %s\n" "cma-pre --check non-trigger silent exit 0"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q exit=%s)\n" "cma-pre --check non-trigger silent exit 0" "$output" "$exit"
+    fail=$((fail + 1))
+fi
+
+# Trigger + matching surface: produces output
+"$CMA" miss "test wrapper miss" --surface auth >/dev/null
+output=$(bash "$PRE" --check "git commit -m fix-auth-bug" 2>&1)
+if [[ "$output" == *"test wrapper miss"* ]]; then
+    printf "PASS  %s\n" "cma-pre --check surfaces matched capture"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "cma-pre --check surfaces matched capture" "$output"
+    fail=$((fail + 1))
+fi
+
+# Trigger but no surface keyword: silent
+output=$(bash "$PRE" --check "make build" 2>&1)
+if [[ -z "$output" ]]; then
+    printf "PASS  %s\n" "cma-pre --check trigger without surface silent"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "cma-pre --check trigger without surface silent" "$output"
+    fail=$((fail + 1))
+fi
+
+# Failure isolation: cma not on PATH
+output=$(env -i HOME="$HOME" PATH="/usr/bin:/bin" CMA_DIR="$CMA_DIR" bash "$PRE" --check "git commit -m auth" 2>&1)
+exit=$?
+if [[ -z "$output" && "$exit" == "0" ]]; then
+    printf "PASS  %s\n" "cma-pre fails silently when cma missing"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q exit=%s)\n" "cma-pre fails silently when cma missing" "$output" "$exit"
+    fail=$((fail + 1))
+fi
+
+# Surface event logged by cma-pre invocations
+events_before=0
+[[ -f "$CMA_DIR/surface_events.jsonl" ]] && events_before=$(wc -l < "$CMA_DIR/surface_events.jsonl" | tr -d ' ')
+bash "$PRE" --check "git commit auth-fix" >/dev/null 2>&1
+events_after=$(wc -l < "$CMA_DIR/surface_events.jsonl" | tr -d ' ')
+if [[ "$events_after" -gt "$events_before" ]]; then
+    printf "PASS  %s\n" "cma-pre logs surface event via cma surface"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (before=%s after=%s)\n" "cma-pre logs surface event via cma surface" "$events_before" "$events_after"
+    fail=$((fail + 1))
+fi
+
+# CMA_PRE_TRIGGERS env var override
+output=$(CMA_PRE_TRIGGERS="custom_tool" bash "$PRE" --check "custom_tool auth-config" 2>&1)
+if [[ "$output" == *"test wrapper miss"* ]]; then
+    printf "PASS  %s\n" "cma-pre respects CMA_PRE_TRIGGERS override"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "cma-pre respects CMA_PRE_TRIGGERS override" "$output"
+    fail=$((fail + 1))
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 
