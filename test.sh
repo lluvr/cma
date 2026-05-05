@@ -370,6 +370,78 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# SessionStart hook
+# ---------------------------------------------------------------------------
+
+reset
+SS_HOOK="$(cd "$(dirname "$0")" && pwd)/hooks/claude-code-session-start.sh"
+
+# Empty data: silent
+out=$(bash "$SS_HOOK" </dev/null 2>&1)
+if [[ -z "$out" ]]; then
+    printf "PASS  %s\n" "session-start silent on empty data"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start silent on empty data" "$out"
+    fail=$((fail + 1))
+fi
+
+# With recurring pattern: outputs recurrence section
+"$CMA" miss "first" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "second" --surface auth --fm fm-1 >/dev/null
+out=$(bash "$SS_HOOK" </dev/null 2>&1)
+if [[ "$out" == *"## recurrence"* ]] && [[ "$out" == *"2x"* ]]; then
+    printf "PASS  %s\n" "session-start surfaces recurrence section"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start surfaces recurrence section" "$out"
+    fail=$((fail + 1))
+fi
+
+# With rejection: includes rejections section
+"$CMA" reject "OPTION: rejected for testing" --surface infra >/dev/null
+out=$(bash "$SS_HOOK" </dev/null 2>&1)
+if [[ "$out" == *"## rejections"* ]] && [[ "$out" == *"OPTION: rejected"* ]]; then
+    printf "PASS  %s\n" "session-start includes rejections section"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start includes rejections section" "$out"
+    fail=$((fail + 1))
+fi
+
+# CMA_SESSION_START_SECTIONS env var override (only rejections)
+out=$(CMA_SESSION_START_SECTIONS=rejections bash "$SS_HOOK" </dev/null 2>&1)
+if [[ "$out" == *"## rejections"* ]] && [[ "$out" != *"## recurrence"* ]]; then
+    printf "PASS  %s\n" "session-start respects CMA_SESSION_START_SECTIONS"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start respects CMA_SESSION_START_SECTIONS" "$out"
+    fail=$((fail + 1))
+fi
+
+# CMA_SESSION_START_SECTIONS=all includes behavior
+"$CMA" miss "with texture" --surface auth --fm fm-1 \
+    --intended "patch symptom" --corrected "fix root" >/dev/null
+out=$(CMA_SESSION_START_SECTIONS=all bash "$SS_HOOK" </dev/null 2>&1)
+if [[ "$out" == *"## behavior"* ]]; then
+    printf "PASS  %s\n" "session-start sections=all includes behavior"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start sections=all includes behavior" "$out"
+    fail=$((fail + 1))
+fi
+
+# Failure isolation: cma missing → silent
+out=$(env -i PATH=/usr/bin:/bin HOME="$HOME" CMA_DIR="$CMA_DIR" bash "$SS_HOOK" </dev/null 2>&1)
+if [[ -z "$out" ]]; then
+    printf "PASS  %s\n" "session-start silent when cma missing"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start silent when cma missing" "$out"
+    fail=$((fail + 1))
+fi
+
+# ---------------------------------------------------------------------------
 # Shell wrapper (cma-pre)
 # ---------------------------------------------------------------------------
 

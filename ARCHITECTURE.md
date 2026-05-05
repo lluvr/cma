@@ -118,6 +118,16 @@ Interception via Claude Code's `PreToolUse` hook event. Reads stdin JSON (curren
 
 Status: implemented, tested.
 
+### 3.1a Claude Code SessionStart hook
+
+`hooks/claude-code-session-start.sh`
+
+Interception via Claude Code's `SessionStart` hook event. Surfaces priming context at the start of each session: recurring failure patterns (from `cma stats --recurrence`), active rejections (from `cma stats --rejections`), and optionally behavior pivots (from `cma stats --behavior`). Configurable via `CMA_SESSION_START_SECTIONS` env var.
+
+Together with the PreToolUse hook, the two cover both ends of the architecture: session-priming context at session boundary and per-action surfacing during work.
+
+Status: implemented, tested.
+
 ### 3.2 Shell wrapper (in development)
 
 `hooks/cma-pre.sh` plus `hooks/cma-pre`

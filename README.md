@@ -52,14 +52,27 @@ cma surfaces relevant prior captures automatically when an operator (or AI assis
 
 ### Claude Code
 
-`hooks/claude-code-pre-tool-use.sh` is a `PreToolUse` hook. Install:
+Two hooks for Claude Code: a `PreToolUse` hook for per-action surfacing and a `SessionStart` hook for session-priming context.
 
-1. Ensure `cma` is on your `PATH` (see Quick start above).
-2. Add a hook entry to `~/.claude/settings.json`:
+**Per-action surfacing** (`hooks/claude-code-pre-tool-use.sh`): when Claude is about to use a tool that touches a file or runs a command, the hook detects surface heuristically from the tool input, queries `cma surface`, and writes matched captures to stdout. Claude Code injects them as additional context. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
+
+**Session-priming context** (`hooks/claude-code-session-start.sh`): at the start of each session, surfaces recurring failure patterns and active rejections so the assistant has orientation before the first tool call. Configurable via `CMA_SESSION_START_SECTIONS` (default `recurrence,rejections`; set to `all` for `recurrence,rejections,behavior`).
+
+Install both:
 
 ```json
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /path/to/cma/hooks/claude-code-session-start.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "hooks": [
@@ -74,7 +87,7 @@ cma surfaces relevant prior captures automatically when an operator (or AI assis
 }
 ```
 
-The hook detects surface heuristically from the tool input (file path or command), queries `cma surface`, and writes results to stdout. Claude Code injects the output as additional context. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
+Together the two hooks cover both ends of the action-time injection theme: priming context at session start, relevant captures at each action.
 
 ### Shell (zsh, bash)
 
