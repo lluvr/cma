@@ -129,6 +129,20 @@ cma is the executable companion to Lodestone. The doctrine is in Lodestone; the 
 
 cma's action-time injection layer follows a five-stage architecture (interception, context extraction, query, injection, logging). The pattern, reference implementations, data contracts, and validation framework are specified in [ARCHITECTURE.md](ARCHITECTURE.md). Read it before writing a new integration; conform to its contracts so downstream analysis tooling stays consistent.
 
+### Performance
+
+ARCHITECTURE.md Section 6 specifies <50ms typical latency for action-time injection. Measured against a synthetic 100-capture data set (`./bench.sh`):
+
+| Operation | Median | p95 |
+|-----------|--------|-----|
+| `cma-pre --check` (no match) | 6ms | 10ms |
+| `cma-pre --check` (matched surface) | 36ms | 43ms |
+| `cma surface --surface <s>` | 27ms | 31ms |
+| `cma stats --recurrence` | 26ms | 31ms |
+| `cma stats` (default summary) | 8ms | 9ms |
+
+All operations stay under the 50ms target at p95. Cold-start invocations (first call in a fresh shell) may run higher; the wrapper warms up after a few hooks fire.
+
 ## Roadmap
 
 The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection is implemented for Claude Code (see [Action-time injection](#action-time-injection-claude-code) above), with a shell wrapper integration in development per the architecture in [ARCHITECTURE.md](ARCHITECTURE.md).
