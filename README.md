@@ -21,6 +21,7 @@ Clone the repository and add the script to your `PATH`:
 ```bash
 git clone https://github.com/Clarethium/cma.git
 ln -s "$(pwd)/cma/cma" ~/.local/bin/cma   # or copy to anywhere on PATH
+cma init                                   # create the data directory with a README
 ```
 
 Capture a failure:
@@ -42,7 +43,7 @@ cma miss "missed JWT expiration in middleware" \
 
 The texture fields (`--excerpt`, `--intended`, `--corrected`) preserve the conditions of the failure so future surfacing can match by situation, not just keywords.
 
-Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`.
+Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](DATA.md).
 
 Run `cma --help` for the full command surface.
 

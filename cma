@@ -725,6 +725,38 @@ PYEOF
 # Help and dispatch
 # ---------------------------------------------------------------------------
 
+cmd_init() {
+    mkdir -p "$CMA_DIR"
+    cat > "$CMA_DIR/README.md" <<EOF
+# cma data directory
+
+This directory is the durable corpus of compound practice. The schema,
+layout, atomicity guarantees, and migration policy are documented at:
+
+  https://github.com/Clarethium/cma/blob/main/DATA.md
+
+Files in this directory:
+
+  misses.jsonl         Captures of failures
+  decisions.jsonl      Captures of architectural choices
+  rejections.jsonl     Captures of eliminated options
+  preventions.jsonl    Captures of caught warnings
+  core.jsonl           Distilled learnings (and retirements)
+  surface_events.jsonl Surface query events (logged by cma surface)
+
+All files are append-only JSONL. Back up by copying this directory.
+
+To inspect:
+  cma stats       Summary dashboard
+  cma surface     Query by filter
+
+cma version that wrote this README: $VERSION
+Schema version: $SCHEMA_VERSION
+EOF
+    echo "Initialized cma data directory at $CMA_DIR"
+    echo "See $CMA_DIR/README.md for layout."
+}
+
 cmd_help() {
     cat <<EOF
 cma $VERSION - compound practice loop
@@ -738,13 +770,18 @@ Captures (write):
 Operations:
   cma surface [--surface <s>] [--file <f>] [--type <t>] [--limit <n>]
   cma distill <learning> [--scope <s>] [--surface <s>] | --retire <p> | --review
-  cma stats [--rejections] [--leaks] [--preventions] [--recurrence]
+  cma stats [--rejections] [--leaks] [--preventions] [--recurrence] [--behavior]
+
+Setup:
+  cma init                Create the data directory with a README
 
 Other:
   cma --version
   cma --help
 
 Specification: DESIGN.md in this repository.
+Architecture:  ARCHITECTURE.md in this repository.
+Schema:        DATA.md in this repository.
 Methodology:   https://github.com/Clarethium/lodestone
 
 Data directory: \$CMA_DIR (default: ~/.cma)
@@ -759,6 +796,7 @@ case "${1:-}" in
     surface)     shift; cmd_surface "$@" ;;
     distill)     shift; cmd_distill "$@" ;;
     stats)       shift; cmd_stats "$@" ;;
+    init)        shift; cmd_init "$@" ;;
     --version|-v) echo "cma $VERSION" ;;
     --help|-h|help|"") cmd_help ;;
     *)

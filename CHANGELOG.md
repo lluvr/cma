@@ -30,6 +30,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Schema versioning on all captures: every record (miss, decision, rejection, prevention, core learning, surface event) now includes `"schema_version":"1.0"` as the first field. Future schema changes can gate migrations against this field. Forward-looking polish for 3-year corpus stability.
 - Atomic write semantics: capture writes use a single python3 `f.write` syscall on the fully-composed JSON record. Atomic for records under PIPE_BUF (typically 4096 bytes); best-effort atomic for longer texture-bearing records. Replaces the prior bash `>>` append, which could interleave on long writes from concurrent cma processes.
 - Tolerant read: corrupted JSONL lines are skipped with a per-file stderr warning of the form `cma: skipped N corrupted line(s) in <file>`, instead of breaking the entire query. The corpus stays usable even when individual records are damaged. Implemented in `cma surface` and `cma stats --leaks`; remaining query paths (recurrence, behavior, distill --review, distill --retire) silently skip with corruption counters that will surface in Phase 2 polish.
+
+### Operator confidence (Phase 2 polish)
+
+- DATA.md: complete schema documentation for the data directory. Layout, per-record-type schemas with examples, schema versioning policy, atomicity guarantees, tolerant-read behavior, backup recommendations, and migration policy for future schema versions. The contract for the durable corpus.
+- `cma init` command: explicitly creates `~/.cma/` with an inline README pointing to DATA.md. Idempotent. Operators can run `cma init` immediately after install instead of waiting for first capture to materialize the directory.
 - Test suite (`test.sh`) with 42 cases covering all functional paths, edge cases (special characters, missing args, unknown flags), and JSON validity.
 - CI workflow (GitHub Actions) running the test suite on every push and pull request.
 - DESIGN.md specifying the seven-primitive surface and the migration from the working version.

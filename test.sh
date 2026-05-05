@@ -184,6 +184,20 @@ else
     fail=$((fail + 1))
 fi
 
+# cma init creates the data directory with a README
+init_dir=$(mktemp -d)/cma-init-test
+expect_exit "init creates directory" 0 env CMA_DIR="$init_dir" "$CMA" init
+if [[ -d "$init_dir" && -f "$init_dir/README.md" ]]; then
+    printf "PASS  %s\n" "init writes README inside data directory"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "init writes README inside data directory"
+    fail=$((fail + 1))
+fi
+expect_exit "init is idempotent" 0 env CMA_DIR="$init_dir" "$CMA" init
+expect_contains "init README references DATA.md" "DATA.md" cat "$init_dir/README.md"
+rm -rf "$(dirname "$init_dir")"
+
 reset
 expect_exit "decision succeeds"                  0 "$CMA" decision "TOPIC: choice (rationale)" --surface infra
 expect_exit "decision with applies-when"         0 "$CMA" decision "X" --applies-when "surface=docs"
