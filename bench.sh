@@ -60,8 +60,8 @@ bench() {
     for i in $(seq 1 "$n"); do
         samples+=( "$(time_ms "$@")" )
     done
-    IFS=$'\n' sorted=( $(printf '%s\n' "${samples[@]}" | sort -n) )
-    unset IFS
+    local sorted=()
+    mapfile -t sorted < <(printf '%s\n' "${samples[@]}" | sort -n)
     local min="${sorted[0]}"
     local median="${sorted[$((n / 2))]}"
     local p95_idx=$(( (n * 95) / 100 ))

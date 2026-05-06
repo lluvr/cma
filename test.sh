@@ -263,7 +263,7 @@ expect_exit "prevented with miss-id"             0 "$CMA" prevented "x" --miss-i
 reset
 "$CMA" miss "simple description" >/dev/null
 "$CMA" miss 'with "quotes"' >/dev/null
-"$CMA" miss 'with \backslashes\' >/dev/null
+"$CMA" miss 'with \backslashes'\\ >/dev/null
 "$CMA" miss "with
 newline" >/dev/null
 expect_json_valid "misses.jsonl is valid JSONL after edge inputs" "$CMA_DIR/misses.jsonl"

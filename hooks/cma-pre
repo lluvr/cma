@@ -86,7 +86,7 @@ detect_surface() {
     local lower
     lower=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
     case "$lower" in
-        *auth*|*login*|*session*|*jwt*|*oauth*|*password*|*credential*) echo "auth"; return ;;
+        *auth*|*login*|*session*|*jwt*|*password*|*credential*) echo "auth"; return ;;
         *payment*|*stripe*|*billing*|*checkout*) echo "payments"; return ;;
         *schema*|*migration*|*database*|*/db/*) echo "db"; return ;;
         *.test.*|*.spec.*|*/__tests__/*|*/tests/*|*/test/*) echo "test"; return ;;
