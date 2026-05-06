@@ -41,6 +41,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
+      # Make the in-repo cma binary discoverable on $PATH so the
+      # subprocess-bound tests (argv-injection-resistance probe,
+      # cma --version smoke, etc.) actually execute in CI rather
+      # than silently skip via the `cma_binary_available` fixture.
+      # Without this, a coverage gap masquerades as green CI.
+      - name: Install bash cma to PATH
+        working-directory: ${{ github.workspace }}
+        run: |
+          chmod +x cma
+          echo "$GITHUB_WORKSPACE" >> "$GITHUB_PATH"
+
+      - name: Verify cma is reachable
+        run: cma --version
+
       - name: Install package and test deps
         run: |
           python -m pip install --upgrade pip

@@ -80,7 +80,7 @@ def base_provenance() -> dict[str, Any]:
         "cost_usd": 0.0,
         "citation": (
             f"cma-mcp {_SERVER_VERSION} (Clarethium, 2026). "
-            f"https://github.com/Clarethium/cma-mcp"
+            f"https://github.com/Clarethium/cma/tree/main/cma-mcp"
         ),
         "deterministic": True,
         "timestamp": _now_iso(),

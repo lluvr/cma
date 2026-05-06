@@ -81,6 +81,12 @@ py-modules = [
     "cma_jsonl",
 ]
 
+# Apache-2.0 §4(d) requires a readable copy of NOTICE in distributed
+# artifacts. license-files instructs setuptools to bundle both
+# LICENSE and NOTICE in the wheel's `*.dist-info` metadata so PyPI
+# operators receive the attribution notices unconditionally.
+license-files = ["LICENSE", "NOTICE"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

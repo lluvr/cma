@@ -120,14 +120,19 @@ AD-003 (5-second timeout).
 
 ### Test addition
 
-`tests/test_mcp_adversarial.py` is the adversarial test
-file: boundary inputs, malformed JSON-RPC, schema violations,
-subprocess timeouts, JSONL corruption recovery. New adversarial cases
-are always welcome.
+cma-mcp's adversarial coverage is split across the existing test
+files: `cma-mcp/tests/test_mcp_server.py` (protocol-level boundaries:
+parse error, invalid JSON-RPC, unknown method, malformed params),
+`cma-mcp/tests/test_resources.py` (JSONL corruption recovery,
+unknown schema-version surfacing, missing-file graceful return),
+and `cma-mcp/tests/test_subprocess.py` (subprocess timeout,
+missing-binary path, argv-injection-resistance probe). New
+adversarial cases are always welcome; add to whichever file fits
+the layer being exercised.
 
-`tests/test_payload_determinism.py` pins the three-section payload
-shape on every tool and resource. Any change that affects payload
-shape requires a determinism-test update.
+`cma-mcp/tests/test_payload_determinism.py` pins the three-section
+payload shape on every tool and resource. Any change that affects
+payload shape requires a determinism-test update.
 
 ---
 
@@ -170,5 +175,7 @@ A PR that lands meets all of the following:
 ## Reporting issues
 
 Bug reports, feature requests, and protocol questions go to
-[GitHub Issues](https://github.com/Clarethium/cma-mcp/issues).
-Security issues go to `hello@clarethium.com` per `SECURITY.md`.
+[GitHub Issues](https://github.com/Clarethium/cma/issues). For
+issues specific to one component, prefix the title with `[cma]`
+or `[cma-mcp]` so triage can disambiguate. Security issues go to
+`hello@clarethium.com` per `SECURITY.md`.

@@ -1,0 +1,63 @@
+cma project (cma + cma-mcp)
+Copyright 2026 Lovro Lucic
+
+Published under Clarethium (https://github.com/Clarethium).
+
+This product includes software developed by Lovro Lucic.
+
+Components
+----------
+
+This repository ships two components, both Apache-2.0 licensed:
+
+- **cma** (repository root): the canonical bash reference
+  implementation of the compound practice loop. Seven primitives
+  (miss, decision, reject, prevented, surface, distill, stats),
+  texture preservation, recurrence detection, leak detection.
+  Action-time injection via Claude Code hooks (PreToolUse +
+  SessionStart) and shell preexec wrappers (zsh native, bash via
+  bash-preexec).
+- **cma-mcp** (cma-mcp/ subdirectory): the Python Model Context
+  Protocol distribution wrapper. Exposes the same seven primitives
+  and four context-resource surfaces to MCP-compatible AI clients
+  (Claude Desktop, Cursor, Cline, Continue.dev). Subprocess
+  wrapper around the bash cma binary; methodology-agnostic
+  substrate; three-section payload discipline.
+
+Licensing
+---------
+
+Code in this repository is licensed under Apache 2.0; see LICENSE
+at repository root.
+
+External works referenced
+-------------------------
+
+Reference methodology lives in Lodestone
+(https://github.com/Clarethium/lodestone), licensed CC-BY 4.0.
+Neither cma nor cma-mcp bundles Lodestone content. Operators who
+tag captures with a methodology's failure-mode vocabulary (such as
+Lodestone's FM-1..10) are responsible for citing that methodology
+in their own work.
+
+Verification substrate referenced in design documents is Touchstone
+(https://github.com/Clarethium/touchstone), Apache 2.0 (library)
+and CC-BY 4.0 (Standard).
+
+Companion projects in the Clarethium body
+-----------------------------------------
+
+- Lodestone: canonical operator methodology (CC-BY 4.0)
+- Touchstone: model-independent measurement substrate
+- frame-check-mcp: applied vehicle, sibling MCP using Touchstone
+  (https://github.com/Clarethium/frame-check-mcp)
+
+Sibling-MCP pattern conformance
+-------------------------------
+
+cma-mcp's three-section payload discipline, governance scaffolding,
+and adversarial test architecture follow the conventions established
+by frame-check-mcp. Where this project diverges (e.g., bundling the
+MCP wrapper alongside the wrapped binary in one repository rather
+than as a separate sibling repo), the divergence is named in
+DECISIONS.md.

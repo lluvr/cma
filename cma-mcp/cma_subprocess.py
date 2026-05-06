@@ -30,6 +30,7 @@ caller follows up with a JSONL fetch via cma_jsonl.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -190,16 +191,53 @@ def run_cma(args: list[str], timeout: int | None = None) -> CmaResult:
     )
 
 
+# Match a "Version X.Y[.Z][-suffix]" line in `cma help` output for cma
+# binaries (or forks) that do not support the `--version` flag.
+# Anchored to the literal token "Version" with at least one space, so a
+# stray "version" word in prose never matches.
+_HELP_VERSION_PATTERN = re.compile(r"^Version\s+([0-9][\w.\-]*)$", re.MULTILINE)
+
+
 def cma_version() -> str | None:
     """
-    Probe `cma --version` for the install fingerprint. Returns the
-    raw stdout (single line) on success, None if cma is unavailable.
+    Probe the cma binary for its version string.
+
+    Strategy:
+      1. Try `cma --version` (canonical cma's documented surface).
+         Returns the raw stdout on success.
+      2. Fall back to parsing `cma help` for a `Version X.Y.Z` line
+         (handles forks or older cma installs that use subcommand-only
+         syntax without a `--version` flag).
+      3. Return None when neither probe succeeds (graceful: operators
+         see `cma_binary_version: null` in the install fingerprint
+         rather than a crash).
 
     Used by `cma-mcp --version` to show operators which cma binary
-    their MCP server is wrapping.
+    their MCP server is wrapping. The function never raises; failure
+    surfaces as None.
     """
+    # Primary probe: --version flag.
     try:
         result = run_cma(["--version"])
+        out = result.stdout.strip()
+        if out:
+            return out
     except CmaError:
-        return None
-    return result.stdout.strip() or None
+        pass
+
+    # Fallback: scan `cma help` output. Some cma binaries return
+    # exit 1 from `cma help` despite emitting useful output, so we
+    # parse from CmaError as well as CmaResult.
+    help_out = ""
+    try:
+        result = run_cma(["help"])
+        help_out = result.stdout
+    except CmaError as exc:
+        help_out = exc.stdout
+
+    if help_out:
+        match = _HELP_VERSION_PATTERN.search(help_out)
+        if match:
+            return f"cma {match.group(1)}"
+
+    return None

@@ -1,10 +1,10 @@
 # cma-mcp
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/cma-mcp/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/Clarethium/cma/blob/main/LICENSE)
 [![Companions](https://img.shields.io/badge/Clarethium-blue.svg)](https://github.com/Clarethium)
 
-The Model Context Protocol distribution layer for [cma](../README.md),
+The Model Context Protocol distribution layer for [cma](https://github.com/Clarethium/cma#readme),
 Clarethium's executable compound practice loop.
 
 ## Where this lives
@@ -15,7 +15,7 @@ implementation; this `cma-mcp/` subdirectory holds the Python
 wrapper that exposes the same loop to MCP-compatible AI clients.
 The two components release independently:
 
-- **bash cma**: see the [parent README](../README.md) for the CLI
+- **bash cma**: see the [parent README](https://github.com/Clarethium/cma#readme) for the CLI
   surface, install, and Claude Code / shell hook integrations.
 - **cma-mcp**: this README, focused on the PyPI installation and
   MCP client configuration.
@@ -37,7 +37,7 @@ from the 1.0 reference implementation.
 ## Quickstart
 
 cma-mcp wraps the canonical bash cma binary. Install bash cma first
-from the [parent repository](../README.md), then confirm it is on
+from the [parent repository](https://github.com/Clarethium/cma#readme), then confirm it is on
 `PATH`:
 
     cma --help
@@ -114,7 +114,7 @@ cma-mcp inherits it. Adversarial tests in
 **Subprocess over reimplementation.** cma-mcp invokes bash cma as
 a subprocess for every captured action. cma-mcp does not
 reimplement cma's seven primitives in Python. See
-[../NOTES.md](../NOTES.md) §6 DD-1 for the durable decision.
+project notes §6 DD-1 for the durable decision.
 
 **Methodology-agnostic substrate.** cma stores `--fm` (failure
 mode) as an opaque string. cma-mcp does not bundle any
@@ -132,7 +132,7 @@ standard library. (Test-time deps: pytest.)
 
 Linux and macOS native. Windows operators run cma-mcp under WSL
 because cma-mcp shells out to the bash cma binary. This is
-deliberate ([../NOTES.md](../NOTES.md) DD-3): canonical-cma
+deliberate (project notes DD-3): canonical-cma
 alignment beats standalone Python reach. Any operator running an
 MCP-compatible AI client on Windows is reasonably expected to have
 WSL available.
@@ -160,13 +160,13 @@ pipeline wiring and that the cma binary is reachable.
 
 Project-level (repository root):
 
-- [README.md](../README.md): cma's CLI overview
+- [README.md](https://github.com/Clarethium/cma#readme): cma's CLI overview
 - project notes: durable decisions
-- [DECISIONS.md](../DECISIONS.md): architectural decisions log
-- [GOVERNANCE.md](../GOVERNANCE.md): BDFL governance, named curator
-- [CONTRIBUTING.md](../CONTRIBUTING.md): contribution mechanics, DCO sign-off
-- [SECURITY.md](../SECURITY.md): threat model and reporting
-- [LICENSE](../LICENSE) (Apache-2.0), [NOTICE](../NOTICE), [CITATION.cff](../CITATION.cff)
+- [DECISIONS.md](https://github.com/Clarethium/cma/blob/main/DECISIONS.md): architectural decisions log
+- [GOVERNANCE.md](https://github.com/Clarethium/cma/blob/main/GOVERNANCE.md): BDFL governance, named curator
+- [CONTRIBUTING.md](https://github.com/Clarethium/cma/blob/main/CONTRIBUTING.md): contribution mechanics, DCO sign-off
+- [SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md): threat model and reporting
+- [LICENSE](https://github.com/Clarethium/cma/blob/main/LICENSE) (Apache-2.0), [NOTICE](https://github.com/Clarethium/cma/blob/main/NOTICE), [CITATION.cff](https://github.com/Clarethium/cma/blob/main/CITATION.cff)
 
 cma-mcp specific (this directory):
 
@@ -197,4 +197,4 @@ Use the `cma-mcp` label or include `[cma-mcp]` in the title to
 disambiguate from bash cma issues.
 
 Security issues go to `hello@clarethium.com` per
-[SECURITY.md](../SECURITY.md).
+[SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md).
