@@ -175,9 +175,9 @@ All operations stay under the 50ms target at p95. Cold-start invocations (first 
 
 ## Roadmap
 
-The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection is implemented for Claude Code (see [Action-time injection](#action-time-injection-claude-code) above), with a shell wrapper integration in development per the architecture in [ARCHITECTURE.md](ARCHITECTURE.md).
+The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection ships for Claude Code (PreToolUse and SessionStart hooks) and for shell environments (zsh native preexec, bash via bash-preexec). Both follow the five-stage architecture in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Beyond 1.0: shell wrapper (zsh, bash with bash-preexec) for non-AI-client operators, counterfactual capture analysis tooling, per-project data scoping, recency-weighted surface ranking. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
+Beyond 1.0: counterfactual capture analysis tooling, per-project data scoping, recency-weighted surface ranking. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
 
 ## License
 
