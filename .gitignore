@@ -1,0 +1,46 @@
+# Python (cma-mcp)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+develop-eggs/
+sdist/
+wheels/
+share/python-wheels/
+MANIFEST
+
+# Python venv
+.venv/
+venv/
+env/
+ENV/
+
+# pytest / coverage (cma-mcp)
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+
+# editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# os
+.DS_Store
+Thumbs.db
+
+# project-local
+*.log
+.cma-mcp.local/

@@ -1,0 +1,77 @@
+# Changelog (cma-mcp)
+
+All notable changes to **cma-mcp** are documented in this file.
+
+cma-mcp ships in this repository alongside the canonical bash cma
+reference implementation. The two components release independently:
+
+- bash cma's release history is in the repository's
+  [CHANGELOG.md](../CHANGELOG.md) at root.
+- This file tracks cma-mcp's release history.
+
+Version tags carry the component prefix (`cma-mcp-0.1.0` for this
+component, `cma-1.0.0` for bash cma).
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased] (0.1.0-dev)
+
+### Added
+
+- Initial cma-mcp 0.1.0 reference implementation. Python ≥3.10,
+  MCP protocol manual JSON-RPC over stdio (no SDK dependency, per
+  [STRATEGY DD-2](../NOTES.md) / [DECISIONS AD-001](../DECISIONS.md)).
+- Subprocess wrapper around the canonical bash cma binary
+  (STRATEGY DD-1 / DECISIONS AD-004): argv-array, no shell
+  interpolation, 5-second timeout per call (AD-003).
+- Seven tools mirroring bash cma's seven primitives: `cma_miss`,
+  `cma_decision`, `cma_reject`, `cma_prevented`, `cma_distill`
+  (modes: default / retire / review), `cma_surface` (instrumented
+  query; logs `surface_events.jsonl` for `cma stats --leaks`
+  validation), `cma_stats` (views: default / leaks / recurrence /
+  preventions / rejections / behavior).
+- Four resources for read-only context: `cma://decisions`,
+  `cma://rejections`, `cma://core`, `cma://stats`.
+- Three-section payload (`analysis` + `agent_guidance` +
+  `provenance`) on every tool response and resource read.
+  Adversarial tests pin the structure (STRATEGY DD-5).
+- Methodology-agnostic substrate (STRATEGY DD-4): `--fm` is
+  opaque. No Lodestone vocabulary bundled.
+- Schema-version handling (DECISIONS AD-002): records with
+  `schema_version: "1.0"` are native; legacy records (no
+  schema_version field) parse leniently; unknown schema_version
+  surfaces in `provenance`.
+- `--version` install fingerprint emitting server_version,
+  protocol version, git_sha (with `+dirty` flag if working tree
+  dirty), cma_binary_version (from `cma --version`), python
+  version, absolute script path.
+- `--test` offline sanity check: prints the full three-section
+  payload for a canned tool call without requiring an MCP client
+  handshake.
+- Initialize handshake carrying the standard MCP fields plus a
+  top-level `instructions` field with cross-tool orientation prose
+  (matches frame-check-mcp's pattern).
+- pytest suite (~30 cases) covering protocol conformance,
+  subprocess wrapping, JSONL parsing, three-section payload
+  determinism, and adversarial inputs (boundary, malformed,
+  argv-injection-resistance probe).
+
+### Notes
+
+- 0.1.0 is the first release. PyPI publication is gated on the DOI
+  allocation from Zenodo and a final pre-flight conformance pass
+  against the installed wheel. Until publication, install from
+  source: `pip install -e .` from this directory.
+- Versioning convention: PEP 440 pre-release markers (`.dev0`)
+  decorate the underlying semver M.m.p during the dev-build
+  window. At lift, the suffix drops and `pyproject.toml` aligns
+  character-for-character with `SERVER_VERSION` in
+  `mcp_server.py`.
+
+---
+
+*cma-mcp internal prototype work prior to 0.1.0 is not documented
+here.*

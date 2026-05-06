@@ -1,0 +1,49 @@
+name: tests-mcp
+
+# pytest suite for the cma-mcp Python MCP wrapper. Exercises protocol
+# conformance, three-section payload determinism, JSONL parsing
+# tolerance, and subprocess-wrapper isolation. Subprocess-bound tests
+# auto-skip when the cma binary is not installed in CI.
+#
+# bash cma's test.yml runs separately for the bash CLI; the two
+# workflows together validate both interfaces of the cma project.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cma-mcp/**"
+      - ".github/workflows/tests-mcp.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "cma-mcp/**"
+      - ".github/workflows/tests-mcp.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: cma-mcp
+
+jobs:
+  pytest:
+    name: pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package and test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test]
+      - name: Run pytest
+        run: python -m pytest -q --strict-markers

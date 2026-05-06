@@ -1,0 +1,41 @@
+name: dco-check
+
+# Enforce Developer Certificate of Origin sign-off on every commit
+# in a pull request. Per CONTRIBUTING.md: contributors must sign off
+# every commit with `git commit -s`, certifying the contribution
+# under https://developercertificate.org/.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  dco:
+    name: Verify DCO sign-off
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check Signed-off-by trailer on every PR commit
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          missing=0
+          for commit in $(git rev-list "$base..$head"); do
+            if ! git log -1 --format='%B' "$commit" | grep -qE '^Signed-off-by: .+ <.+@.+>$'; then
+              echo "::error::Commit $commit missing Signed-off-by trailer (DCO)"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "Add the trailer with: git commit -s --amend (or rebase + sign-off-by-each-commit)"
+            echo "Background: https://developercertificate.org/"
+            exit 1
+          fi
+          echo "All commits carry Signed-off-by."

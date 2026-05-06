@@ -123,6 +123,20 @@ Failure isolation: if cma is missing, errors, or times out (default 5 seconds), 
 
 Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced — the validation evidence that the loop closes.
 
+## MCP distribution (cma-mcp)
+
+The bash CLI and shell hooks above cover Claude Code and any
+shell-environment operator. For operators reaching the loop
+through other MCP-compatible AI clients (Claude Desktop, Cursor,
+Cline, Continue.dev), the same compound practice loop ships as a
+Python MCP server at [`cma-mcp/`](cma-mcp/). Subprocess wrapper
+around this binary; methodology-agnostic substrate; three-section
+payload discipline. PyPI: `pip install cma-mcp`.
+
+See [`cma-mcp/README.md`](cma-mcp/README.md) for the MCP-specific
+quickstart and tool surface, and project notes for
+the durable decisions governing the wrapper.
+
 ## Testing
 
 ```bash
