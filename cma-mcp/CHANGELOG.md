@@ -17,7 +17,17 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ---
 
-## [Unreleased] (0.1.0-dev)
+## [Unreleased]
+
+(no changes since 0.1.0)
+
+---
+
+## [0.1.0] - 2026-05-07
+
+First public release. Single-operator pilot evidence is documented
+honestly in `docs/VALIDATION_PROGRAM.md`'s Interim Evidence section;
+the cohort study (Layer 3) is the post-publish work.
 
 ### Added
 

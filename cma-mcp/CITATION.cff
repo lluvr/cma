@@ -35,7 +35,7 @@ keywords:
   - clarethium
 license: Apache-2.0
 version: "0.1.0"
-date-released: "2026-05-06"
+date-released: "2026-05-07"
 references:
   - type: software
     title: "cma: executable compound practice loop"
