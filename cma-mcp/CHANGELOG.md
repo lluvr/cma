@@ -60,11 +60,30 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - Initialize handshake carrying the standard MCP fields plus a
   top-level `instructions` field with cross-tool orientation prose
   (matches frame-check-mcp's pattern).
-- pytest suite (36 cases) covering protocol conformance,
+- pytest suite (48 cases) covering protocol conformance,
   subprocess wrapping, JSONL parsing, three-section payload
-  determinism, the install-fingerprint git_sha fallback, and
-  adversarial inputs (boundary, malformed, argv-injection-
-  resistance probe).
+  determinism, install-fingerprint git_sha fallback, adversarial
+  inputs (boundary, malformed, argv-injection-resistance probe),
+  and wire-protocol subprocess roundtrips
+  (`tests/test_mcp_wire.py` — closes
+  `docs/ANTICIPATED_CRITIQUES.md` C-8). Coverage in CI scopes the
+  eight runtime modules; reported number is a floor (subprocess
+  paths in wire tests are not counted by pytest-cov without a
+  sitecustomize hook).
+- `docs/ARCHITECTURE.md`: module map, data flow for tool calls
+  and resource reads, three-section payload contract, subprocess
+  discipline, JSONL read tolerance, install fingerprint two-path
+  resolution. Reading map for new contributors.
+- `docs/FAQ.md` and `docs/TROUBLESHOOTING.md`: conceptual and
+  maintainer-side gotchas, MCP-client config patterns across Claude
+  Desktop / Cursor / Cline / Continue.dev, the four-command
+  diagnostic loop, and reproducible bug-report template.
+- `bench.py`: latency benchmark mirroring bash cma's `bench.sh`
+  shape — measures wire-level round-trip latency for each tool
+  and resource through real stdin/stdout pipes against a
+  100-capture synthetic corpus. Reveals the wrapper itself adds
+  essentially zero overhead; subprocess-bound calls inherit
+  cma's latency.
 - Publish workflow (`.github/workflows/publish-mcp.yml`) builds
   the wheel + sdist on `cma-mcp-X.Y.Z` tag pushes, validates with
   twine, smoke-tests the installed wheel against the baked SHA,

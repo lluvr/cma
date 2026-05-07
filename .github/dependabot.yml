@@ -1,0 +1,55 @@
+# Dependabot configuration for the cma project.
+#
+# Two ecosystems are tracked:
+#
+# - GitHub Actions (workflow YAML): floating action versions
+#   (`actions/checkout@v4`, `actions/setup-python@v5`, etc.) get
+#   weekly major/minor PRs so security advisories land without
+#   manual chasing.
+# - Python (cma-mcp): runtime deps are intentionally empty
+#   (DECISIONS AD-001) so the dev-deps block (`pytest`,
+#   `pytest-timeout`, `pytest-cov`) is the only watched surface.
+#   Scoped to `cma-mcp/pyproject.toml` per the AD-008 monorepo
+#   layout.
+#
+# bash cma has no package dependencies (Python stdlib only for JSON
+# escape) so it does not need a Dependabot ecosystem.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: scope
+    labels:
+      - dependencies
+      - github-actions
+    reviewers:
+      - lluvr
+
+  - package-ecosystem: pip
+    directory: /cma-mcp
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(cma-mcp)"
+      include: scope
+    labels:
+      - dependencies
+      - cma-mcp
+    reviewers:
+      - lluvr
+    # Only test-time dependencies exist; group their updates so a
+    # pytest minor bump and a pytest-cov minor bump arrive as one
+    # PR rather than two.
+    groups:
+      test-deps:
+        patterns:
+          - "pytest*"

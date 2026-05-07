@@ -21,6 +21,8 @@ The full surface is specified in [DESIGN.md](DESIGN.md). Additive features (acti
 
 ## Quick start
 
+**Requirements:** bash 3.2 or newer (Linux, macOS native, and Windows-WSL all work; the `cma` binary uses no bash 4+ features so macOS's system `/bin/bash` is sufficient), and `python3` (used only for JSON escaping). No package-manager dependencies.
+
 Clone the repository and add the script to your `PATH`:
 
 ```bash

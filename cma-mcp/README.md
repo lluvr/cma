@@ -174,6 +174,12 @@ cma-mcp specific (this directory):
 
 - [CHANGELOG.md](CHANGELOG.md): cma-mcp release history
 - [docs/MCP_SERVER.md](docs/MCP_SERVER.md): protocol reference
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): module layout, data
+  flow, contracts; reading map for new contributors
+- [docs/FAQ.md](docs/FAQ.md): conceptual questions, install gotchas,
+  cross-client config patterns
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md): symptoms and
+  fixes; the diagnostic loop is the four-command sequence at the top
 - [docs/ANTICIPATED_CRITIQUES.md](docs/ANTICIPATED_CRITIQUES.md):
   self-enumerated adversarial readings of cma-mcp's design
 - [docs/VALIDATION_PROGRAM.md](docs/VALIDATION_PROGRAM.md): empirical

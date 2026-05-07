@@ -60,8 +60,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .[test]
-      - name: Run pytest
-        run: python -m pytest -q --strict-markers
+      - name: Run pytest with coverage
+        # Coverage measurement scopes the eight runtime modules per
+        # [tool.coverage.run] in pyproject.toml. The reported number
+        # reflects in-process dispatch only — `tests/test_mcp_wire.py`
+        # spawns cma-mcp as a real subprocess (closes ANTICIPATED_
+        # CRITIQUES C-8), and pytest-cov does not follow subprocess
+        # paths without a sitecustomize hook. Lines exercised only
+        # via the wire-protocol tests therefore count as uncovered
+        # in this report even though they are exercised end-to-end.
+        # Treat the number as a floor on coverage, not a ceiling.
+        run: python -m pytest -q --strict-markers --cov --cov-report=term-missing
 
       # Wheel install smoke. Builds the sdist + wheel exactly as PyPI
       # publication would, installs the wheel into a fresh virtualenv,

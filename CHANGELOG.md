@@ -45,9 +45,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - DESIGN.md specifying the seven-primitive surface and the migration from the working version.
 - README with quick-start, status, and license information.
 
-### Pending for 1.0.0
+### Pending for 1.0.0 (lift checklist)
 
-(none — all seven primitives functional in this dev branch)
+The seven-primitive surface is functional and frozen in this dev
+branch; the `1.0.0-dev` suffix on `VERSION` reflects the items below
+that gate the lift, not unfinished feature work.
+
+- Zenodo DOI allocation (one-time GitHub-Zenodo integration in repo
+  settings; first DOI fires on the next published release tag).
+- `cma 1.0.0` release tag (`cma-1.0.0`) cut and a corresponding
+  CHANGELOG.md `[1.0.0]` entry replacing this `[Unreleased]` block.
+- Cross-component release notes covering the cma-mcp 0.1 lift if
+  the two ship in the same window (see `cma-mcp/CHANGELOG.md`).
 
 ### Future (post-1.0)
 - Counterfactual capture: explicit "what was about to happen versus what happened" data structure for studying basin transitions.
