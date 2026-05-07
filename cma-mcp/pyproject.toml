@@ -60,7 +60,7 @@ Security = "https://github.com/Clarethium/cma/blob/main/SECURITY.md"
 Strategy = "https://github.com/Clarethium/cma/blob/main/NOTES.md"
 Decisions = "https://github.com/Clarethium/cma/blob/main/DECISIONS.md"
 "MCP Server Reference" = "https://github.com/Clarethium/cma/blob/main/cma-mcp/docs/MCP_SERVER.md"
-"cma (the wrapped CLI, same repo)" = "https://github.com/Clarethium/cma"
+"Wrapped CLI (cma)" = "https://github.com/Clarethium/cma"
 "Methodology Canon (Lodestone)" = "https://github.com/Clarethium/lodestone"
 
 [project.scripts]
