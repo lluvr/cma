@@ -80,30 +80,23 @@ forward-only commit. Instead:
 ## Commit-message hygiene
 
 A commit that removes leaked content should not narrate the leak
-in its own message. Bad:
-
-> Remove REPO_SHAPE_MEMO.md (contained discussion of frame-check
-> rename, web-app coupling, lift-cost analysis ...)
-
-That commit message itself is a leak. Better:
-
-> Remove an maintainer-internal artifact from public surface
-
-The diff shows what was removed; the message should not
-re-narrate it.
+in its own message. The diff shows what was removed; the message
+should not re-narrate it. If you must reference what was removed,
+use a generic descriptor like "an maintainer-internal artifact"
+rather than the document name or content category.
 
 ## Engineering norms
 
 - DCO sign-off is required (`git commit -s ...`). The
   `dco-check` workflow blocks merges of unsigned commits.
-- Tests live in `tests/`; the bash CLI tests run via `test.sh`,
-  the MCP wrapper tests run via `pytest cma-mcp/tests/`. Both
-  must pass before merging.
+- Bash CLI tests run via `./test.sh` at the repo root. MCP
+  wrapper tests live at `cma-mcp/tests/` and run via
+  `pytest cma-mcp/tests/`. Both must pass before merging.
 - Style: no em-dashes, en-dashes, smart quotes, or curly
   apostrophes anywhere in committed content (prose, code,
-  commit messages). The `check_no_em_dashes.py` script enforces
-  this if invoked locally; commit-time enforcement is
-  per-developer convention.
+  commit messages). Use straight quotes and rewrite sentences
+  rather than reaching for an em-dash. Enforcement is per-
+  developer convention; no automated check ships in this repo.
 - No AI attribution in commit messages. No "Generated with
   Claude Code" footer. No `Co-Authored-By: Claude`. The work is
   the operator's regardless of which tool produced the diff.

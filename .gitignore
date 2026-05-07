@@ -50,5 +50,29 @@ Thumbs.db
 # installed wheel carries the git SHA it was built from. The file is
 # regenerated on every build and must never be committed.
 cma-mcp/_build_info.py
+
+# Internal-doc patterns: never commit maintainer-side strategic memos,
+# audit deliverables, methodology proposal drafts, outreach lists, or
+# tooling that references private operator workspace. The discipline
+# is documented in AGENTS.md ("Public-canon discipline") and pinned
+# at commit time by .gitleaks.toml.
+docs/internal/
+*_INVENTORY_v[0-9]*.md
+*_AUDIT_v[0-9]*.md
+*_VERDICT_v[0-9]*.md
+*_REMEDIATION_LOG_v[0-9]*.md
+*_OUTREACH_v[0-9]*.md
+*_PROMOTION.md
+EXTRACT_POLICY.md
+PUBLICATION_STATE_v[0-9]*.md
+RELEASE_PREP_v[0-9]*.md
+ENGINE_TIER_*.md
+METHODOLOGY_PAPER_*.md
+METHODOLOGY_V*_CANDIDATES_*.md
+TRACK_*_INFORMAL_STUDY_*.md
 REPO_SHAPE_MEMO.md
+verify_publication_state.sh
+
+# Operator workspace path patterns (never commit absolute paths)
+*maintainer-internal*
 /clarethium-tools/

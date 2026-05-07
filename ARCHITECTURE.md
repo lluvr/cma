@@ -250,7 +250,7 @@ The architecture is designed to produce data supporting three independent layers
 - Score deltas correlated with cma usage intensity (captures per task, surfacings per task).
 - Failure-shape distribution shifts (fewer recurrences of named failure shapes).
 
-**Strength**: objective, model-independent measurement. **Weakness**: requires operator's actual work to be amenable to Touchstone evaluation, which depends on output type. Currently aspirational; the bridge between Lodestone, cma, and Touchstone is the shared backbone and is the next major architectural project after this one.
+**Strength**: objective, model-independent measurement. **Weakness**: requires operator's actual work to be amenable to Touchstone evaluation, which depends on output type. Currently aspirational; the bridge between Lodestone, cma, and Touchstone is the project's intellectual spine and is the next major architectural project after this one.
 
 The three layers are independent. A system that passes the Process layer alone is a journal. A system that passes Process + Behavior is a working compound practice loop. A system that passes all three is a methodology with empirical grounding.
 
