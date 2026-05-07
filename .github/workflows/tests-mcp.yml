@@ -62,3 +62,35 @@ jobs:
           pip install -e .[test]
       - name: Run pytest
         run: python -m pytest -q --strict-markers
+
+      # Wheel install smoke. Builds the sdist + wheel exactly as PyPI
+      # publication would, installs the wheel into a fresh virtualenv,
+      # and exercises the console-script entry point. Catches
+      # packaging regressions (missing py-modules, broken entry
+      # points, _build_info.py absence) that the editable-install
+      # pytest path cannot see. Also verifies the build-time SHA
+      # bake survives PEP 517 build isolation.
+      - name: Build wheel and sdist
+        env:
+          CMA_MCP_BUILD_SHA: ${{ github.sha }}
+        run: |
+          pip install --upgrade build
+          python -m build
+      - name: Smoke-test installed wheel in clean venv
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          python -m venv /tmp/cma-mcp-smoke
+          /tmp/cma-mcp-smoke/bin/pip install dist/cma_mcp-*.whl
+          /tmp/cma-mcp-smoke/bin/cma-mcp --help >/dev/null
+          fingerprint=$(/tmp/cma-mcp-smoke/bin/cma-mcp --version)
+          echo "$fingerprint"
+          /tmp/cma-mcp-smoke/bin/python - "$fingerprint" "$GITHUB_SHA" <<'PY'
+          import json, sys
+          fp = json.loads(sys.argv[1])
+          expected = sys.argv[2]
+          got = fp.get("git_sha")
+          if got != expected:
+              sys.exit(f"git_sha mismatch: wheel reports {got!r}, expected {expected!r}")
+          print(f"git_sha bake verified: {got}")
+          PY

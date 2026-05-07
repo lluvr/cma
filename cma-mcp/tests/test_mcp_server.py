@@ -157,3 +157,47 @@ def test_initialize_notification_does_not_crash(fresh_dispatcher):
     assert handler is not None
     # Notifications return None and must not raise.
     assert handler({}) is None
+
+
+def test_git_sha_falls_back_to_baked_build_info(monkeypatch, tmp_path):
+    """When the runtime git probe fails (PyPI install layout — no `.git`
+    next to the script), `_git_sha()` must fall back to the build-time
+    value baked into `_build_info.BUILD_GIT_SHA` by `setup.py`.
+
+    Without this fallback, the install fingerprint silently degrades
+    to `git_sha: null` on the most common install path, weakening the
+    forensic-traceability claim documented in cma-mcp/README.md.
+    """
+    import subprocess as _subprocess
+    import sys
+
+    def _always_fail(*args, **kwargs):
+        raise FileNotFoundError("git probe disabled for this test")
+
+    monkeypatch.setattr(_subprocess, "check_output", _always_fail)
+
+    fake_module = type(sys)("_build_info")
+    fake_module.BUILD_GIT_SHA = "deadbeefcafefade1234567890abcdef00000000"
+    monkeypatch.setitem(sys.modules, "_build_info", fake_module)
+
+    assert mcp_server._git_sha() == "deadbeefcafefade1234567890abcdef00000000"
+
+
+def test_git_sha_returns_none_when_no_runtime_and_no_baked(monkeypatch):
+    """If the runtime probe fails AND no `_build_info` is importable
+    (or its baked SHA is empty), `_git_sha()` must return None so the
+    fingerprint surfaces the missing trace as `git_sha: null` honestly.
+    """
+    import subprocess as _subprocess
+    import sys
+
+    def _always_fail(*args, **kwargs):
+        raise FileNotFoundError("git probe disabled for this test")
+
+    monkeypatch.setattr(_subprocess, "check_output", _always_fail)
+
+    empty_module = type(sys)("_build_info")
+    empty_module.BUILD_GIT_SHA = ""
+    monkeypatch.setitem(sys.modules, "_build_info", empty_module)
+
+    assert mcp_server._git_sha() is None

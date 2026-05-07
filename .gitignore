@@ -44,3 +44,9 @@ Thumbs.db
 # project-local
 *.log
 .cma-mcp.local/
+
+# build-time generated (cma-mcp)
+# setup.py writes _build_info.py at sdist/wheel build time so the
+# installed wheel carries the git SHA it was built from. The file is
+# regenerated on every build and must never be committed.
+cma-mcp/_build_info.py

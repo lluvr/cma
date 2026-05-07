@@ -1,0 +1,198 @@
+# Publish workflow for cma-mcp.
+#
+# Builds the cma-mcp wheel + sdist on every cma-mcp tag push
+# (`cma-mcp-X.Y.Z` per DECISIONS AD-008's tag-prefix convention),
+# bakes the build-time git SHA into the artifacts, validates them,
+# smoke-tests the installed wheel, and uploads them as workflow
+# artifacts. The PyPI / TestPyPI upload jobs are intentionally
+# commented out — publication is held until the operator lifts it.
+#
+# To enable publishing:
+#
+#   1. Bump version in cma-mcp/pyproject.toml from `0.1.0.dev0` to
+#      `0.1.0`. Bump SERVER_VERSION in cma-mcp/mcp_server.py to the
+#      same value. Move cma-mcp/CHANGELOG.md `[Unreleased]` to
+#      `[0.1.0]` with the release date.
+#   2. Confirm Zenodo DOI allocation has landed (see CITATION.cff).
+#   3. Configure PyPI Trusted Publishing for `cma-mcp` against this
+#      repo (https://docs.pypi.org/trusted-publishers/), adding the
+#      `testpypi` and `pypi` GitHub environments.
+#   4. Uncomment `publish-to-testpypi` below. Push tag
+#      `cma-mcp-0.1.0`. The workflow builds, validates, and uploads
+#      to TestPyPI.
+#   5. Verify the TestPyPI install:
+#      `pipx run --index-url https://test.pypi.org/simple/ \
+#         --pip-args='--extra-index-url https://pypi.org/simple/' \
+#         cma-mcp==0.1.0 --version`
+#   6. Uncomment `publish-to-pypi`. Push the same tag again (or a
+#      new tag); the workflow uploads to real PyPI.
+#   7. Zenodo issues a DOI automatically if GitHub-Zenodo
+#      integration is enabled (one-time repo-settings toggle).
+#
+# Releases of bash cma (tags `cma-X.Y.Z`) flow through a separate
+# release process — they do not invoke this workflow.
+
+name: publish-mcp
+
+on:
+  push:
+    tags:
+      - 'cma-mcp-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: cma-mcp
+
+jobs:
+  build:
+    name: Build wheel + sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the SHA bake survives if a contributor
+          # ever invokes setup.py without the env var path.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify the tag matches pyproject + SERVER_VERSION
+        env:
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          python - <<'PY'
+          import os, re, sys, tomllib
+          ref = os.environ["GITHUB_REF"]
+          prefix = "refs/tags/cma-mcp-"
+          if not ref.startswith(prefix):
+              sys.exit(f"unexpected ref {ref!r}; expected refs/tags/cma-mcp-...")
+          tag_version = ref[len(prefix):]
+          with open("pyproject.toml", "rb") as f:
+              pyver = tomllib.load(f)["project"]["version"]
+          text = open("mcp_server.py").read()
+          m = re.search(r'^SERVER_VERSION\s*=\s*"([^"]+)"', text, re.MULTILINE)
+          codever = m.group(1) if m else None
+          mismatches = []
+          if pyver != tag_version:
+              mismatches.append(f"pyproject.toml version={pyver!r} != tag {tag_version!r}")
+          if codever != tag_version:
+              mismatches.append(f"mcp_server.SERVER_VERSION={codever!r} != tag {tag_version!r}")
+          if mismatches:
+              for line in mismatches:
+                  print(f"::error::{line}", file=sys.stderr)
+              sys.exit(1)
+          print(f"Versions in sync at {tag_version}")
+          PY
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build twine
+
+      - name: Build wheel + sdist
+        env:
+          CMA_MCP_BUILD_SHA: ${{ github.sha }}
+        run: python -m build
+
+      - name: Validate artifacts with twine
+        run: python -m twine check dist/*
+
+      - name: Inspect wheel contents
+        run: |
+          python - <<'PY'
+          import glob, zipfile, sys
+          wheel = glob.glob("dist/cma_mcp-*-py3-none-any.whl")[0]
+          z = zipfile.ZipFile(wheel)
+          files = z.namelist()
+          required = [
+              "_build_info.py",
+              "mcp_server.py",
+              "mcp_protocol.py",
+              "mcp_schema.py",
+              "mcp_resources.py",
+              "mcp_compose.py",
+              "mcp_log.py",
+              "cma_subprocess.py",
+              "cma_jsonl.py",
+          ]
+          missing = [r for r in required if r not in files]
+          if missing:
+              sys.exit(f"missing from wheel: {missing}")
+          # License + notice must ship in dist-info/licenses/ (PEP 639)
+          dist_info_licenses = [f for f in files if f.startswith("cma_mcp-") and "/licenses/" in f]
+          required_licenses = {"LICENSE", "NOTICE"}
+          got_licenses = {f.rsplit("/", 1)[-1] for f in dist_info_licenses}
+          if not required_licenses <= got_licenses:
+              sys.exit(f"wheel missing license artifacts: {required_licenses - got_licenses}")
+          print(f"Wheel OK: {wheel}")
+          print(f"  modules: {len([f for f in files if f.endswith('.py')])}")
+          print(f"  licenses: {sorted(got_licenses)}")
+          PY
+
+      - name: Smoke-test installed wheel
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          python -m venv /tmp/cma-mcp-publish-smoke
+          /tmp/cma-mcp-publish-smoke/bin/pip install --quiet dist/cma_mcp-*-py3-none-any.whl
+          /tmp/cma-mcp-publish-smoke/bin/cma-mcp --help >/dev/null
+          fingerprint=$(/tmp/cma-mcp-publish-smoke/bin/cma-mcp --version)
+          echo "$fingerprint"
+          /tmp/cma-mcp-publish-smoke/bin/python - "$fingerprint" "$GITHUB_SHA" <<'PY'
+          import json, sys
+          fp = json.loads(sys.argv[1])
+          expected = sys.argv[2]
+          got = fp.get("git_sha")
+          if got != expected:
+              sys.exit(f"git_sha bake mismatch: wheel reports {got!r}, expected {expected!r}")
+          if fp.get("server_name") != "cma-mcp":
+              sys.exit(f"server_name mismatch: {fp.get('server_name')!r}")
+          print(f"Smoke OK: server_version={fp['server_version']} git_sha={got}")
+          PY
+
+      - name: Upload artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: cma-mcp-dist
+          path: cma-mcp/dist/*
+
+  # publish-to-testpypi:
+  #   name: Publish to TestPyPI
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment: testpypi
+  #   permissions:
+  #     id-token: write  # OIDC for Trusted Publishing (PEP 740)
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: cma-mcp-dist
+  #         path: dist/
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
+
+  # publish-to-pypi:
+  #   name: Publish to PyPI
+  #   needs: publish-to-testpypi
+  #   # Lift-only: real PyPI uploads require a non-pre-release tag
+  #   # (no .dev / .rc / .a / .b suffix in the version).
+  #   if: |
+  #     !contains(github.ref, '.dev') &&
+  #     !contains(github.ref, 'rc') &&
+  #     !contains(github.ref, 'a') &&
+  #     !contains(github.ref, 'b')
+  #   runs-on: ubuntu-latest
+  #   environment: pypi
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: cma-mcp-dist
+  #         path: dist/
+  #     - uses: pypa/gh-action-pypi-publish@release/v1

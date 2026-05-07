@@ -1,5 +1,10 @@
 # cma
 
+[![tests](https://github.com/Clarethium/cma/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/test.yml)
+[![tests-mcp](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml)
+[![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Executable compound practice loop. The terminal-side companion to [Lodestone](https://github.com/Clarethium/lodestone).
 
 ## What this is

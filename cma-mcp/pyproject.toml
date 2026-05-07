@@ -79,6 +79,7 @@ py-modules = [
     "mcp_log",
     "cma_subprocess",
     "cma_jsonl",
+    "_build_info",
 ]
 
 # Apache-2.0 §4(d) requires a readable copy of NOTICE in distributed

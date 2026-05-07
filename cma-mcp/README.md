@@ -1,5 +1,7 @@
 # cma-mcp
 
+[![tests-mcp](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml)
+[![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/cma-mcp/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/Clarethium/cma/blob/main/LICENSE)
 [![Companions](https://img.shields.io/badge/Clarethium-blue.svg)](https://github.com/Clarethium)

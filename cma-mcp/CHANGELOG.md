@@ -47,17 +47,35 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - `--version` install fingerprint emitting server_version,
   protocol version, git_sha (with `+dirty` flag if working tree
   dirty), cma_binary_version (from `cma --version`), python
-  version, absolute script path.
+  version, absolute script path. The git_sha resolves via two
+  paths: a runtime probe of the script's directory (works in
+  development clones) and a build-time bake into `_build_info.py`
+  via `setup.py` (works for PyPI installs where the runtime probe
+  has no `.git` to read). CI sets the `CMA_MCP_BUILD_SHA` env var
+  before `python -m build` so PEP 517 build isolation does not
+  drop the SHA.
 - `--test` offline sanity check: prints the full three-section
   payload for a canned tool call without requiring an MCP client
   handshake.
 - Initialize handshake carrying the standard MCP fields plus a
   top-level `instructions` field with cross-tool orientation prose
   (matches frame-check-mcp's pattern).
-- pytest suite (~30 cases) covering protocol conformance,
+- pytest suite (36 cases) covering protocol conformance,
   subprocess wrapping, JSONL parsing, three-section payload
-  determinism, and adversarial inputs (boundary, malformed,
-  argv-injection-resistance probe).
+  determinism, the install-fingerprint git_sha fallback, and
+  adversarial inputs (boundary, malformed, argv-injection-
+  resistance probe).
+- Publish workflow (`.github/workflows/publish-mcp.yml`) builds
+  the wheel + sdist on `cma-mcp-X.Y.Z` tag pushes, validates with
+  twine, smoke-tests the installed wheel against the baked SHA,
+  and stages the artifacts. PyPI / TestPyPI upload steps are
+  intentionally commented out pending the lift checklist
+  documented in the workflow header.
+- CI wheel-install smoke step in `tests-mcp.yml` builds and
+  installs the wheel into a clean virtualenv on every push,
+  catching packaging regressions (missing modules, broken entry
+  points, dropped license-files, dropped `_build_info.py`) that
+  the editable-install pytest path cannot see.
 
 ### Notes
 
