@@ -50,3 +50,5 @@ Thumbs.db
 # installed wheel carries the git SHA it was built from. The file is
 # regenerated on every build and must never be committed.
 cma-mcp/_build_info.py
+REPO_SHAPE_MEMO.md
+/clarethium-tools/
