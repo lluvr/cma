@@ -8,9 +8,9 @@
 # representative line here AND extend the audit's regex. Both ship
 # together.
 
-# ── §3c rigid: maintainer-side / maintainer-internal ──
-This is maintainer-side notes and should not appear in public surface.
-The maintainer-internal evaluation rubric is referenced here.
+# ── §3c rigid: operator-side / operator-internal ──
+This is operator-side notes and should not appear in public surface.
+The operator-internal evaluation rubric is referenced here.
 
 # ── §3c rigid: the operator's [optional adjective] [strategy|...] ──
 # Adjectives intervening between "operator's" and the leak noun do not exempt.
@@ -42,8 +42,8 @@ Forked into the private fork for auditing.
 # ── §3c rigid: meta-reference parentheticals ──
 This is calibrated upstream (see private).
 The decision lives elsewhere (internal reference).
-Threshold tuning applies (maintainer-side reference).
-See the protocol (see maintainer-side studies).
+Threshold tuning applies (operator-side reference).
+See the protocol (see operator-side studies).
 
 # ── §3c rigid: internal version / unredacted / the full X ──
 The internal version of this rubric is more detailed.
@@ -60,7 +60,7 @@ The canonical methodology lives separately.
 # ── §3c rigid: strategic-vocabulary bigrams ──
 Our trust moat comes from authorship.
 Data moat is the durable advantage.
-The core claim survives this round.
+The compounding claim survives this round.
 This is named-authorship moat at work.
 Methodology-as-moat framing.
 
@@ -70,9 +70,9 @@ Empire-wide rollout planned.
 The Clarethium shape favors composition.
 The project's empire is built on canon.
 
-# ── §3c rigid: evidence discipline ──
-Evidence discipline applies at every layer.
-We follow the evidence discipline strictly.
+# ── §3c rigid: construct-honesty discipline ──
+Construct-honesty discipline applies at every layer.
+We follow the construct honesty discipline strictly.
 
 # ── §3c rigid: examplehost.localdomain hostname ──
 Author: lluvr <user@examplehost.localdomain>
