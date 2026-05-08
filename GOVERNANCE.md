@@ -48,10 +48,9 @@ authority (BDFL-style) over:
 - Companion-link maintenance with cma, Lodestone, Touchstone,
   frame-check-mcp
 
-Named authorship is the project's primary credibility asset, in line
-with the broader Clarethium discipline (see frame-check-mcp's
-`GOVERNANCE.md` for the parallel statement). The curator is the
-named author on every published release.
+The curator is the named author on every published release. This
+mirrors the convention used across the Clarethium organization
+(see frame-check-mcp's `GOVERNANCE.md` for the parallel statement).
 
 ---
 

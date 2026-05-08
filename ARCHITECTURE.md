@@ -6,7 +6,7 @@ The document is the contract between cma and any integration that connects it to
 
 ## 1. Purpose and scope
 
-cma is the executable of compound practice, the maintainer-side discipline defined in [Lodestone](https://github.com/Clarethium/lodestone). The compound practice loop (Lodestone Section VIII) has five steps:
+cma is the executable of compound practice, the discipline defined in [Lodestone](https://github.com/Clarethium/lodestone). The compound practice loop (Lodestone Section VIII) has five steps:
 
 1. **Capture** a failure, decision, rejection, or prevention.
 2. **Surface** relevant prior captures when context matches a future action.
@@ -330,7 +330,7 @@ The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes t
 
 cma is methodology-agnostic. The `--fm` field on captures and any methodology-specific tags are opaque strings from cma's perspective. Semantics are owned by the methodology in use.
 
-When operators use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is the canonical operator-AI methodology under Clarethium; others may emerge), they tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
+When operators use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is the canonical human-AI collaboration methodology under Clarethium; others may emerge), they tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
 
 The integration is by convention (shared vocabulary), not by code. cma does not depend on any methodology. Methodologies do not depend on cma. Each evolves independently. cma documentation does not replicate methodology catalogs; methodology documents own their catalogs and their meaning.
 
@@ -347,7 +347,7 @@ Failure modes:
 
 The plugin point exists so operators can wire methodology-aware classification (a Lodestone-aware classifier, for instance) without coupling cma to any specific methodology. Operators using a different methodology wire a different classifier. Operators not using auto-classification leave the env var unset and tag manually with `--fm`.
 
-The classifier is maintainer-side: cma ships no classifier in this repository. Methodologies that wish to provide one ship it as a separate companion tool (or document the wiring pattern in their own docs). This preserves the loose coupling.
+The classifier is external to cma: this repository ships no classifier. Methodologies that wish to provide one ship it as a separate companion tool (or document the wiring pattern in their own docs). This preserves the loose coupling.
 
 ## 10. References
 

@@ -174,7 +174,7 @@ cma miss "the operator skipped verification before deploying"
 # Classifier auto-tags the --fm value based on the description.
 ```
 
-The classifier is maintainer-side. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma calls it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](ARCHITECTURE.md) for the full integration pattern.
+The classifier is external to cma; you provide the command. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma invokes it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](ARCHITECTURE.md) for the full integration pattern.
 
 ## Architecture
 

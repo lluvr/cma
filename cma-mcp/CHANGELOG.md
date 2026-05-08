@@ -85,7 +85,7 @@ the cohort study (Layer 3) is the post-publish work.
   discipline, JSONL read tolerance, install fingerprint two-path
   resolution. Reading map for new contributors.
 - `docs/FAQ.md` and `docs/TROUBLESHOOTING.md`: conceptual and
-  maintainer-side gotchas, MCP-client config patterns across Claude
+  installation gotchas, MCP-client config patterns across Claude
   Desktop / Cursor / Cline / Continue.dev, the four-command
   diagnostic loop, and reproducible bug-report template.
 - `bench.py`: latency benchmark mirroring bash cma's `bench.sh`

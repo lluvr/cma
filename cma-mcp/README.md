@@ -4,7 +4,7 @@
 [![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/cma-mcp/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/Clarethium/cma/blob/main/LICENSE)
-[![Companions](https://img.shields.io/badge/Clarethium-blue.svg)](https://github.com/Clarethium)
+[![Companions](https://img.shields.io/badge/org-Clarethium-blue.svg)](https://github.com/Clarethium)
 
 The Model Context Protocol distribution layer for [cma](https://github.com/Clarethium/cma#readme),
 Clarethium's executable compound practice loop.
@@ -104,10 +104,10 @@ three top-level sections:
 
 The `agent_guidance` and `provenance` sections exist because an
 agent passing cma-mcp output to a user without attribution would
-strip the evidence discipline that makes the loop's
-evidence worth citing. Surfacing "how to cite faithfully" inside
-the payload is the structure that carries the discipline forward.
-This convention is established by [frame-check-mcp](https://github.com/Clarethium/frame-check-mcp);
+strip the reproducibility that makes the loop's evidence worth
+citing. Surfacing "how to cite faithfully" inside the payload is
+the structure that carries that integrity forward. This convention
+is established by [frame-check-mcp](https://github.com/Clarethium/frame-check-mcp);
 cma-mcp inherits it. Adversarial tests in
 `tests/test_payload_determinism.py` pin the structure.
 
@@ -116,7 +116,7 @@ cma-mcp inherits it. Adversarial tests in
 **Subprocess over reimplementation.** cma-mcp invokes bash cma as
 a subprocess for every captured action. cma-mcp does not
 reimplement cma's seven primitives in Python. See
-project notes §6 DD-1 for the durable decision.
+[DECISIONS.md](https://github.com/Clarethium/cma/blob/main/DECISIONS.md) AD-001 for the rationale.
 
 **Methodology-agnostic substrate.** cma stores `--fm` (failure
 mode) as an opaque string. cma-mcp does not bundle any

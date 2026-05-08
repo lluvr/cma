@@ -24,9 +24,9 @@ epistemic payload with three sections:
                      citation string
 
 The agent_guidance and provenance blocks exist because an agent
-passing cma-mcp output to a user without attribution would strip the
-evidence discipline that makes the compound-practice
-evidence worth citing.
+passing cma-mcp output to a user without attribution would strip
+the reproducibility that makes the compound-practice evidence
+worth citing.
 
 Protocol
 --------
