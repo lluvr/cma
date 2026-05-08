@@ -107,7 +107,7 @@ agent passing cma-mcp output to a user without attribution would
 strip the reproducibility that makes the loop's evidence worth
 citing. Surfacing "how to cite faithfully" inside the payload is
 the structure that carries that integrity forward. This convention
-is established by [frame-check-mcp](https://github.com/Clarethium/frame-check-mcp);
+is established by [frame-check](https://github.com/Clarethium/frame-check);
 cma-mcp inherits it. Adversarial tests in
 `tests/test_payload_determinism.py` pin the structure.
 
