@@ -24,12 +24,10 @@ clients. When cma adds project scoping, cma-mcp will follow.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 import cma_jsonl
-import cma_subprocess
 import mcp_compose
-from cma_subprocess import CmaError
+from cma_subprocess import CmaError, run_cma
 
 
 DECISIONS_LOOKBACK_DAYS = 180
@@ -164,7 +162,7 @@ def read_stats() -> dict:
     `view` argument.
     """
     try:
-        result = cma_subprocess.run_cma(["stats"])
+        result = run_cma(["stats"])
         return mcp_compose.compose_stats_response(
             view="default",
             cma_stdout=result.stdout,

@@ -223,6 +223,7 @@ def cma_version() -> str | None:
         if out:
             return out
     except CmaError:
+        # --version not supported (older cma) or non-zero exit; fall through to `cma help` parse.
         pass
 
     # Fallback: scan `cma help` output. Some cma binaries return

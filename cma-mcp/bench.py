@@ -42,7 +42,6 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from statistics import median
 
 
 HERE = Path(__file__).parent.resolve()
@@ -123,6 +122,7 @@ class WireClient:
         try:
             self.proc.stdin.close()
         except Exception:
+            # Already closed or pipe broken: cleanup proceeds either way.
             pass
         try:
             self.proc.wait(timeout=2)

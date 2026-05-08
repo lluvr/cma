@@ -9,8 +9,6 @@ does on receipt.
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 import cma_subprocess
@@ -75,6 +73,7 @@ def test_argv_injection_is_structurally_impossible(cma_binary_available, isolate
     try:
         cma_subprocess.run_cma(["miss", payload])
     except cma_subprocess.CmaError:
+        # Whether the call errors is irrelevant; the assertion below is sentinel-non-existence.
         pass
     assert not sentinel.exists(), "argv-array discipline broken: shell metacharacter executed"
 

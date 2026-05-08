@@ -54,6 +54,7 @@ def _probe_git_sha(cwd: Path) -> str:
         if dirty:
             sha = sha + "+dirty"
     except Exception:
+        # `git status` failure (no git, timeout, lock contention) leaves SHA un-suffixed; build proceeds.
         pass
     return sha
 

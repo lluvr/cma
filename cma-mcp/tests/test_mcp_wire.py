@@ -27,7 +27,7 @@ import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Iterator
 
 import pytest
 
@@ -108,6 +108,7 @@ class WireServer:
             if self.proc.stdin and not self.proc.stdin.closed:
                 self.proc.stdin.close()
         except Exception:
+            # Already closed or pipe broken: cleanup proceeds either way.
             pass
         try:
             self.proc.wait(timeout=2)

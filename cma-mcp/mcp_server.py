@@ -48,15 +48,13 @@ import os
 import platform
 import subprocess
 import sys
-from typing import Any
 
-import cma_subprocess
 import mcp_compose
 import mcp_log
 import mcp_protocol
 import mcp_resources
 import mcp_schema
-from cma_subprocess import CmaError, run_cma
+from cma_subprocess import CmaError, cma_version, run_cma
 
 
 # ── version constants ──────────────────────────────────────────────
@@ -450,6 +448,7 @@ def _git_sha() -> str | None:
             if dirty:
                 sha = sha + "+dirty"
         except Exception:
+            # `git status` failure leaves SHA un-suffixed; clean SHA still serves the install fingerprint.
             pass
         return sha
     except Exception:
@@ -486,7 +485,7 @@ def _emit_version_fingerprint() -> None:
         "server_version": SERVER_VERSION,
         "protocol_version": PROTOCOL_VERSION,
         "git_sha": _git_sha(),
-        "cma_binary_version": cma_subprocess.cma_version(),
+        "cma_binary_version": cma_version(),
         "python": platform.python_version(),
         "script": os.path.abspath(__file__),
     }
