@@ -46,11 +46,11 @@ authority (BDFL-style) over:
 - Which pull requests merge (reviewer, per `CONTRIBUTING.md`)
 - Release timing and version numbers
 - Companion-link maintenance with cma, Lodestone, Touchstone,
-  frame-check-mcp
+  frame-check
 
 The curator is the named author on every published release. This
 mirrors the convention used across the Clarethium organization
-(see frame-check-mcp's `GOVERNANCE.md` for the parallel statement).
+(see frame-check's `GOVERNANCE.md` for the parallel statement).
 
 ---
 
@@ -92,7 +92,7 @@ description that names the affected source(s) above:
    `tests/test_mcp_server.py`, and the docs in `docs/MCP_SERVER.md`.
    All four must move together.
 5. **Companion-link change** (text in `NOTES.md §3` or `README.md`
-   that references Lodestone, Touchstone, cma, frame-check-mcp).
+   that references Lodestone, Touchstone, cma, frame-check).
    Coordinate with the affected companion repo's curator before
    merge. Currently the curator is the same person; that simplifies
    coordination but does not exempt it.

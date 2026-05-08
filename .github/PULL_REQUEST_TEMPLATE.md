@@ -37,7 +37,7 @@ GOVERNANCE.md before opening a substantial change. Especially:
 
 <!--
 Does this change affect references to cma, Lodestone, Touchstone,
-or frame-check-mcp? If yes, name what coordinates with each
+or frame-check? If yes, name what coordinates with each
 companion repo. If no, write "none".
 -->
 

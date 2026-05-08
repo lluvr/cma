@@ -69,7 +69,7 @@ the cohort study (Layer 3) is the post-publish work.
   handshake.
 - Initialize handshake carrying the standard MCP fields plus a
   top-level `instructions` field with cross-tool orientation prose
-  (matches frame-check-mcp's pattern).
+  (matches frame-check's pattern).
 - pytest suite (48 cases) covering protocol conformance,
   subprocess wrapping, JSONL parsing, three-section payload
   determinism, install-fingerprint git_sha fallback, adversarial

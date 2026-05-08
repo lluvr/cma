@@ -66,7 +66,7 @@ same-repo-as-cma; DECISIONS AD-001 locks no-MCP-SDK-dependency.
 Plus two cross-cutting modules:
 
 - `mcp_log.py` — stderr-only structured logging. Stdout is reserved
-  for JSON-RPC. STRATEGY DD-6.
+  for JSON-RPC.
 - `_build_info.py` — auto-generated at build time by `setup.py`,
   bakes the git SHA into the wheel so `--version` reports a real
   value after `pip install` (see "Install fingerprint" below).
@@ -185,7 +185,7 @@ Adversarial determinism tests in `tests/test_payload_determinism.py`
 pin the shape on every tool and resource. Any change that affects
 the payload requires updating those tests.
 
-The convention is inherited from frame-check-mcp; STRATEGY DD-5
+The convention is inherited from frame-check; STRATEGY DD-5
 locks it for cma-mcp.
 
 ---
@@ -307,15 +307,15 @@ in CI.
 ## What this design rejects
 
 - **No MCP SDK dependency.** Manual JSON-RPC keeps the runtime
-  surface to the Python standard library. STRATEGY DD-2.
+  surface to the Python standard library.
 - **No methodology vocabulary bundled.** `--fm` is opaque.
   Operators tag with their methodology's catalog (Lodestone's
-  FM-1..10 or otherwise). STRATEGY DD-4.
+  FM-1..10 or otherwise).
 - **No transports beyond stdio.** SSE / WebSocket / HTTP are out of
   scope; gateways exist for multi-client deployment. DECISIONS
   AD-005.
 - **No reimplementation of cma's primitives.** Every flag is a
-  subprocess argv slot. STRATEGY DD-1.
+  subprocess argv slot.
 
 These rejections are not "we'll get to them later." They are the
 shape that keeps cma-mcp thin and drift-resistant.

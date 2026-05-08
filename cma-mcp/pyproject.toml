@@ -67,7 +67,7 @@ Decisions = "https://github.com/Clarethium/cma/blob/main/DECISIONS.md"
 cma-mcp = "mcp_server:cli"
 
 [tool.setuptools]
-# Flat-modules layout matching frame-check-mcp's wheel-bundle
+# Flat-modules layout matching frame-check's wheel-bundle
 # convention. Each *.py at the repo root ships as a top-level import
 # on the installed wheel.
 py-modules = [

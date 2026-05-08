@@ -8,7 +8,7 @@ C-8: spawn cma-mcp as a real subprocess, exchange JSON-RPC over
 the standard MCP transport, and pin the framing-level invariants
 that an in-process dispatcher cannot see.
 
-Mirrors frame-check-mcp's `test_mcp_adversarial.py` pattern:
+Mirrors frame-check's `test_mcp_adversarial.py` pattern:
 construct a real client→server→client roundtrip, fire malformed
 and rapid-fire inputs at it, and confirm the server stays
 responsive with well-formed JSON-RPC error envelopes throughout.
