@@ -1,19 +1,19 @@
 title = "cma gitleaks configuration"
 
 # Extends gitleaks' default ruleset with patterns specific to the
-# Clarethium public-canon discipline. Default rules already catch
-# GitHub PATs, AWS keys, Stripe tokens, and generic high-entropy
-# secrets; the custom rules below add path-pattern blocks for
-# maintainer-internal artifact families plus operator-workspace
-# absolute paths.
+# public-canon discipline. Default rules already catch GitHub PATs,
+# AWS keys, Stripe tokens, and generic high-entropy secrets. The
+# custom rules below add path-pattern blocks for known unbundled
+# artifact filename shapes plus contributor-workspace absolute
+# paths.
 
 [extend]
 # Inherit gitleaks' built-in ruleset. Custom rules below ADD to
 # these, do not replace.
 useDefault = true
 
-# Catch CONTINUATION_PROMPT-shaped agent-handoff scratchpads being
-# committed. These files are scratch space and should never enter
+# Refuse commits matching common agent-handoff scratchpad filename
+# patterns. These files are scratch space and should never enter
 # version control regardless of content.
 [[rules]]
 id = "agent-handoff-scratchpad"
@@ -21,27 +21,25 @@ description = "Agent handoff scratchpad files (should not be committed)"
 regex = '''.+''' # match anything in the file content
 path = '''(?i)(CONTINUATION_PROMPT|HANDOFF_PROMPT|AGENT_HANDOFF|SESSION_HANDOFF|SCRATCH_PROMPT|AGENT_SCRATCH).*\.md$'''
 
-# Maintainer-internal strategic memos and audit deliverables. Per the
-# AGENTS.md "Public-canon discipline" section: docs/internal/, and
-# any *_INVENTORY / *_AUDIT / *_VERDICT / *_REMEDIATION / *_OUTREACH /
-# *_PROMOTION / *_TIER / METHODOLOGY_PAPER / EXTRACT_POLICY / PUBLICATION_STATE
-# patterns are maintainer-side artifacts that must never enter the
-# public repo. Discoverable artifacts go through public-canon review;
-# everything else stays in the operator workspace.
+# Filename shapes that fall outside the public-repo content scope
+# defined in AGENTS.md. Strategic memos, audit deliverables, and
+# similar working-set artifacts have shapes that the linter can
+# refuse on by name. The pattern is shape-based; deployment-specific
+# additions load from a maintainer-side config file rather than
+# being enumerated here.
 [[rules]]
-id = "maintainer-internal-strategy-doc"
-description = "Maintainer-internal strategic memo or audit deliverable"
+id = "out-of-scope-doc-shape"
+description = "Filename shape that falls outside the public-repo content scope"
 regex = '''.+'''
-path = '''(?i)(^docs/internal/|^|/)([A-Z_]*INVENTORY|[A-Z_]*AUDIT|[A-Z_]*VERDICT|[A-Z_]*REMEDIATION_LOG|[A-Z_]*OUTREACH|[A-Z_]*PROMOTION|ENGINE_TIER_[A-Z_]+|METHODOLOGY_PAPER_[A-Z0-9_]+|METHODOLOGY_V[0-9]+_CANDIDATES_[A-Z0-9_]*|TRACK_[A-Z]_INFORMAL_STUDY_[A-Z0-9_]*|EXTRACT_POLICY|PUBLICATION_STATE_v[0-9]+|RELEASE_PREP_v[0-9]+|REPO_SHAPE_MEMO|verify_publication_state)(_v[0-9]+)?\.(md|sh|py)$'''
+path = '''(?i)(^|/)([A-Z_]*INVENTORY|[A-Z_]*AUDIT|[A-Z_]*VERDICT|[A-Z_]*REMEDIATION_LOG|[A-Z_]*OUTREACH|[A-Z_]*PROMOTION)(_v[0-9]+)?\.(md|sh|py)$'''
 
-# Operator workspace paths. Never commit absolute paths into a
-# user's home directory, regardless of file type. The pattern is
-# broad on purpose: any /home/<user>/<subdir> shape is suspicious
-# in committed content. Legitimate cases (path examples in docs,
-# fictional fixtures) are in the allowlist.
+# Absolute paths into a contributor's home directory. The pattern
+# is broad on purpose: any /home/<user>/<subdir> shape is suspicious
+# in committed content. Legitimate cases (placeholder paths in
+# docs, fictional fixtures) are in the allowlist.
 [[rules]]
-id = "operator-home-path"
-description = "Absolute path into a user's home directory"
+id = "absolute-home-path"
+description = "Absolute path into a contributor's home directory"
 regex = '''(?i)/home/[a-z][a-z0-9._-]*/[a-z.][a-z0-9._-]*'''
 [rules.allowlist]
 regexes = [
@@ -50,18 +48,3 @@ regexes = [
   '''/home/USER''',
   '''/home/\$USER''',
 ]
-
-# References to the operator's secrets vault by component name.
-# "secrets-vault" or "clarethium-vault" anywhere in committed text
-# leaks the existence and tooling boundary of the operator's vault.
-# Generic phrases ("local proxy", "credential vault", "encrypted
-# at rest") are fine.
-[[rules]]
-id = "operator-vault-name-reference"
-description = "Reference to the operator's secrets-vault by name"
-regex = '''(?i)\b(secrets-vault|clarethium-vault)\b'''
-[rules.allowlist]
-# Allow .gitignore entries that block these patterns to mention them
-# (the very patterns this rule blocks need to be named in gitignore
-# and gitleaks config).
-paths = ['''^\.gitignore$''', '''^\.gitleaks\.toml$''']
