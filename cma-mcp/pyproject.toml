@@ -41,7 +41,7 @@ classifiers = [
 # Runtime dependencies are intentionally empty: cma-mcp uses Python
 # standard library only. The MCP protocol is implemented manually
 # (DECISIONS AD-001), and the bash cma binary is invoked as a
-# subprocess (STRATEGY DD-1, DECISIONS AD-004).
+# subprocess (DECISIONS AD-004).
 dependencies = []
 
 [project.optional-dependencies]
@@ -57,7 +57,6 @@ Repository = "https://github.com/Clarethium/cma"
 Issues = "https://github.com/Clarethium/cma/issues"
 Changelog = "https://github.com/Clarethium/cma/blob/main/cma-mcp/CHANGELOG.md"
 Security = "https://github.com/Clarethium/cma/blob/main/SECURITY.md"
-Strategy = "https://github.com/Clarethium/cma/blob/main/NOTES.md"
 Decisions = "https://github.com/Clarethium/cma/blob/main/DECISIONS.md"
 "MCP Server Reference" = "https://github.com/Clarethium/cma/blob/main/cma-mcp/docs/MCP_SERVER.md"
 "Wrapped CLI (cma)" = "https://github.com/Clarethium/cma"

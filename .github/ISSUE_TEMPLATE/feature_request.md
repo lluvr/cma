@@ -29,13 +29,6 @@ existing cma-mcp patterns where possible (three-section payload,
 snake_case fields, optional surface label).
 -->
 
-## STRATEGY check
-
-<!--
-Does this change touch a NOTES.md §6 durable decision? If yes,
-note which one. If no, write "none".
--->
-
 ## Companion impact
 
 <!--

@@ -1,10 +1,13 @@
 cff-version: 1.2.0
 message: >-
-  If you use cma in academic, applied, or compliance work, please
-  cite it using the metadata below. The methodology canon
-  (Lodestone) and the MCP distribution wrapper (cma-mcp, in this
-  repository under cma-mcp/) are separately citeable artifacts;
-  see the references block.
+  cma 1.0.0 is pre-release; the reference binary reports the
+  1.0.0-dev marker until the 1.0.0 tag lands. The date-released
+  field is intentionally absent until lift. To cite this work in
+  its current pre-release state, reference this repository
+  directly. The methodology canon (Lodestone) and the MCP
+  distribution wrapper (cma-mcp, in this repository under
+  cma-mcp/) are separately citeable artifacts; see the references
+  block.
 title: "cma: executable compound practice loop"
 type: software
 authors:
@@ -16,7 +19,7 @@ repository-code: "https://github.com/Clarethium/cma"
 url: "https://github.com/Clarethium/cma"
 abstract: >-
   cma is the executable companion to Lodestone, Clarethium's
-  canonical operator methodology for AI-coupled work. cma runs the
+  canonical methodology for AI-coupled work. cma runs the
   compound practice loop on the operator's local machine: it
   captures failures, surfaces relevant prior context at the moment
   of action, tracks decisions and rejected alternatives, detects
@@ -34,7 +37,6 @@ keywords:
   - clarethium
 license: Apache-2.0
 version: "1.0.0"
-date-released: "2026-05-06"
 references:
   - type: software
     title: "cma-mcp: Model Context Protocol distribution for the cma compound practice loop"

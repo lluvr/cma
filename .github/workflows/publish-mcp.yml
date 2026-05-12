@@ -9,24 +9,26 @@
 #
 # To enable publishing:
 #
-#   1. Bump version in cma-mcp/pyproject.toml from `0.1.0.dev0` to
-#      `0.1.0`. Bump SERVER_VERSION in cma-mcp/mcp_server.py to the
-#      same value. Move cma-mcp/CHANGELOG.md `[Unreleased]` to
-#      `[0.1.0]` with the release date.
-#   2. Confirm Zenodo DOI allocation has landed (see CITATION.cff).
-#   3. Configure PyPI Trusted Publishing for `cma-mcp` against this
+#   1. Confirm cma-mcp/pyproject.toml version, SERVER_VERSION in
+#      cma-mcp/mcp_server.py, and the planned tag are all aligned
+#      character-for-character. The verify-tag step in the `build`
+#      job below hard-fails on mismatch.
+#   2. Move cma-mcp/CHANGELOG.md `[Unreleased]` to the new
+#      `[X.Y.Z]` block with the release date.
+#   3. Confirm Zenodo DOI allocation has landed (see CITATION.cff).
+#   4. Configure PyPI Trusted Publishing for `cma-mcp` against this
 #      repo (https://docs.pypi.org/trusted-publishers/), adding the
 #      `testpypi` and `pypi` GitHub environments.
-#   4. Uncomment `publish-to-testpypi` below. Push tag
-#      `cma-mcp-0.1.0`. The workflow builds, validates, and uploads
+#   5. Uncomment `publish-to-testpypi` below. Push tag
+#      `cma-mcp-X.Y.Z`. The workflow builds, validates, and uploads
 #      to TestPyPI.
-#   5. Verify the TestPyPI install:
+#   6. Verify the TestPyPI install:
 #      `pipx run --index-url https://test.pypi.org/simple/ \
 #         --pip-args='--extra-index-url https://pypi.org/simple/' \
-#         cma-mcp==0.1.0 --version`
-#   6. Uncomment `publish-to-pypi`. Push the same tag again (or a
+#         cma-mcp==X.Y.Z --version`
+#   7. Uncomment `publish-to-pypi`. Push the same tag again (or a
 #      new tag); the workflow uploads to real PyPI.
-#   7. Zenodo issues a DOI automatically if GitHub-Zenodo
+#   8. Zenodo issues a DOI automatically if GitHub-Zenodo
 #      integration is enabled (one-time repo-settings toggle).
 #
 # Releases of bash cma (tags `cma-X.Y.Z`) flow through a separate

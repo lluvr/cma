@@ -14,8 +14,8 @@ The cma project ships two components in this repository:
 This document covers **how** contributions happen mechanically: file
 layout, test requirements, PR process, and what a reviewer will
 check. For **who** decides and **when** a contribution becomes
-canon, see `GOVERNANCE.md`. For strategic positioning and durable
-decisions, see `NOTES.md`.
+canon, see `GOVERNANCE.md`. Architectural decisions and their
+rationales are recorded in `DECISIONS.md`.
 
 ---
 
@@ -32,11 +32,11 @@ cma/
 ├── cma-mcp/                     Python MCP distribution wrapper
 │   ├── mcp_server.py mcp_*.py cma_*.py   flat-modules wheel layout
 │   ├── tests/                   pytest suite
-│   ├── docs/                    MCP_SERVER, ANTICIPATED_CRITIQUES, VALIDATION_PROGRAM
+│   ├── docs/                    MCP_SERVER, ARCHITECTURE, FAQ, TROUBLESHOOTING
 │   ├── pyproject.toml           PyPI metadata, build config, py-modules list
 │   ├── README.md                cma-mcp quickstart (also rendered on PyPI)
 │   └── CHANGELOG.md             cma-mcp's release history (independent of cma)
-├── NOTES.md DECISIONS.md GOVERNANCE.md   project-level governance (covers both)
+├── DECISIONS.md GOVERNANCE.md   project-level governance (covers both)
 ├── CONTRIBUTING.md SECURITY.md CITATION.cff NOTICE LICENSE   cross-cutting
 └── .github/
     ├── workflows/test.yml       cma's bash test workflow
@@ -56,22 +56,21 @@ prefixed accordingly (`cma-1.1`, `cma-mcp-0.2`).
 
 ## Before you start
 
-1. **Read `NOTES.md`.** Especially §6 Durable Decisions.
-   Contributions that require overturning a durable decision need an
-   explicit overturn proposal, not a silent PR.
-2. **Read `DECISIONS.md`.** New architectural changes append a new
-   entry; do not silently overturn an existing one.
-3. **For bash cma contributions:** ensure `bash` and a working
+1. **Read `DECISIONS.md`.** Architectural changes append a new
+   entry; do not silently overturn an existing one. A contribution
+   that contradicts a prior decision needs the contradiction named
+   in the PR description.
+2. **For bash cma contributions:** ensure `bash` and a working
    `python3` are available (cma uses python3 for JSON escape only).
    Run `./test.sh` from the repository root before opening a PR.
-4. **For cma-mcp contributions:** confirm bash cma is installed and
+3. **For cma-mcp contributions:** confirm bash cma is installed and
    on `PATH` (cma-mcp's tests exercise real subprocess calls).
    ```bash
    cma --help
    ```
    If cma is missing, build it from this repository: `ln -s
    "$(pwd)/cma" ~/.local/bin/cma` (per cma's README quickstart).
-5. **Run the full test suite for the component you touched.**
+4. **Run the full test suite for the component you touched.**
    ```bash
    ./test.sh                   # bash cma tests
    cd cma-mcp && pip install -e .[test] && python3 -m pytest -q
@@ -168,7 +167,7 @@ A PR that lands meets all of the following:
 - [ ] Schema, server, test, and docs updated together for surface changes
 - [ ] CHANGELOG.md `[Unreleased]` updated
 - [ ] No new runtime dependency without architectural decision
-- [ ] NOTES.md `§6` durable decisions not silently overturned
+- [ ] If contradicting a prior DECISIONS.md entry, the contradiction is named in the PR description
 
 ---
 

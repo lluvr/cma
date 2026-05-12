@@ -138,11 +138,12 @@ through other MCP-compatible AI clients (Claude Desktop, Cursor,
 Cline, Continue.dev), the same compound practice loop ships as a
 Python MCP server at [`cma-mcp/`](cma-mcp/). Subprocess wrapper
 around this binary; methodology-agnostic substrate; three-section
-payload discipline. PyPI: `pip install cma-mcp`.
+payload discipline. PyPI publication of `cma-mcp` is pending;
+install from source until then (see `cma-mcp/README.md`).
 
 See [`cma-mcp/README.md`](cma-mcp/README.md) for the MCP-specific
-quickstart and tool surface, and project notes for
-the durable decisions governing the wrapper.
+quickstart and tool surface. The architectural decisions governing
+the wrapper are recorded in [DECISIONS.md](DECISIONS.md).
 
 ## Testing
 

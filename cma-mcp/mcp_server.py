@@ -63,8 +63,9 @@ from cma_subprocess import CmaError, cma_version, run_cma
 # see it on connect. Bump on every user-visible capability change.
 # Strict M.m.p form (no suffixes here) is enforced by
 # tests/test_mcp_server.py::test_server_version_is_strict_semver.
-# pyproject.toml carries the PEP 440 .dev0 marker during the dev
-# window; at lift the suffix drops and the strings align.
+# pyproject.toml.version, SERVER_VERSION, and the planned
+# `cma-mcp-X.Y.Z` tag must align character-for-character; the
+# publish workflow's verify-tag step hard-fails on mismatch.
 SERVER_NAME = "cma-mcp"
 SERVER_VERSION = "0.1.0"
 PROTOCOL_VERSION = "2024-11-05"

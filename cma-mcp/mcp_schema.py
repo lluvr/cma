@@ -18,7 +18,7 @@ as an opaque string; the canonical examples (`auth`, `db`, `docs`,
 `ui`, `infra`, `general`, `git`) are listed in the field description
 but operators may pass any short label that fits their work.
 
-`fm` (failure-mode) is opaque per STRATEGY DD-4. cma-mcp does not
+`fm` (failure-mode) is opaque per DECISIONS AD-006. cma-mcp does not
 bundle a failure-mode catalog. Tool descriptions reference Lodestone
 as the canonical methodology that owns the FM-1..10 vocabulary;
 operators using a different methodology pass that methodology's tag

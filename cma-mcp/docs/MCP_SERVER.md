@@ -5,8 +5,8 @@ protocol surface: the initialize handshake, tools/list, tools/call,
 resources/list, resources/read, ping, and notifications. It covers
 the request and response shapes a client sees.
 
-For the rationale behind these choices, see `NOTES.md` (durable
-decisions) and `DECISIONS.md` (architectural decisions).
+For the rationale behind these choices, see [`DECISIONS.md`](../../DECISIONS.md)
+at the repository root.
 
 ## Transport
 
@@ -88,7 +88,7 @@ implementation: `auth`, `db`, `docs`, `ui`, `infra`, `general`,
 
 `cma_miss` and `cma_prevented` accept `fm` as an optional opaque
 string. cma-mcp does not bundle Lodestone's FM-1..10 catalog
-(STRATEGY DD-4); operators using a methodology with a canonical
+(DECISIONS AD-006); operators using a methodology with a canonical
 catalog (such as Lodestone) pass that methodology's tag here.
 Operators who want autoclassification at capture time wire the
 `CMA_FM_CLASSIFIER` plugin per cma's CLI convention; cma-mcp

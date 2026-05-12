@@ -4,8 +4,8 @@ GOVERNANCE.md before opening a substantial change. Especially:
 
 - Sign every commit with DCO: `git commit -s`
 - Run pytest before pushing: `python3 -m pytest -q`
-- Check whether your change touches a NOTES.md durable decision;
-  if so, the PR description must include the overturn rationale.
+- Check whether your change contradicts a prior DECISIONS.md entry;
+  if so, the PR description must name the contradiction.
 -->
 
 ## Summary
@@ -18,11 +18,10 @@ GOVERNANCE.md before opening a substantial change. Especially:
 
 - [ ] Bug fix (no schema change)
 - [ ] New tool, resource, or schema field (additive; minor SERVER_VERSION bump)
-- [ ] Schema-breaking change (major SERVER_VERSION bump; STRATEGY review required)
+- [ ] Schema-breaking change (major SERVER_VERSION bump)
 - [ ] Documentation only
 - [ ] Test addition / refactor
 - [ ] Architectural decision (DECISIONS.md entry added)
-- [ ] Durable decision change (NOTES.md §6; rationale below)
 
 ## Reviewer checklist
 
@@ -31,7 +30,7 @@ GOVERNANCE.md before opening a substantial change. Especially:
 - [ ] If surface changed: `mcp_schema.py`, `mcp_server.py`, the relevant test, and `docs/MCP_SERVER.md` all updated together
 - [ ] If payload shape changed: `tests/test_payload_determinism.py` updated
 - [ ] If runtime behavior changed: `CHANGELOG.md` `[Unreleased]` updated
-- [ ] No new runtime dependency added (cma-mcp's runtime stays stdlib-only unless STRATEGY says otherwise)
+- [ ] No new runtime dependency added (cma-mcp's runtime stays stdlib-only by default)
 
 ## Companion-link impact
 
@@ -41,10 +40,10 @@ or frame-check? If yes, name what coordinates with each
 companion repo. If no, write "none".
 -->
 
-## STRATEGY / DECISIONS
+## DECISIONS
 
 <!--
 If this PR adds a DECISIONS.md entry, paste the AD-NNN block here.
-If this PR changes a NOTES.md durable decision, paste the
-overturn rationale here.
+If this PR contradicts a prior DECISIONS.md entry, name the
+contradiction and the reason.
 -->

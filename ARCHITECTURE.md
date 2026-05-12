@@ -128,21 +128,21 @@ Together with the PreToolUse hook, the two cover both ends of the architecture: 
 
 Status: implemented, tested.
 
-### 3.2 Shell wrapper (in development)
+### 3.2 Shell wrapper
 
-`hooks/cma-pre.sh` plus `hooks/cma-pre`
+`hooks/cma-pre`
 
-Interception via zsh's native `preexec` or bash's bash-preexec library. Multi-shell support. Configurable command rules. Stderr injection. Failure-isolated: if cma errors, the wrapped command still runs.
+Interception via zsh's native `preexec` or bash's bash-preexec library. Multi-shell support. Configurable command rules via `CMA_PRE_TRIGGERS`. Stderr injection. Failure-isolated: if cma errors or times out (5-second ceiling), the wrapped command still runs.
 
-Status: in design.
+Status: implemented, tested.
 
 ### 3.3 Manual wrapper
 
-`hooks/cma-pre` standalone invocation (`cma-pre <command>`).
+`hooks/cma-pre` invoked standalone (`cma-pre <command>`).
 
 For environments where automatic interception is unavailable or undesirable. Operators wrap substantive commands explicitly. Same pipeline as the shell wrapper, just triggered manually.
 
-Status: in design.
+Status: implemented, tested.
 
 ## 4. Data contracts
 

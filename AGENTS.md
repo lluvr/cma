@@ -116,11 +116,11 @@ with a placeholder marker; the marker itself is a leak.
 
 ## Forbidden vocabulary
 
-Beyond the file shapes above, certain phrasings always leak. These never appear in committed content (with the exception of this AGENTS.md, the canon audit script, and its self-test fixture, which are allowed to name the patterns in order to forbid them):
+Beyond the file shapes above, certain phrasings always leak. These never appear in committed content (with the exception of this AGENTS.md, the canon audit script `scripts/canon_audit.sh`, and its two self-test fixtures `scripts/canon_audit_known_leaks.txt` and `scripts/canon_audit_pystring_concat_known_leaks.py`, which are allowed to name the patterns in order to forbid or self-verify them):
 
 - `maintainer-side`, `maintainer-internal` (any compound).
 - `the operator's [strategy|methodology|notes|vault|workspace|tree|dev tree|bet|stake|positioning]` — also when an adjective intervenes (`the operator's research vault`).
-- Bare `operator [methodology|framework|practice|positioning|paper|study|playbook|doctrine|memo|brief]`.
+- Bare `operator [paper|study|playbook|doctrine|memo|brief]` — these artifact-shape words name a written artifact authored by "the operator" and are unambiguously leak-shaped. Note that `operator methodology`, `operator framework`, `operator practice`, `operator positioning` are deliberately NOT in this list: "operator" in the cma/lodestone domain means "AI-coupled-work practitioner", and those compounds collide with legitimate domain usage. The §5a fresh-reader test catches the operator-strategic uses of those compounds when they appear.
 - Any definite reference to `vault` as a body of operator material: `the vault`, `in the vault`, `from the vault`. Also forbidden as terms of art: `vault-faithful`, `vault-validated`, `vault behaviour`, `vault precision threshold`, `vault notes`. Allowed only in domain compounds where `vault` is unrelated (`password vault`, `secrets vault`, `hashicorp vault`, `key vault`).
 - Sanitization-shape parentheticals: `(see private)`, `(internal reference)`, `(maintainer-side reference)`, `(see maintainer-side ...)`.
 - Strategic-positioning vocabulary: `trust|data|authorship|named-authorship|compounding|methodology moat`, `Clarethium`, `empire-grade`, `the project's empire`, `core claim`, `evidence discipline`.

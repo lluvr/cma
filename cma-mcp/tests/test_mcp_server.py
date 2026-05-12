@@ -59,7 +59,7 @@ def test_tools_list_carries_seven_tools(fresh_dispatcher):
 
 def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher):
     """
-    Per STRATEGY DD-4: cma-mcp does not bundle Lodestone vocabulary.
+    Per DECISIONS AD-006: cma-mcp does not bundle Lodestone vocabulary.
     The fm field on cma_miss (and cma_prevented) is where FM tagging
     surfaces; that field's description must reference Lodestone as
     the canonical methodology rather than enumerating the catalog.
@@ -71,7 +71,7 @@ def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher)
         "fm field must point to Lodestone as the canonical methodology"
     )
     # The description must NOT define what each FM means (bundling the
-    # catalog inverts canon-vs-companion separation per STRATEGY DD-4).
+    # catalog inverts canon-vs-companion separation per DECISIONS AD-006).
     # Brief reference to FM-1..10 as an example tag namespace is OK;
     # an enumeration of definitions is not. We probe by checking for
     # the disambiguation prose ("Speed Over Understanding", etc.) that

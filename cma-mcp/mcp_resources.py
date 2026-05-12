@@ -12,8 +12,8 @@ will. cma-mcp ships four:
 Reads bypass the bash cma subprocess and parse JSONL directly via
 cma_jsonl. The exception is `cma://stats`, which shells out to
 `cma stats` so the summary text matches what an operator would see
-in their terminal — drift between the resource and the CLI would
-violate STRATEGY DD-1.
+in their terminal; the subprocess wrapping discipline keeps the
+resource output and the CLI output identical by construction.
 
 cma 1.0 is single-project (per-project scoping is on cma's roadmap
 beyond 1.0). cma-mcp follows: no project filtering at v0.1; all

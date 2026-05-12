@@ -19,24 +19,33 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-(no changes since 0.1.0)
+New entries since the most recent published release accumulate
+here. At lift time they either fold into the pending `[0.1.0]`
+block below (if 0.1.0 has not yet shipped) or open a new
+`[0.1.1]` / `[0.2.0]` block above it (if 0.1.0 has shipped). The
+section is intentionally not empty at any time: contributors add
+their CHANGELOG entry here as part of the same PR that makes the
+change.
+
+(no entries yet)
 
 ---
 
-## [0.1.0] - 2026-05-07
+## [0.1.0] - pending publication
 
-First public release. Single-operator pilot evidence is documented
-honestly in `docs/VALIDATION_PROGRAM.md`'s Interim Evidence section;
-the cohort study (Layer 3) is the post-publish work.
+First public release. Version content is frozen; PyPI upload is
+gated on the lift checklist in the Notes section below. The date
+in this header updates to the actual publication date at lift
+time.
 
 ### Added
 
 - Initial cma-mcp 0.1.0 reference implementation. Python ≥3.10,
   MCP protocol manual JSON-RPC over stdio (no SDK dependency, per
-  [STRATEGY DD-2](../NOTES.md) / [DECISIONS AD-001](../DECISIONS.md)).
+  [DECISIONS AD-001](../DECISIONS.md)).
 - Subprocess wrapper around the canonical bash cma binary
-  (STRATEGY DD-1 / DECISIONS AD-004): argv-array, no shell
-  interpolation, 5-second timeout per call (AD-003).
+  (DECISIONS AD-004): argv-array, no shell interpolation,
+  5-second timeout per call (AD-003).
 - Seven tools mirroring bash cma's seven primitives: `cma_miss`,
   `cma_decision`, `cma_reject`, `cma_prevented`, `cma_distill`
   (modes: default / retire / review), `cma_surface` (instrumented
@@ -47,8 +56,8 @@ the cohort study (Layer 3) is the post-publish work.
   `cma://rejections`, `cma://core`, `cma://stats`.
 - Three-section payload (`analysis` + `agent_guidance` +
   `provenance`) on every tool response and resource read.
-  Adversarial tests pin the structure (STRATEGY DD-5).
-- Methodology-agnostic substrate (STRATEGY DD-4): `--fm` is
+  Adversarial tests pin the structure.
+- Methodology-agnostic substrate (DECISIONS AD-006): `--fm` is
   opaque. No Lodestone vocabulary bundled.
 - Schema-version handling (DECISIONS AD-002): records with
   `schema_version: "1.0"` are native; legacy records (no
@@ -75,8 +84,7 @@ the cohort study (Layer 3) is the post-publish work.
   determinism, install-fingerprint git_sha fallback, adversarial
   inputs (boundary, malformed, argv-injection-resistance probe),
   and wire-protocol subprocess roundtrips
-  (`tests/test_mcp_wire.py` — closes
-  `docs/ANTICIPATED_CRITIQUES.md` C-8). Coverage in CI scopes the
+  (`tests/test_mcp_wire.py`). Coverage in CI scopes the
   eight runtime modules; reported number is a floor (subprocess
   paths in wire tests are not counted by pytest-cov without a
   sitecustomize hook).

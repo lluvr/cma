@@ -16,7 +16,7 @@ PreToolUse and SessionStart hooks) and with shell environments
 seven primitives to MCP-compatible AI clients that have no shell
 hook surface: Claude Desktop, Cursor, Cline, Continue.dev, and
 others. The contribution is which audiences can run the loop, not
-new loop semantics. STRATEGY DD-1.
+new loop semantics.
 
 ### Does cma-mcp add LLM cost?
 
@@ -44,7 +44,7 @@ No. cma stores `--fm` as an opaque string. Operators using
 with FM-1..10; operators using a different methodology tag with
 that catalog. cma-mcp does not validate, expand, or interpret the
 tag. Tool descriptions reference Lodestone as the canonical
-methodology but bundle no vocabulary. STRATEGY DD-4.
+methodology but bundle no vocabulary (DECISIONS AD-006).
 
 ---
 
@@ -92,10 +92,12 @@ script as the only entry point.
 
 bash cma is the canonical implementation and uses `/bin/bash`.
 Windows operators run cma-mcp under WSL, which gives them the same
-binary on `PATH`. STRATEGY DD-3 documents the platform stance.
-Operators on a pure Windows host with no WSL cannot run cma-mcp
-today; that is the deliberate trade-off between canonical-binary
-alignment and standalone Python reach.
+binary on `PATH`. Operators on a pure Windows host with no WSL
+cannot run cma-mcp today; that is the deliberate trade-off between
+canonical-binary alignment and standalone Python reach. Routing
+every tool call through the same canonical binary keeps cma-mcp
+thin and prevents drift between a Python re-implementation and the
+bash reference.
 
 ---
 
@@ -161,8 +163,10 @@ backwards-compatible bump the relevant major version explicitly.
   parser is a v0.2 target.
 - **Structured stdout parsing** for capture verbs. cma-mcp passes
   `cma_stdout` through unchanged; v0.2 may extract structured
-  records from verbs whose output format is stable. ANTICIPATED_
-  CRITIQUES C-5.
+  records from verbs whose output format is stable. The deferral is
+  deliberate: parsing requires committing to cma's exact output
+  format, which would couple cma-mcp to formatting choices that
+  change at bash-cma's cadence rather than cma-mcp's.
 - **Cancellation / progress notifications.** cma calls are
   sub-second; the MCP cancellation surface and `progress`
   notifications are out of scope for the current call shape.
@@ -175,7 +179,7 @@ the `inputSchema` in `mcp_schema.py`) and surfaces validation
 errors as `isError: true` with reason. It does not enforce
 methodology rules (which `--fm` values are legal, what shapes a
 "good" miss has). That belongs in the methodology layer
-(Lodestone), not the substrate. STRATEGY DD-4.
+(Lodestone), not the substrate (DECISIONS AD-006).
 
 ### What happens if cma writes to a corrupted JSONL line?
 
@@ -184,7 +188,7 @@ Resource reads use a tolerant parser
 parse failures. The count surfaces in
 `provenance.data_source.parse_failures` so the caller knows what
 the trust signal is. This matches bash cma's own tolerant-read
-discipline. ANTICIPATED_CRITIQUES C-9.
+discipline (DECISIONS AD-002).
 
 ---
 
@@ -215,9 +219,4 @@ Lodestone separately if you reference its vocabulary.
   shapes.
 - **Architecture map:** [`ARCHITECTURE.md`](ARCHITECTURE.md) —
   module layout, data flow, contracts.
-- **Validation plan:** [`VALIDATION_PROGRAM.md`](VALIDATION_PROGRAM.md) —
-  what claims this project makes and how they are tested.
-- **Self-criticism:** [`ANTICIPATED_CRITIQUES.md`](ANTICIPATED_CRITIQUES.md) —
-  the strongest readings against the design, named openly with
-  positions and trade-offs.
 - **Symptoms and fixes:** [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).

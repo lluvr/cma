@@ -49,15 +49,15 @@ Companion projects in the Clarethium body
 
 - Lodestone: canonical operator methodology (CC-BY 4.0)
 - Touchstone: model-independent measurement substrate
-- frame-check-mcp: applied vehicle, sibling MCP using Touchstone
-  (https://github.com/Clarethium/frame-check-mcp)
+- frame-check: applied vehicle, sibling MCP using Touchstone
+  (https://github.com/Clarethium/frame-check)
 
 Sibling-MCP pattern conformance
 -------------------------------
 
 cma-mcp's three-section payload discipline, governance scaffolding,
 and adversarial test architecture follow the conventions established
-by frame-check-mcp. Where this project diverges (e.g., bundling the
+by frame-check. Where this project diverges (e.g., bundling the
 MCP wrapper alongside the wrapped binary in one repository rather
 than as a separate sibling repo), the divergence is named in
 DECISIONS.md.

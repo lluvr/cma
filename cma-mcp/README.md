@@ -22,8 +22,20 @@ The two components release independently:
 - **cma-mcp**: this README, focused on the PyPI installation and
   MCP client configuration.
 
-Cross-cutting governance (license, citation, security, strategy,
+Cross-cutting governance (license, citation, security,
 contribution) lives at the repository root.
+
+## Status
+
+cma-mcp 0.1.0 is pre-publish. The wheel has not yet uploaded to
+PyPI; install from source per the Quickstart below until
+publication lands. The lift checklist (Zenodo DOI allocation, PyPI
+Trusted Publishing setup, pre-flight conformance pass) is
+documented in the Notes section of
+[CHANGELOG.md](CHANGELOG.md) and serves as the single source of
+truth for what gates publication. When `cma-mcp` ships to PyPI
+the install becomes `pip install cma-mcp` and the rest of this
+README applies unchanged.
 
 ## What this is
 
@@ -44,9 +56,15 @@ from the [parent repository](https://github.com/Clarethium/cma#readme), then con
 
     cma --help
 
-Install cma-mcp from PyPI:
+Install cma-mcp from source (PyPI publication pending):
 
-    pip install cma-mcp
+    git clone https://github.com/Clarethium/cma.git
+    cd cma/cma-mcp
+    pip install -e .
+
+The `cma-mcp` console script lands on PATH after install. Confirm:
+
+    cma-mcp --version
 
 Point your MCP client at the installed entry point. For Claude
 Desktop, add to `claude_desktop_config.json`:
@@ -133,11 +151,12 @@ standard library. (Test-time deps: pytest.)
 ## Platform support
 
 Linux and macOS native. Windows operators run cma-mcp under WSL
-because cma-mcp shells out to the bash cma binary. This is
-deliberate (project notes DD-3): canonical-cma
-alignment beats standalone Python reach. Any operator running an
-MCP-compatible AI client on Windows is reasonably expected to have
-WSL available.
+because cma-mcp shells out to the bash cma binary. Routing every
+tool call through the same canonical binary on every platform is
+how cma-mcp avoids drift; a parallel Python implementation would
+require keeping two surface definitions in sync forever. Any
+operator running an MCP-compatible AI client on Windows is
+reasonably expected to have WSL available.
 
 ## Install fingerprint
 
@@ -163,7 +182,6 @@ pipeline wiring and that the cma binary is reachable.
 Project-level (repository root):
 
 - [README.md](https://github.com/Clarethium/cma#readme): cma's CLI overview
-- project notes: durable decisions
 - [DECISIONS.md](https://github.com/Clarethium/cma/blob/main/DECISIONS.md): architectural decisions log
 - [GOVERNANCE.md](https://github.com/Clarethium/cma/blob/main/GOVERNANCE.md): BDFL governance, named curator
 - [CONTRIBUTING.md](https://github.com/Clarethium/cma/blob/main/CONTRIBUTING.md): contribution mechanics, DCO sign-off
@@ -180,10 +198,6 @@ cma-mcp specific (this directory):
   cross-client config patterns
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md): symptoms and
   fixes; the diagnostic loop is the four-command sequence at the top
-- [docs/ANTICIPATED_CRITIQUES.md](docs/ANTICIPATED_CRITIQUES.md):
-  self-enumerated adversarial readings of cma-mcp's design
-- [docs/VALIDATION_PROGRAM.md](docs/VALIDATION_PROGRAM.md): empirical
-  validation plan for whether the loop closes through MCP exposure
 
 ## Running tests
 

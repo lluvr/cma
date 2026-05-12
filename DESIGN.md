@@ -208,10 +208,10 @@ Reference-implementation polish identified in the audit will land as additive fe
 
 cma is a local tool. All captures are stored in the operator's local data directory (default: `~/.cma/`). The captures are private to the operator. The cma toolkit is open source; the operator's data is not.
 
-This separation matches the Lodestone-versus-personal-practice distinction: the methodology is canonical and shared, the operator's running practice is private substantiation.
+This separation matches the Lodestone-versus-personal-practice distinction: the methodology is canonical and shared; what an operator captures while running it stays local.
 
 ## Implementation status
 
 This design locks the cma 1.0 surface. Implementation work involves porting the existing working version of cma to this surface. Functional behavior is preserved; argument styles and command names are sharpened.
 
-The reference implementation lands in this repository under MIT license as it is ported.
+The reference implementation lands in this repository under the Apache-2.0 license as it is ported.

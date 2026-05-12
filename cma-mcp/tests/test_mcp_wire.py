@@ -3,9 +3,8 @@ Wire-protocol subprocess tests.
 
 The other test files dispatch in-process — they exercise handler
 logic but never push bytes through real stdin/stdout pipes. This
-file closes the gap documented in `docs/ANTICIPATED_CRITIQUES.md`
-C-8: spawn cma-mcp as a real subprocess, exchange JSON-RPC over
-the standard MCP transport, and pin the framing-level invariants
+file spawns cma-mcp as a real subprocess, exchanges JSON-RPC over
+the standard MCP transport, and pins the framing-level invariants
 that an in-process dispatcher cannot see.
 
 Mirrors frame-check's `test_mcp_adversarial.py` pattern:

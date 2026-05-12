@@ -105,11 +105,12 @@ _GUIDANCE_CAPTURE = {
     ),
     "what_this_tool_does_not_do": (
         "Does not interpret the capture, does not classify "
-        "automatically, and does not compose with the operator's "
-        "methodology unless the operator has wired CMA_FM_CLASSIFIER. "
-        "cma-mcp is a substrate; vocabulary lives in the methodology "
-        "(see https://github.com/Clarethium/lodestone for the "
-        "canonical methodology Clarethium publishes)."
+        "automatically. The fm field stays opaque unless "
+        "CMA_FM_CLASSIFIER is wired for an external classifier. "
+        "cma-mcp is a substrate; methodology vocabulary lives in the "
+        "methodology canon (see "
+        "https://github.com/Clarethium/lodestone for the canonical "
+        "methodology Clarethium publishes)."
     ),
     "how_to_cite_faithfully": (
         "Cite the capture explicitly when telling the operator about "
