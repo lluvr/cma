@@ -89,6 +89,20 @@ def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher)
         )
 
 
+def test_cma_stats_view_enum_includes_evidence(fresh_dispatcher):
+    """
+    bash cma exposes `cma stats --evidence`; the MCP wrapper must
+    pass it through. Without this, the central evidence signal is
+    unreachable from any MCP-connected client.
+    """
+    result = call_handler(fresh_dispatcher, "tools/list")
+    cma_stats = next(t for t in result["tools"] if t["name"] == "cma_stats")
+    view_enum = cma_stats["inputSchema"]["properties"]["view"]["enum"]
+    assert "evidence" in view_enum, (
+        f"evidence view missing from cma_stats enum: {view_enum}"
+    )
+
+
 def test_every_string_field_has_max_length(fresh_dispatcher):
     """
     Every string input field must carry maxLength. An MCP client (or

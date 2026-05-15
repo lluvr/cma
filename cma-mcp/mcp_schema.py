@@ -448,6 +448,10 @@ CMA_STATS = {
         "Views:\n"
         "- `default`: summary (totals, recent activity, top surfaces, "
         "  top failure shapes, prevention rate, recurrence trends).\n"
+        "- `evidence`: prevention-rate signal over a trailing 30-day "
+        "  window (preventions / (preventions + leaks)), recurring "
+        "  patterns in window, prevention-miss linkage rate. The "
+        "  single number that says whether the loop is closing.\n"
         "- `leaks`: failures that occurred despite an active warning "
         "  having been surfaced. Each leak increments the warning's "
         "  weight. The empirical signal that compound learning is "
@@ -474,6 +478,7 @@ CMA_STATS = {
                 "type": "string",
                 "enum": [
                     "default",
+                    "evidence",
                     "leaks",
                     "recurrence",
                     "preventions",
@@ -482,7 +487,9 @@ CMA_STATS = {
                 ],
                 "description": (
                     "Which view to compute. Defaults to 'default' "
-                    "(summary)."
+                    "(summary). The 'evidence' view composes "
+                    "preventions and leaks into a prevention-rate "
+                    "signal over a trailing 30-day window."
                 ),
             },
         },

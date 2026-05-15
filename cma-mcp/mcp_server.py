@@ -259,7 +259,7 @@ def _handle_cma_surface(params: dict) -> dict:
 
 def _handle_cma_stats(params: dict) -> dict:
     view = params.get("view", "default")
-    valid_views = {"default", "leaks", "recurrence", "preventions", "rejections", "behavior"}
+    valid_views = {"default", "evidence", "leaks", "recurrence", "preventions", "rejections", "behavior"}
     if view not in valid_views:
         raise mcp_protocol.ProtocolError(
             mcp_protocol.INVALID_PARAMS,
