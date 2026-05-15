@@ -741,41 +741,76 @@ if not events:
     sys.exit(0)
 
 leaks = []
+weak_leaks = []
 for miss in misses:
     miss_ts = miss.get("timestamp", "")
     miss_surface = miss.get("surface", "")
     miss_fm = miss.get("fm", "")
     if not miss_surface and not miss_fm:
         continue  # nothing to match against
+    strong_hit = None
+    weak_hit = None
     for event in events:
         event_ts = event.get("timestamp", "")
         if event_ts >= miss_ts:
             continue  # event after miss
         for matched in event.get("matched", []):
-            if matched.get("surface") == miss_surface and matched.get("fm") == miss_fm and miss_surface:
-                leaks.append((miss, event, matched))
+            m_surface = matched.get("surface", "")
+            m_fm = matched.get("fm", "")
+            # Strong: surface and fm both present and equal on both sides.
+            if (miss_surface and m_surface == miss_surface and
+                miss_fm and m_fm and m_fm == miss_fm):
+                strong_hit = (event, matched)
                 break
-        else:
-            continue
-        break
+            # Weak: surface matches but fm absent on one or both sides.
+            # Surface must be truthy on both ends; without surface there
+            # is no shared dimension to anchor the join on.
+            if (weak_hit is None and miss_surface and
+                m_surface == miss_surface and (not miss_fm or not m_fm)):
+                weak_hit = (event, matched)
+        if strong_hit:
+            break
+    if strong_hit:
+        leaks.append((miss, strong_hit[0], strong_hit[1]))
+    elif weak_hit:
+        weak_leaks.append((miss, weak_hit[0], weak_hit[1]))
 
-if not leaks:
+if not leaks and not weak_leaks:
     print("{} miss(es), {} surface event(s); no leaks detected.".format(len(misses), len(events)))
     print("(A leak is a miss whose surface/fm was already surfaced by a prior event.)")
     sys.exit(0)
 
-print("{} leak(s): failures despite a relevant warning being surfaced earlier.".format(len(leaks)))
-print()
-for miss, event, matched in leaks:
-    desc = miss.get("description", "")
-    desc = " ".join(desc.split())
-    if len(desc) > 70:
-        desc = desc[:67] + "..."
-    print("  Miss:    {} {}".format(miss.get("id"), desc))
-    print("    surface={}  fm={}".format(miss.get("surface", ""), miss.get("fm", "")))
-    print("  Was surfaced by event {} at {}".format(event.get("id"), event.get("timestamp")))
-    print("    via capture {} (same surface/fm)".format(matched.get("id")))
+if leaks:
+    print("{} leak(s): failures despite a relevant warning being surfaced earlier.".format(len(leaks)))
     print()
+    for miss, event, matched in leaks:
+        desc = miss.get("description", "")
+        desc = " ".join(desc.split())
+        if len(desc) > 70:
+            desc = desc[:67] + "..."
+        print("  Miss:    {} {}".format(miss.get("id"), desc))
+        print("    surface={}  fm={}".format(miss.get("surface", ""), miss.get("fm", "")))
+        print("  Was surfaced by event {} at {}".format(event.get("id"), event.get("timestamp")))
+        print("    via capture {} (same surface/fm)".format(matched.get("id")))
+        print()
+
+if weak_leaks:
+    print("{} weak signal(s): surface matched but fm absent on one side.".format(len(weak_leaks)))
+    print("(Weak signals are not leaks. Capture fm consistently to upgrade them.)")
+    print()
+    for miss, event, matched in weak_leaks:
+        desc = miss.get("description", "")
+        desc = " ".join(desc.split())
+        if len(desc) > 70:
+            desc = desc[:67] + "..."
+        miss_fm_display = miss.get("fm", "") or "(none)"
+        matched_fm_display = matched.get("fm", "") or "(none)"
+        print("  Miss:    {} {}".format(miss.get("id"), desc))
+        print("    surface={}  fm={}".format(miss.get("surface", ""), miss_fm_display))
+        print("  Was surfaced by event {} at {}".format(event.get("id"), event.get("timestamp")))
+        print("    via capture {} (surface={}, fm={})".format(
+            matched.get("id"), matched.get("surface", ""), matched_fm_display))
+        print()
 PYEOF
         return 0
     fi

@@ -416,6 +416,24 @@ expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stat
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
 expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log
 
+# stats --leaks weak signals (surface match, fm absent on one side)
+reset
+"$CMA" miss "fm-absent on new side" --surface auth --fm fm-1 >/dev/null
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "recurred without fm" --surface auth >/dev/null
+expect_contains "leaks weak: fm absent on new side"   "weak signal" "$CMA" stats --leaks
+# Strong leak (both fms present and equal) co-existing with a weak signal in same run.
+reset
+"$CMA" miss "fm anchor" --surface auth --fm fm-1 >/dev/null
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "strong recur" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "weak recur, no fm" --surface auth >/dev/null
+expect_contains "leaks strong still labeled leak"     "1 leak" "$CMA" stats --leaks
+expect_contains "leaks weak alongside strong"         "weak signal" "$CMA" stats --leaks
+expect_contains "leaks weak label fm=(none)"          "fm=(none)" "$CMA" stats --leaks
+
 # stats --evidence
 reset
 expect_contains "evidence empty data"            "No evidence yet" "$CMA" stats --evidence
