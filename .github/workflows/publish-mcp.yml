@@ -19,16 +19,19 @@
 #   4. Configure PyPI Trusted Publishing for `cma-mcp` against this
 #      repo (https://docs.pypi.org/trusted-publishers/), adding the
 #      `testpypi` and `pypi` GitHub environments.
-#   5. The `publish-to-testpypi` job below is uncommented (see
-#      diff against history for the gate flip). Pushing tag
-#      `cma-mcp-X.Y.Z` triggers the build + TestPyPI upload.
-#   6. Verify the TestPyPI install:
-#      `pipx run --index-url https://test.pypi.org/simple/ \
-#         --pip-args='--extra-index-url https://pypi.org/simple/' \
-#         cma-mcp==X.Y.Z --version`
-#   7. Uncomment `publish-to-pypi`. Push the same tag again (or a
-#      new tag); the workflow uploads to real PyPI.
-#   8. Zenodo issues a DOI automatically if GitHub-Zenodo
+#   5. The `publish-to-pypi` job below is uncommented (see diff
+#      against history). `publish-to-testpypi` is commented out;
+#      this workflow currently publishes directly to PyPI. The
+#      safety gate is the `pypi` GitHub Environment's required-
+#      reviewers protection rule: the upload step pauses for
+#      operator approval in the GitHub UI before any wheel hits
+#      immutable PyPI. If TestPyPI testing is desired in a future
+#      release, swap the comment blocks and add the
+#      `needs: publish-to-testpypi` back to publish-to-pypi.
+#   6. Push tag `cma-mcp-X.Y.Z`. The workflow builds, validates,
+#      and (after the reviewer approves the deployment) uploads
+#      to PyPI.
+#   7. Zenodo issues a DOI automatically if GitHub-Zenodo
 #      integration is enabled (one-time repo-settings toggle).
 #
 # Releases of bash cma (tags `cma-X.Y.Z`) flow through a separate
@@ -162,39 +165,39 @@ jobs:
           name: cma-mcp-dist
           path: cma-mcp/dist/*
 
-  publish-to-testpypi:
-    name: Publish to TestPyPI
-    needs: build
-    runs-on: ubuntu-latest
-    environment: testpypi
-    permissions:
-      id-token: write  # OIDC for Trusted Publishing (PEP 740)
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: cma-mcp-dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
-  # publish-to-pypi:
-  #   name: Publish to PyPI
-  #   needs: publish-to-testpypi
-  #   # Lift-only: real PyPI uploads require a non-pre-release tag
-  #   # (no .dev / .rc / .a / .b suffix in the version).
-  #   if: |
-  #     !contains(github.ref, '.dev') &&
-  #     !contains(github.ref, 'rc') &&
-  #     !contains(github.ref, 'a') &&
-  #     !contains(github.ref, 'b')
+  # publish-to-testpypi:
+  #   name: Publish to TestPyPI
+  #   needs: build
   #   runs-on: ubuntu-latest
-  #   environment: pypi
+  #   environment: testpypi
   #   permissions:
-  #     id-token: write
+  #     id-token: write  # OIDC for Trusted Publishing (PEP 740)
   #   steps:
   #     - uses: actions/download-artifact@v4
   #       with:
   #         name: cma-mcp-dist
   #         path: dist/
   #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: build
+    # Lift-only: real PyPI uploads require a non-pre-release tag
+    # (no .dev / .rc / .a / .b suffix in the version).
+    if: |
+      !contains(github.ref, '.dev') &&
+      !contains(github.ref, 'rc') &&
+      !contains(github.ref, 'a') &&
+      !contains(github.ref, 'b')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: cma-mcp-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
