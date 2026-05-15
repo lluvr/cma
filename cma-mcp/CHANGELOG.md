@@ -27,7 +27,31 @@ section is intentionally not empty at any time: contributors add
 their CHANGELOG entry here as part of the same PR that makes the
 change.
 
-(no entries yet)
+### Added
+
+- Input bounds on every string field in the cma_miss, cma_decision,
+  cma_reject, cma_prevented, cma_distill, cma_surface, and cma_stats
+  tool schemas (`MAX_DESCRIPTION=4 KiB`, `MAX_TEXTURE=64 KiB`,
+  `MAX_SHORT_FIELD=2 KiB`). Fields constrained by enum are exempt;
+  the enum is a tighter constraint. A schema-invariant test asserts
+  the property; future tool additions cannot regress the bound.
+- `MAX_ARGV_BYTES=512 KiB` pre-flight guard in
+  `cma_subprocess.run_cma`. An over-budget payload raises
+  `CmaError(reason='input_too_large')` before exec, replacing the
+  generic OS `ARG_MAX` 'unexpected' failure with a clear,
+  actionable error.
+- `cma_stats` view enum carries `evidence`, exposing the new
+  `cma stats --evidence` view through MCP. The single signal that
+  says whether the loop is closing is now reachable from any
+  MCP-connected client.
+- `cma_stats` input schema carries an integer `window` parameter
+  (1..3650, defaults to 30); the dispatcher forwards `--window N`
+  to the bash cma subprocess when `view='evidence'`. Operators
+  can tune the trailing window from MCP without recompiling.
+- End-to-end wire test exercising `cma_stats(view='evidence',
+  window=7)` over real stdio. The test pins `CMA_BIN` to the
+  canonical bash cma in this repo so the assertion does not depend
+  on which cma happens to be earliest on the operator's PATH.
 
 ---
 

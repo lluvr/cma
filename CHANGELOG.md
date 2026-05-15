@@ -6,7 +6,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased] (1.0.0-dev)
 
-### Added
+### Added (compound-loop evidence)
+
+- `cma stats --evidence`: composes preventions and leaks into a single prevention-rate signal over a trailing window (default 30 days; `--window N` to override). Output includes recurring patterns in the window and the prevention-to-miss linkage rate. The single number the README's "compound learning is evidence" promise implies, now computable from cma's own data. `--json` emits a structured record for downstream consumers (dashboards, corpus-stats publishers, other agents).
+- Weak-signal soft-match in `cma stats --leaks`. The strong-leak threshold now requires both `surface` and `fm` to be present and equal on miss and prior surface event. When surface matches but `fm` is absent on one side, the result is reported as a weak signal in a separate block, not as a leak. Reduces the silent zero-leak case for operators who capture without `--fm`.
+- Preventions composed into `cma stats --recurrence` and `cma stats --leaks`. Each prevention with `miss_id` attributes one catch to the miss's `(surface, fm)` pair. The recurrence view now annotates each recurring pair with `(caught: N, catch-rate: P%)`. The leak view annotates each leak with `Caught on this pair: N`. A pair with high catch-rate alongside recurrence is the loop working most of the time but slipping occasionally, framed correctly instead of "the prevention is not working."
+
+### Added (storage and benchmarks)
+
+- `cma init` warns when `$CMA_DIR` matches a cloud-sync path shape (Dropbox, iCloud Drive, OneDrive, Google Drive, pCloud) or a network filesystem type (NFS, CIFS / SMB, sshfs). Advisory; init still succeeds. DATA.md gains a Storage requirements subsection naming supported / unsupported filesystems.
+- DATA.md atomicity paragraph corrected: kernel-level append serialization on Linux and macOS is stronger than the PIPE_BUF floor the prior wording implied. The bash test suite already exercises 200 concurrent processes writing 64 KiB records and verifies all land valid.
+- `bench.sh` reports min / p50 / p95 / p99 over `N=100` timed iterations per operation (after 3 warmup runs) instead of single-sample p95. New `--json` flag emits a machine-readable record carrying operation latencies, host kernel/CPU/filesystem fingerprint, and timestamp, suitable for tracking results over time. README Performance section no longer carries a fixed table; describes the methodology and points at `bench.sh --json` for actual numbers.
+
+### Added (toolchain honesty)
+
+- README requirements line declares `python3` 3.10 or newer as a hard runtime dependency. The "no package-manager dependencies" framing was true but understated: cma shells out to python3 for JSON encoding and JSONL queries on every capture and every stats view.
+- CI matrix runs `test.sh` against Python 3.10, 3.11, and 3.12 in parallel (`fail-fast: false`).
+
+### Initial 1.0 surface
 
 - Initial cma 1.0 reference implementation (bash, no external dependencies; python3 used for JSON escape).
 - Capture verbs fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`.
