@@ -474,6 +474,43 @@ expect_contains "evidence counts leak"           "Leaks:           1" "$CMA" sta
 expect_contains "evidence counts prevention"     "Preventions:     1" "$CMA" stats --evidence
 expect_contains "evidence shows prevention rate" "Prevention rate: 50%" "$CMA" stats --evidence
 
+# --evidence --json emits structured output with the expected keys.
+json_out=$("$CMA" stats --evidence --json --window 7 2>/dev/null)
+json_ok=$(python3 -c "
+import json, sys
+d = json.loads(sys.stdin.read())
+required = {'schema_version', 'window_days', 'generated_at', 'preventions', 'leaks', 'prevention_rate', 'recurring', 'preventions_linked_to_miss'}
+missing = required - set(d.keys())
+ok = (
+    not missing
+    and d['preventions'] == 1
+    and d['leaks'] == 1
+    and d['prevention_rate'] == 0.5
+    and d['window_days'] == 7
+    and len(d['recurring']) == 1
+    and d['recurring'][0]['surface'] == 'auth'
+)
+print('ok' if ok else f'fail (missing={missing} d={d})')
+" <<<"$json_out")
+if [[ "$json_ok" == "ok" ]]; then
+    printf "PASS  %s\n" "evidence --json emits structured record with expected keys"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s: %s\n" "evidence --json emits structured record with expected keys" "$json_ok"
+    fail=$((fail + 1))
+fi
+# Empty corpus: prevention_rate is null in JSON form (not 0.0).
+reset
+empty_json=$("$CMA" stats --evidence --json 2>/dev/null)
+empty_rate=$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['prevention_rate'])" <<<"$empty_json")
+if [[ "$empty_rate" == "None" ]]; then
+    printf "PASS  %s\n" "evidence --json empty corpus rate is null"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (got=%q)\n" "evidence --json empty corpus rate is null" "$empty_rate"
+    fail=$((fail + 1))
+fi
+
 # stats --behavior
 reset
 expect_contains "behavior empty data"            "No misses" "$CMA" stats --behavior

@@ -92,11 +92,12 @@ EOF
         stats)
             cat <<'EOF'
 cma stats [--rejections] [--leaks] [--preventions] [--recurrence] [--behavior]
-cma stats --evidence [--window <days>]
+cma stats --evidence [--window <days>] [--json]
 
 Evidence dashboard. Default mode shows summary; flags select views.
 The --evidence view composes preventions and leaks into a single
 prevention-rate signal over a trailing window (default 30 days).
+With --json, emits a machine-readable record instead of prose.
 EOF
             ;;
     esac
@@ -514,7 +515,7 @@ PYEOF
 
 cmd_stats() {
     local view="" recurrence_mode=false leaks_mode=false behavior_mode=false evidence_mode=false
-    local window_days=30
+    local window_days=30 json_mode=false
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --rejections) view="rejection"; shift ;;
@@ -523,6 +524,7 @@ cmd_stats() {
             --leaks) leaks_mode=true; shift ;;
             --behavior) behavior_mode=true; shift ;;
             --evidence) evidence_mode=true; shift ;;
+            --json) json_mode=true; shift ;;
             --window)
                 if ! [[ "${2:-}" =~ ^[0-9]+$ ]] || [[ "${2:-0}" -lt 1 ]]; then
                     echo "cma stats: --window requires a positive integer (days)" >&2; exit 1
@@ -533,13 +535,16 @@ cmd_stats() {
     done
 
     if $evidence_mode; then
-        python3 - "$CMA_DIR" "$window_days" <<'PYEOF'
+        local json_arg="prose"
+        $json_mode && json_arg="json"
+        python3 - "$CMA_DIR" "$window_days" "$json_arg" <<'PYEOF'
 import json, os, sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 data_dir = sys.argv[1]
 window_days = int(sys.argv[2])
+output_format = sys.argv[3]  # "prose" or "json"
 
 cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
 cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -591,17 +596,7 @@ for miss in misses_w:
 prevented_count = len(preventions_w)
 leak_count = len(leaks)
 denom = prevented_count + leak_count
-
-print("Compound practice evidence (trailing {} days)".format(window_days))
-print()
-print("  Preventions:     {}".format(prevented_count))
-print("  Leaks:           {}".format(leak_count))
-if denom == 0:
-    print("  Prevention rate: -- (no preventions or leaks in window)")
-else:
-    rate = prevented_count / denom
-    print("  Prevention rate: {:.0%}  ({}/{})".format(rate, prevented_count, denom))
-print()
+rate = (prevented_count / denom) if denom > 0 else None
 
 groups = Counter()
 for m in misses_w:
@@ -610,6 +605,35 @@ recurring = sorted(
     [(k, v) for k, v in groups.items() if v >= 2],
     key=lambda x: x[1], reverse=True
 )
+linked = sum(1 for p in preventions_w if p.get("miss_id")) if prevented_count else 0
+
+if output_format == "json":
+    out = {
+        "schema_version": "1.0",
+        "window_days": window_days,
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "preventions": prevented_count,
+        "leaks": leak_count,
+        "prevention_rate": rate,
+        "recurring": [
+            {"surface": s, "fm": f, "count": n}
+            for (s, f), n in recurring
+        ],
+        "preventions_linked_to_miss": linked,
+    }
+    print(json.dumps(out, indent=2))
+    sys.exit(0)
+
+print("Compound practice evidence (trailing {} days)".format(window_days))
+print()
+print("  Preventions:     {}".format(prevented_count))
+print("  Leaks:           {}".format(leak_count))
+if denom == 0:
+    print("  Prevention rate: -- (no preventions or leaks in window)")
+else:
+    print("  Prevention rate: {:.0%}  ({}/{})".format(rate, prevented_count, denom))
+print()
+
 if recurring:
     print("  Recurring patterns in window ({}):".format(len(recurring)))
     for (s, f), n in recurring[:5]:
@@ -619,7 +643,6 @@ if recurring:
     print()
 
 if prevented_count:
-    linked = sum(1 for p in preventions_w if p.get("miss_id"))
     print("  Preventions with miss_id linkage: {}/{}".format(linked, prevented_count))
     print()
 
