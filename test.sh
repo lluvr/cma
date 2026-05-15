@@ -427,7 +427,35 @@ expect_contains "recurrence empty data"          "No misses" "$CMA" stats --recu
 expect_contains "recurrence single miss not recurring" "no patterns are recurring" "$CMA" stats --recurrence
 "$CMA" miss "y" --surface auth --fm fm-1 >/dev/null
 expect_contains "recurrence detects pattern"     "2x" "$CMA" stats --recurrence
-expect_contains "recurrence frames as not working" "not working" "$CMA" stats --recurrence
+expect_contains "recurrence frames as not closing" "not closing the loop" "$CMA" stats --recurrence
+
+# Recurrence + preventions: catch-rate annotation appears when a prevention
+# links to a miss in the recurring pair.
+reset
+"$CMA" miss "x1" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "x2" --surface auth --fm fm-1 >/dev/null
+miss_id=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.readline()).get('id'))
+")
+"$CMA" prevented "caught one" --miss-id "$miss_id" >/dev/null
+expect_contains "recurrence shows caught count"        "caught: 1" "$CMA" stats --recurrence
+expect_contains "recurrence shows catch-rate"          "catch-rate: 33%" "$CMA" stats --recurrence
+
+# Leaks + preventions: the per-leak line shows the caught count for the pair.
+reset
+"$CMA" miss "anchor" --surface auth --fm fm-1 >/dev/null
+anchor_id=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.readline()).get('id'))
+")
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
+"$CMA" prevented "caught a different time" --miss-id "$anchor_id" >/dev/null
+expect_contains "leaks line shows caught annotation"   "Caught on this pair: 1" "$CMA" stats --leaks
 
 # stats --leaks
 reset

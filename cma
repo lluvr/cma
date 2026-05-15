@@ -756,6 +756,25 @@ def load_jsonl(path):
 
 misses = load_jsonl(os.path.join(data_dir, "misses.jsonl"))
 events = load_jsonl(os.path.join(data_dir, "surface_events.jsonl"))
+preventions = load_jsonl(os.path.join(data_dir, "preventions.jsonl"))
+
+# Build (surface, fm) -> prevention count by following prevention.miss_id
+# back to the miss's surface/fm. A prevention without miss_id cannot be
+# attributed to a pair; counted separately as unlinked_preventions.
+miss_by_id = {m.get("id"): m for m in misses}
+caught_by_pair = {}
+unlinked_preventions = 0
+for prev in preventions:
+    target = prev.get("miss_id")
+    if not target:
+        unlinked_preventions += 1
+        continue
+    m = miss_by_id.get(target)
+    if m is None:
+        unlinked_preventions += 1
+        continue
+    key = (m.get("surface", ""), m.get("fm", ""))
+    caught_by_pair[key] = caught_by_pair.get(key, 0) + 1
 
 if not events:
     print("No surface events recorded yet.")
@@ -811,10 +830,13 @@ if leaks:
         desc = " ".join(desc.split())
         if len(desc) > 70:
             desc = desc[:67] + "..."
+        pair = (miss.get("surface", ""), miss.get("fm", ""))
+        caught = caught_by_pair.get(pair, 0)
         print("  Miss:    {} {}".format(miss.get("id"), desc))
         print("    surface={}  fm={}".format(miss.get("surface", ""), miss.get("fm", "")))
         print("  Was surfaced by event {} at {}".format(event.get("id"), event.get("timestamp")))
         print("    via capture {} (same surface/fm)".format(matched.get("id")))
+        print("  Caught on this pair: {}".format(caught))
         print()
 
 if weak_leaks:
@@ -846,6 +868,7 @@ from collections import Counter
 data_dir = sys.argv[1]
 groups = Counter()
 total = 0
+misses_index = {}
 
 misses_path = os.path.join(data_dir, "misses.jsonl")
 corrupted = 0
@@ -863,9 +886,36 @@ if os.path.exists(misses_path):
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1
             total += 1
+            if rec.get("id"):
+                misses_index[rec["id"]] = rec
 
 if corrupted:
     print("cma: skipped {} corrupted line(s) in misses.jsonl".format(corrupted), file=sys.stderr)
+
+# Caught-by-pair join: a prevention with miss_id pointing at a known
+# miss attributes one catch to that miss's (surface, fm) pair. Without
+# this signal the recurrence view says "this prevention is not working"
+# even when most attempts on the pair are caught and a few leaked.
+caught_by_pair = {}
+preventions_path = os.path.join(data_dir, "preventions.jsonl")
+if os.path.exists(preventions_path):
+    with open(preventions_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                prev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            target = prev.get("miss_id")
+            if not target:
+                continue
+            m = misses_index.get(target)
+            if m is None:
+                continue
+            key = (m.get("surface", ""), m.get("fm", ""))
+            caught_by_pair[key] = caught_by_pair.get(key, 0) + 1
 
 if total == 0:
     print("No misses recorded yet.")
@@ -885,10 +935,20 @@ print()
 for (surface, fm), count in recurring:
     s = surface if surface else "(no surface)"
     f = fm if fm else "(no fm)"
-    print("  {}x  surface={}  fm={}".format(count, s, f))
+    caught = caught_by_pair.get((surface, fm), 0)
+    denom = count + caught
+    if caught:
+        rate = caught / denom
+        print("  {}x  surface={}  fm={}   (caught: {}, catch-rate: {:.0%})".format(
+            count, s, f, caught, rate))
+    else:
+        print("  {}x  surface={}  fm={}   (caught: 0)".format(count, s, f))
 print()
-print("Recurrence indicates the prevention currently in place is not working.")
-print("Sharpen the warning, change when it surfaces, or retire it as ineffective.")
+print("Recurrence indicates the prevention is not closing the loop fully.")
+print("A high catch-rate alongside recurrence means the warning works most of")
+print("the time but slips occasionally; sharpen the trigger. A zero catch-rate")
+print("means the warning is not firing at the right moment, or no prevention")
+print("has been captured yet.")
 PYEOF
         return 0
     fi
