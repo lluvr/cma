@@ -318,3 +318,44 @@ def test_tools_call_cma_stats_round_trips_three_section_payload(
         # passed to cma. On an empty corpus the call still succeeds.
         assert payload["provenance"]["cma_returncode"] == 0
         assert payload["provenance"]["cma_argv"][-1] == "stats"
+
+
+@pytest.mark.subprocess
+def test_tools_call_cma_stats_evidence_forwards_window(
+    tmp_path, cma_binary_available, monkeypatch,
+):
+    """End-to-end: cma_stats(view='evidence', window=7) must translate
+    into `cma stats --evidence --window 7` at the subprocess layer.
+    Without the wiring the window parameter is silently dropped on
+    the floor and operators always get the 30-day default.
+
+    Pin the canonical bash cma via CMA_BIN so the assertion does not
+    depend on which cma happens to be earliest on PATH.
+    """
+    if not cma_binary_available:
+        pytest.skip("cma binary not on PATH")
+    canonical_cma = HERE.parent / "cma"
+    if not canonical_cma.is_file():
+        pytest.skip(f"canonical cma not found at {canonical_cma}")
+    monkeypatch.setenv("CMA_BIN", str(canonical_cma))
+    with wire_server(tmp_path) as server:
+        server.call("initialize", {"protocolVersion": "2024-11-05"})
+        reply = server.call("tools/call", {
+            "name": "cma_stats",
+            "arguments": {"view": "evidence", "window": 7},
+        })
+        result = reply["result"]
+        payload = json.loads(result["content"][0]["text"])
+        argv = payload["provenance"]["cma_argv"]
+        assert "stats" in argv and "--evidence" in argv, (
+            f"evidence view did not translate to --evidence in argv: {argv}"
+        )
+        assert "--window" in argv and "7" in argv, (
+            f"window parameter not forwarded to cma: {argv}"
+        )
+        # Empty corpus is fine here; we are testing the dispatch
+        # wiring, not the signal itself.
+        assert payload["provenance"]["cma_returncode"] == 0
+        assert "trailing 7 days" in payload["analysis"]["cma_stdout"], (
+            "analysis.cma_stdout should reflect the requested window"
+        )

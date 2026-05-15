@@ -268,6 +268,10 @@ def _handle_cma_stats(params: dict) -> dict:
     argv = ["stats"]
     if view != "default":
         argv.append(f"--{view}")
+    if view == "evidence":
+        window = params.get("window")
+        if window is not None:
+            argv.extend(["--window", str(window)])
     try:
         result = run_cma(argv)
     except CmaError as exc:

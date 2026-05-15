@@ -492,6 +492,16 @@ CMA_STATS = {
                     "signal over a trailing 30-day window."
                 ),
             },
+            "window": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3650,
+                "description": (
+                    "Trailing window in days for the evidence view. "
+                    "Defaults to 30. Ignored when view is not "
+                    "'evidence'."
+                ),
+            },
         },
     },
 }

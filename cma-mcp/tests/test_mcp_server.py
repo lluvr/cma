@@ -103,6 +103,21 @@ def test_cma_stats_view_enum_includes_evidence(fresh_dispatcher):
     )
 
 
+def test_cma_stats_carries_window_parameter(fresh_dispatcher):
+    """
+    The evidence view runs over a trailing window (default 30 days).
+    Operators need to tune the window without recompiling; the
+    cma_stats tool must expose window so MCP-connected agents can
+    pass it through.
+    """
+    result = call_handler(fresh_dispatcher, "tools/list")
+    cma_stats = next(t for t in result["tools"] if t["name"] == "cma_stats")
+    props = cma_stats["inputSchema"]["properties"]
+    assert "window" in props, "cma_stats must expose a window parameter"
+    assert props["window"]["type"] == "integer"
+    assert props["window"].get("minimum", 0) >= 1
+
+
 def test_every_string_field_has_max_length(fresh_dispatcher):
     """
     Every string input field must carry maxLength. An MCP client (or
