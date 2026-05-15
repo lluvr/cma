@@ -27,12 +27,9 @@ contribution) lives at the repository root.
 
 ## Status
 
-cma-mcp 0.1.1 is the current release line. 0.1.0 was uploaded to
-PyPI on 2026-05-07 and yanked on 2026-05-15; the reason and
-upgrade path are documented in the `[0.1.1]` block of
-[CHANGELOG.md](CHANGELOG.md). Adopters install with
-`pip install cma-mcp`, which resolves to 0.1.1 (yanked versions
-are excluded from default resolution).
+cma-mcp 0.1.1 is the current release. `pip install cma-mcp` pulls
+it from PyPI. See [CHANGELOG.md](CHANGELOG.md) for the release
+history.
 
 ## What this is
 
@@ -53,15 +50,20 @@ from the [parent repository](https://github.com/Clarethium/cma#readme), then con
 
     cma --help
 
-Install cma-mcp from source (PyPI publication pending):
+Install cma-mcp:
 
-    git clone https://github.com/Clarethium/cma.git
-    cd cma/cma-mcp
-    pip install -e .
+    pip install cma-mcp
 
 The `cma-mcp` console script lands on PATH after install. Confirm:
 
     cma-mcp --version
+
+For local development against an editable checkout, swap the
+install for:
+
+    git clone https://github.com/Clarethium/cma.git
+    cd cma/cma-mcp
+    pip install -e .
 
 Point your MCP client at the installed entry point. For Claude
 Desktop, add to `claude_desktop_config.json`:

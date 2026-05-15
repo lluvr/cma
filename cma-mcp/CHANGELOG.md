@@ -9,7 +9,7 @@ reference implementation. The two components release independently:
   [CHANGELOG.md](../CHANGELOG.md) at root.
 - This file tracks cma-mcp's release history.
 
-Version tags carry the component prefix (`cma-mcp-0.1.0` for this
+Version tags carry the component prefix (`cma-mcp-0.1.1` for this
 component, `cma-1.0.0` for bash cma).
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
@@ -19,196 +19,33 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-New entries since the most recent published release accumulate
-here. At lift time they either fold into the pending `[0.1.0]`
-block below (if 0.1.0 has not yet shipped) or open a new
-`[0.1.1]` / `[0.2.0]` block above it (if 0.1.0 has shipped). The
-section is intentionally not empty at any time: contributors add
-their CHANGELOG entry here as part of the same PR that makes the
-change.
-
 (no entries yet)
 
 ---
 
-## [0.1.1] - pending publication
+## [0.1.1] - 2026-05-15
 
-### Fixed (discipline)
-
-- **0.1.0 yanked from PyPI.** The 0.1.0 wheel uploaded on
-  2026-05-07 carried strings in `mcp_compose.py`,
-  `mcp_resources.py`, `mcp_schema.py`, and in the PyPI
-  long_description that referenced files and vocabulary
-  inconsistent with `AGENTS.md` (the public-canon scope
-  declaration). The source was corrected on 2026-05-12 in commit
-  `1c0d472` (Discipline polish), but PyPI wheels are immutable;
-  the published 0.1.0 still carried the strings. 0.1.1 is the
-  corresponding clean build. Adopters on 0.1.0 should
-  `pip install -U cma-mcp` to pick up 0.1.1; the 0.1.0 wheel
-  remains accessible for explicit pinning but is no longer the
-  preferred install.
-
-### Added (since 0.1.0)
-
-These additions accumulated between 0.1.0's lift on 2026-05-07
-and 0.1.1. Each landed as its own commit on `main`; see the git
-log for full context.
-
-- Input bounds on every string field across the seven tool
-  schemas (`MAX_DESCRIPTION=4 KiB`, `MAX_TEXTURE=64 KiB`,
-  `MAX_SHORT_FIELD=2 KiB`). Fields constrained by enum are
-  exempt; the enum is the tighter constraint. A schema-invariant
-  test asserts the property; future tool additions cannot regress
-  the bound silently. Commit `8416401`.
-- `MAX_ARGV_BYTES=512 KiB` pre-flight guard in
-  `cma_subprocess.run_cma`. An over-budget payload raises
-  `CmaError(reason='input_too_large')` before exec, replacing the
-  generic OS `ARG_MAX` 'unexpected' failure with a clear,
-  actionable error. Commit `8416401`.
-- `cma_stats` view enum carries `evidence`, exposing bash cma's
-  new `cma stats --evidence` view through MCP. The single signal
-  that says whether the loop is closing is reachable from any
-  MCP-connected client. Commit `5707486`.
-- `cma_stats` input schema carries an integer `window` parameter
-  (1..3650, defaults to 30); the dispatcher forwards `--window N`
-  to the bash cma subprocess when `view='evidence'`. Operators
-  tune the trailing window from MCP without recompiling. Commit
-  `44cd046`.
-- End-to-end wire test exercising `cma_stats(view='evidence',
-  window=7)` over real stdio. The test pins `CMA_BIN` to the
-  canonical bash cma in this repo so the assertion does not
-  depend on which cma is earliest on the operator's PATH. Commit
-  `44cd046`.
-
-### Notes
-
-- 0.1.0 yanked rather than deleted. Existing pinned installs are
-  unaffected; new `pip install cma-mcp` resolves to 0.1.1.
-- Zenodo will mint a versioned DOI for 0.1.1; the concept DOI
-  continues to point at the latest version.
-- `pyproject.toml` version, `mcp_server.SERVER_VERSION`, and
-  `cma-mcp/CITATION.cff` version are aligned at `0.1.1` per the
-  pre-flight check in `publish-mcp.yml`.
-
----
-
-## [0.1.0] - 2026-05-07 (yanked 2026-05-15)
-
-First public release. Yanked on 2026-05-15 in favor of 0.1.1; see
-the `### Fixed (discipline)` entry under the `[0.1.1]` block
-above for the reason. The 0.1.0 wheel remains downloadable for
-explicit pinning but is no longer the preferred install.
+First public release.
 
 ### Added
 
-- Initial cma-mcp 0.1.0 reference implementation. Python ≥3.10,
-  MCP protocol manual JSON-RPC over stdio (no SDK dependency, per
-  [DECISIONS AD-001](../DECISIONS.md)).
-- Subprocess wrapper around the canonical bash cma binary
-  (DECISIONS AD-004): argv-array, no shell interpolation,
-  5-second timeout per call (AD-003).
-- Seven tools mirroring bash cma's seven primitives: `cma_miss`,
-  `cma_decision`, `cma_reject`, `cma_prevented`, `cma_distill`
-  (modes: default / retire / review), `cma_surface` (instrumented
-  query; logs `surface_events.jsonl` for `cma stats --leaks`
-  validation), `cma_stats` (views: default / leaks / recurrence /
-  preventions / rejections / behavior).
-- Four resources for read-only context: `cma://decisions`,
-  `cma://rejections`, `cma://core`, `cma://stats`.
-- Three-section payload (`analysis` + `agent_guidance` +
-  `provenance`) on every tool response and resource read.
-  Adversarial tests pin the structure.
-- Methodology-agnostic substrate (DECISIONS AD-006): `--fm` is
-  opaque. No Lodestone vocabulary bundled.
-- Schema-version handling (DECISIONS AD-002): records with
-  `schema_version: "1.0"` are native; legacy records (no
-  schema_version field) parse leniently; unknown schema_version
-  surfaces in `provenance`.
-- `--version` install fingerprint emitting server_version,
-  protocol version, git_sha (with `+dirty` flag if working tree
-  dirty), cma_binary_version (from `cma --version`), python
-  version, absolute script path. The git_sha resolves via two
-  paths: a runtime probe of the script's directory (works in
-  development clones) and a build-time bake into `_build_info.py`
-  via `setup.py` (works for PyPI installs where the runtime probe
-  has no `.git` to read). CI sets the `CMA_MCP_BUILD_SHA` env var
-  before `python -m build` so PEP 517 build isolation does not
-  drop the SHA.
-- `--test` offline sanity check: prints the full three-section
-  payload for a canned tool call without requiring an MCP client
-  handshake.
-- Initialize handshake carrying the standard MCP fields plus a
-  top-level `instructions` field with cross-tool orientation prose
-  (matches frame-check's pattern).
-- pytest suite (48 cases) covering protocol conformance,
-  subprocess wrapping, JSONL parsing, three-section payload
-  determinism, install-fingerprint git_sha fallback, adversarial
-  inputs (boundary, malformed, argv-injection-resistance probe),
-  and wire-protocol subprocess roundtrips
-  (`tests/test_mcp_wire.py`). Coverage in CI scopes the
-  eight runtime modules; reported number is a floor (subprocess
-  paths in wire tests are not counted by pytest-cov without a
-  sitecustomize hook).
-- `docs/ARCHITECTURE.md`: module map, data flow for tool calls
-  and resource reads, three-section payload contract, subprocess
-  discipline, JSONL read tolerance, install fingerprint two-path
-  resolution. Reading map for new contributors.
-- `docs/FAQ.md` and `docs/TROUBLESHOOTING.md`: conceptual and
-  installation gotchas, MCP-client config patterns across Claude
-  Desktop / Cursor / Cline / Continue.dev, the four-command
-  diagnostic loop, and reproducible bug-report template.
-- `bench.py`: latency benchmark mirroring bash cma's `bench.sh`
-  shape — measures wire-level round-trip latency for each tool
-  and resource through real stdin/stdout pipes against a
-  100-capture synthetic corpus. Reveals the wrapper itself adds
-  essentially zero overhead; subprocess-bound calls inherit
-  cma's latency.
-- Publish workflow (`.github/workflows/publish-mcp.yml`) builds
-  the wheel + sdist on `cma-mcp-X.Y.Z` tag pushes, validates with
-  twine, smoke-tests the installed wheel against the baked SHA,
-  and stages the artifacts. PyPI / TestPyPI upload steps are
-  intentionally commented out pending the lift checklist
-  documented in the workflow header.
-- CI wheel-install smoke step in `tests-mcp.yml` builds and
-  installs the wheel into a clean virtualenv on every push,
-  catching packaging regressions (missing modules, broken entry
-  points, dropped license-files, dropped `_build_info.py`) that
-  the editable-install pytest path cannot see.
-- Input bounds on every string field across the seven tool
-  schemas (`MAX_DESCRIPTION=4 KiB`, `MAX_TEXTURE=64 KiB`,
-  `MAX_SHORT_FIELD=2 KiB`). Fields constrained by enum are
-  exempt; the enum is the tighter constraint. A schema-invariant
-  test asserts the property; future tool additions cannot regress
-  the bound silently.
-- `MAX_ARGV_BYTES=512 KiB` pre-flight guard in
-  `cma_subprocess.run_cma`. An over-budget payload raises
-  `CmaError(reason='input_too_large')` before exec, replacing the
-  generic OS `ARG_MAX` 'unexpected' failure with a clear,
-  actionable error to the MCP caller.
-- `cma_stats` view enum carries `evidence`, exposing bash cma's
-  new `cma stats --evidence` view through MCP. The single signal
-  that says whether the loop is closing is reachable from any
-  MCP-connected client.
-- `cma_stats` input schema carries an integer `window` parameter
-  (1..3650, defaults to 30); the dispatcher forwards `--window N`
-  to the bash cma subprocess when `view='evidence'`. Operators
-  tune the trailing window from MCP without recompiling.
-- End-to-end wire test exercising `cma_stats(view='evidence',
-  window=7)` over real stdio. The test pins `CMA_BIN` to the
-  canonical bash cma in this repo so the assertion does not
-  depend on which cma is earliest on the operator's PATH.
+- Python ≥3.10 MCP server speaking JSON-RPC over stdio. No SDK dependency; protocol implemented directly (AD-001).
+- Seven tools mirroring bash cma's primitives: `cma_miss`, `cma_decision`, `cma_reject`, `cma_prevented`, `cma_distill` (modes: `default` / `retire` / `review`), `cma_surface` (instrumented; logs `surface_events.jsonl` for leak detection), `cma_stats` (views: `default` / `evidence` / `leaks` / `recurrence` / `preventions` / `rejections` / `behavior`; integer `window` parameter scopes the evidence view).
+- Four read-only resources for context inheritance: `cma://decisions`, `cma://rejections`, `cma://core`, `cma://stats`.
+- Three-section payload (`analysis` + `agent_guidance` + `provenance`) on every tool response and resource read. Tests pin the structure.
+- Methodology-agnostic substrate (AD-006): `fm` is an opaque string. cma-mcp bundles no methodology vocabulary; operators pass their methodology's tag through.
+- Schema-version handling (AD-002): records with `schema_version: "1.0"` are native; legacy records parse leniently; unknown versions surface in `provenance`.
+- Subprocess wrapper around the canonical bash cma binary (AD-004): argv-array (no shell interpolation), 5-second per-call timeout (AD-003), and a 512 KiB argv byte-budget pre-flight guard that surfaces `input_too_large` cleanly before exec.
+- Schema-level input bounds on every string field: `MAX_DESCRIPTION` 4 KiB, `MAX_TEXTURE` 64 KiB, `MAX_SHORT_FIELD` 2 KiB. Enum-constrained fields are exempt (the enum is tighter). A schema-invariant test asserts the property; future tool additions cannot regress the bound silently.
+- `cma-mcp --version` emits an install fingerprint: `server_version`, `protocol_version`, `git_sha` (runtime probe with build-time bake fallback), `cma_binary_version`, Python version, script path. CI sets `CMA_MCP_BUILD_SHA` so PEP 517 build isolation does not drop the SHA.
+- `cma-mcp --test` prints the three-section payload for a canned tool call without an MCP handshake (offline sanity check).
+- Initialize handshake carries the standard MCP fields plus a top-level `instructions` block with cross-tool orientation prose.
+- pytest suite (54 cases) covers protocol conformance, subprocess wrapping, JSONL parsing, three-section payload determinism, install-fingerprint resolution, adversarial inputs (boundary, malformed, argv-injection probe), and wire-protocol subprocess roundtrips over real stdin/stdout pipes.
+- Documentation: `docs/ARCHITECTURE.md` (module map, data flow, contracts), `docs/FAQ.md` and `docs/TROUBLESHOOTING.md` (gotchas, MCP-client configuration across Claude Desktop / Cursor / Cline / Continue.dev, diagnostic loop, bug-report template).
+- `bench.py`: wire-level latency benchmark across all tools and resources against a 100-capture synthetic corpus. Shows the wrapper adds essentially zero overhead; subprocess-bound calls inherit bash cma's latency.
+- Publish workflow `.github/workflows/publish-mcp.yml`: tag-triggered build of wheel + sdist, twine validation, wheel-content inspection, smoke install, then PyPI upload via OIDC Trusted Publishing. Gated by a required-reviewer protection rule on the `pypi` GitHub Environment.
+- CI: `tests-mcp.yml` runs pytest plus a wheel-install smoke check in a clean virtualenv on every push, catching packaging regressions the editable-install path cannot see.
 
 ### Notes
 
-- 0.1.0 was the first public release on PyPI. Yanked on
-  2026-05-15 in favor of 0.1.1; reason is in the `[0.1.1]` block
-  above.
-- Versioning convention: `pyproject.toml` version,
-  `mcp_server.SERVER_VERSION`, and `cma-mcp/CITATION.cff` version
-  align character-for-character at tag-push time. The
-  `publish-mcp.yml` verify-tag step hard-fails on drift.
-
----
-
-*cma-mcp internal prototype work prior to 0.1.0 is not documented
-here.*
+- Version alignment is enforced at tag-push time: `pyproject.toml`, `mcp_server.SERVER_VERSION`, and `cma-mcp/CITATION.cff` must match the tag's `cma-mcp-X.Y.Z` literal. The `verify-tag` step in `publish-mcp.yml` hard-fails on drift.

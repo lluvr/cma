@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-VERSION="1.0.0-dev"
+VERSION="1.0.0"
 SCHEMA_VERSION="1.0"
 CMA_DIR="${CMA_DIR:-$HOME/.cma}"
 

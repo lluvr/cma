@@ -8,13 +8,13 @@ or `.cursorrules` is. Read it before making changes.
 
 ## What this repo is
 
-`Clarethium/cma` is the public canonical repository for the **CMA**
-(Compound Memory Architecture) bash CLI plus its MCP wrapper at
+`Clarethium/cma` is the public canonical repository for **cma**
+(executable compound practice loop) plus its MCP wrapper at
 `cma-mcp/`. The bash CLI at the repo root is the load-bearing
 implementation; the Python MCP wrapper at `cma-mcp/` is a thin
-distribution surface. They ship together because every CMA flag is a
-CMA-MCP tool argument and every JSONL field in `surface_events.jsonl`
-is a CMA-MCP parser concern; same-repo prevents drift structurally.
+distribution surface. They ship together because every cma flag is a
+cma-mcp tool argument and every JSONL field in `surface_events.jsonl`
+is a cma-mcp parser concern; same-repo prevents drift structurally.
 
 The decision is codified in `DECISIONS.md` AD-008. If you are
 proposing structural changes, read AD-008 first.

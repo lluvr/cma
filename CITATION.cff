@@ -1,13 +1,10 @@
 cff-version: 1.2.0
 message: >-
-  cma 1.0.0 is pre-release; the reference binary reports the
-  1.0.0-dev marker until the 1.0.0 tag lands. The date-released
-  field is intentionally absent until lift. To cite this work in
-  its current pre-release state, reference this repository
-  directly. The methodology canon (Lodestone) and the MCP
-  distribution wrapper (cma-mcp, in this repository under
-  cma-mcp/) are separately citeable artifacts; see the references
-  block.
+  If you use cma in academic, applied, or compliance work, please
+  cite it using the metadata below. The methodology canon
+  (Lodestone) and the MCP distribution wrapper (cma-mcp, in this
+  repository under cma-mcp/) are separately citeable artifacts;
+  see the references block.
 title: "cma: executable compound practice loop"
 type: software
 authors:
