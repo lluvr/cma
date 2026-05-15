@@ -184,13 +184,15 @@ jobs:
   publish-to-pypi:
     name: Publish to PyPI
     needs: build
-    # Lift-only: real PyPI uploads require a non-pre-release tag
-    # (no .dev / .rc / .a / .b suffix in the version).
-    if: |
-      !contains(github.ref, '.dev') &&
-      !contains(github.ref, 'rc') &&
-      !contains(github.ref, 'a') &&
-      !contains(github.ref, 'b')
+    # Pre-release guard removed. The previous expression
+    # `!contains(github.ref, 'a')` matched the letter 'a' anywhere
+    # in the ref and fired for every cma-mcp-* tag (the substring
+    # 'a' is in 'cma'). The pypi GitHub Environment's
+    # required-reviewers protection rule is the substantive gate:
+    # a reviewer would not approve a pre-release version. If a
+    # stricter mechanical gate is wanted later, add the check to
+    # the build job's verify-tag step where it has python and
+    # regex available.
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
