@@ -1,41 +1,34 @@
 # Publish workflow for cma-mcp.
 #
-# Builds the cma-mcp wheel + sdist on every cma-mcp tag push
-# (`cma-mcp-X.Y.Z` per DECISIONS AD-008's tag-prefix convention),
-# bakes the build-time git SHA into the artifacts, validates them,
-# smoke-tests the installed wheel, and uploads them as workflow
-# artifacts. The PyPI / TestPyPI upload jobs are intentionally
-# commented out — publication is held until the operator lifts it.
+# Triggered on `cma-mcp-X.Y.Z` tag pushes (per DECISIONS AD-008's
+# tag-prefix convention). Builds the wheel + sdist, bakes the
+# build-time git SHA, validates with twine, inspects wheel contents,
+# smoke-tests the installed wheel, and (after a reviewer approves
+# the deployment to the `pypi` GitHub Environment) uploads via
+# OIDC Trusted Publishing.
 #
-# To enable publishing:
+# Release procedure:
 #
-#   1. Confirm cma-mcp/pyproject.toml version, SERVER_VERSION in
-#      cma-mcp/mcp_server.py, and the planned tag are all aligned
-#      character-for-character. The verify-tag step in the `build`
-#      job below hard-fails on mismatch.
-#   2. Move cma-mcp/CHANGELOG.md `[Unreleased]` to the new
-#      `[X.Y.Z]` block with the release date.
-#   3. Confirm Zenodo DOI allocation has landed (see CITATION.cff).
-#   4. Configure PyPI Trusted Publishing for `cma-mcp` against this
-#      repo (https://docs.pypi.org/trusted-publishers/), adding the
-#      `testpypi` and `pypi` GitHub environments.
-#   5. The `publish-to-pypi` job below is uncommented (see diff
-#      against history). `publish-to-testpypi` is commented out;
-#      this workflow currently publishes directly to PyPI. The
-#      safety gate is the `pypi` GitHub Environment's required-
-#      reviewers protection rule: the upload step pauses for
-#      operator approval in the GitHub UI before any wheel hits
-#      immutable PyPI. If TestPyPI testing is desired in a future
-#      release, swap the comment blocks and add the
-#      `needs: publish-to-testpypi` back to publish-to-pypi.
-#   6. Push tag `cma-mcp-X.Y.Z`. The workflow builds, validates,
-#      and (after the reviewer approves the deployment) uploads
-#      to PyPI.
-#   7. Zenodo issues a DOI automatically if GitHub-Zenodo
-#      integration is enabled (one-time repo-settings toggle).
+#   1. Bump `cma-mcp/pyproject.toml` version, `SERVER_VERSION` in
+#      `cma-mcp/mcp_server.py`, and `cma-mcp/CITATION.cff` version
+#      to the new X.Y.Z. The `verify-tag` step hard-fails on drift.
+#   2. Open a new `[X.Y.Z]` block in `cma-mcp/CHANGELOG.md` with
+#      the release date.
+#   3. Push tag `cma-mcp-X.Y.Z`.
+#   4. Approve the deployment in the GitHub Actions UI when the
+#      reviewer-required gate fires on the `pypi` environment.
+#   5. Create a GitHub Release at the tag so the GitHub-Zenodo
+#      integration mints a versioned DOI.
+#   6. Update `cma-mcp/CITATION.cff` with the issued DOI under
+#      `identifiers:` and bump `doi:` to the versioned DOI.
+#
+# A TestPyPI upload step is available as a commented job below
+# (`publish-to-testpypi`); swap the comment blocks and add
+# `needs: publish-to-testpypi` to the pypi job if a future release
+# wants the TestPyPI dry run before real PyPI.
 #
 # Releases of bash cma (tags `cma-X.Y.Z`) flow through a separate
-# release process — they do not invoke this workflow.
+# release process; this workflow does not run on those tags.
 
 name: publish-mcp
 

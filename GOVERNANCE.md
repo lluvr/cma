@@ -13,7 +13,7 @@ a real external contributor or reviewer engages.
 
 **Date:** 2026-05-06
 
-**Curator:** Lovro Lucic (single-curator BDFL model for v0.x).
+**Curator:** Lovro Lucic (single-curator BDFL model).
 
 ---
 
@@ -37,7 +37,7 @@ change.
 
 The cma project is a single-curator project. **Lovro Lucic** is the
 curator.
-For v0.x of the project, the curator carries benevolent-dictator
+In the single-curator phase, the curator carries benevolent-dictator
 authority (BDFL-style) over:
 
 - Which architectural decisions land in `DECISIONS.md`
@@ -101,7 +101,7 @@ forces a position:
   Deferred until a sustained external contributor exists.
 - **Suggestion/RFC process** modeled on Touchstone's
   `SUGGESTIONS/PROCESS.md`. cma-mcp is small enough that PR review
-  is sufficient for v0.x; an RFC layer may add unwanted weight.
+  is sufficient at the current scale; an RFC layer may add unwanted weight.
 - **Trademark and brand policy.** cma-mcp is published under
   Clarethium; brand decisions defer to the Clarethium-level
   curator.
