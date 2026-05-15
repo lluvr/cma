@@ -595,8 +595,42 @@ for miss in misses_w:
 
 prevented_count = len(preventions_w)
 leak_count = len(leaks)
-denom = prevented_count + leak_count
-rate = (prevented_count / denom) if denom > 0 else None
+
+# Loop-closure evidence: a prevention is evidence the loop fired
+# only when a surface event for the linked miss occurred between
+# the miss timestamp and the prevention timestamp. Operator
+# self-attestation without a surfaced warning is captured (the
+# total count above) but does not inflate the closure rate.
+miss_by_id = {m.get("id"): m for m in misses if m.get("id")}
+evidenced_preventions = []
+for prev in preventions_w:
+    target = prev.get("miss_id")
+    if not target:
+        continue
+    m = miss_by_id.get(target)
+    if m is None:
+        continue
+    miss_ts = m.get("timestamp", "")
+    prev_ts = prev.get("timestamp", "")
+    if not miss_ts or not prev_ts or miss_ts >= prev_ts:
+        continue
+    surfaced_between = False
+    for event in events:
+        ev_ts = event.get("timestamp", "")
+        if not (miss_ts <= ev_ts < prev_ts):
+            continue
+        for matched in event.get("matched", []):
+            if matched.get("id") == target:
+                surfaced_between = True
+                break
+        if surfaced_between:
+            break
+    if surfaced_between:
+        evidenced_preventions.append(prev)
+
+evidenced_count = len(evidenced_preventions)
+closure_denom = evidenced_count + leak_count
+closure_rate = (evidenced_count / closure_denom) if closure_denom > 0 else None
 
 groups = Counter()
 for m in misses_w:
@@ -605,7 +639,7 @@ recurring = sorted(
     [(k, v) for k, v in groups.items() if v >= 2],
     key=lambda x: x[1], reverse=True
 )
-linked = sum(1 for p in preventions_w if p.get("miss_id")) if prevented_count else 0
+linked = sum(1 for p in preventions_w if p.get("miss_id"))
 
 if output_format == "json":
     out = {
@@ -613,25 +647,29 @@ if output_format == "json":
         "window_days": window_days,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "preventions": prevented_count,
+        "preventions_linked_to_miss": linked,
+        "preventions_evidenced": evidenced_count,
         "leaks": leak_count,
-        "prevention_rate": rate,
+        "loop_closure_rate": closure_rate,
         "recurring": [
             {"surface": s, "fm": f, "count": n}
             for (s, f), n in recurring
         ],
-        "preventions_linked_to_miss": linked,
     }
     print(json.dumps(out, indent=2))
     sys.exit(0)
 
 print("Compound practice evidence (trailing {} days)".format(window_days))
 print()
-print("  Preventions:     {}".format(prevented_count))
-print("  Leaks:           {}".format(leak_count))
-if denom == 0:
-    print("  Prevention rate: -- (no preventions or leaks in window)")
+print("  Preventions captured:        {}".format(prevented_count))
+print("    of which linked to a miss: {}".format(linked))
+print("    of which evidenced:        {}".format(evidenced_count))
+print("  Leaks:                       {}".format(leak_count))
+if closure_denom == 0:
+    print("  Loop closure rate:           -- (no evidenced preventions or leaks in window)")
 else:
-    print("  Prevention rate: {:.0%}  ({}/{})".format(rate, prevented_count, denom))
+    print("  Loop closure rate:           {:.0%}  ({}/{})".format(
+        closure_rate, evidenced_count, closure_denom))
 print()
 
 if recurring:
@@ -642,21 +680,20 @@ if recurring:
         print("    {}x  surface={}  fm={}".format(n, s, f))
     print()
 
-if prevented_count:
-    print("  Preventions with miss_id linkage: {}/{}".format(linked, prevented_count))
-    print()
-
-if denom == 0:
-    print("  No evidence yet. The signal computes once preventions or leaks")
-    print("  accumulate in the window. Run cma surface (or wire the hook) so")
-    print("  surface events exist before misses, which is what enables leak")
-    print("  detection. Capture preventions with cma prevented when a")
-    print("  surfaced warning changes behavior.")
+if closure_denom == 0:
+    print("  No loop-closure evidence yet. A prevention is evidenced when")
+    print("  the miss it links to (via --miss-id) was surfaced by cma between")
+    print("  the miss's capture and the prevention's capture. Without that")
+    print("  chain, a prevention is operator self-attestation and is counted")
+    print("  above but does not enter the closure rate. Wire the hook (or run")
+    print("  cma surface manually) so surface events exist, and link each")
+    print("  prevention with cma prevented --miss-id <id>.")
 else:
-    print("  Prevention rate measures: of moments where the loop could close")
-    print("  (a relevant capture existed and was surfaced before the action),")
-    print("  what fraction closed (prevention captured) vs leaked (a miss")
-    print("  recurred despite the warning).")
+    print("  Loop closure rate measures: among moments where a prior miss")
+    print("  was actually surfaced before the next attempt, what fraction")
+    print("  closed (an evidenced prevention) versus leaked (the miss")
+    print("  recurred). Self-attested preventions without surface-event")
+    print("  evidence are captured separately and do not enter this rate.")
 PYEOF
         return 0
     fi

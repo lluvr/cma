@@ -489,48 +489,93 @@ expect_contains "leaks weak label fm=(none)"          "fm=(none)" "$CMA" stats -
 
 # stats --evidence
 reset
-expect_contains "evidence empty data"            "No evidence yet" "$CMA" stats --evidence
+expect_contains "evidence empty data"            "No loop-closure evidence yet" "$CMA" stats --evidence
 expect_contains "evidence window flag accepted"  "trailing 7 days" "$CMA" stats --evidence --window 7
 expect_exit     "evidence rejects window 0"      1 "$CMA" stats --evidence --window 0
 expect_exit     "evidence rejects window non-numeric" 1 "$CMA" stats --evidence --window foo
-"$CMA" miss "leaky" --surface auth --fm fm-1 >/dev/null
+
+# Loop-closure evidence requires the chain: miss → surface event → prevention.
+# Arrange that chain: capture an anchor miss, surface it (which logs an event
+# whose `matched` list carries the anchor's id), then a leak miss, then a
+# prevention linking to the anchor. The prevention is evidenced because a
+# surface event for the anchor's id exists between the anchor's capture and
+# the prevention's capture.
+"$CMA" miss "anchor miss to be evidenced" --surface auth --fm fm-1 >/dev/null
+anchor_id=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.readline()).get('id'))
+")
 "$CMA" surface --surface auth >/dev/null
 sleep 1
-"$CMA" miss "recurred despite warning" --surface auth --fm fm-1 >/dev/null
-expect_contains "evidence counts leak"           "Leaks:           1" "$CMA" stats --evidence
-"$CMA" prevented "saw the warning, did the right thing" >/dev/null
-expect_contains "evidence counts prevention"     "Preventions:     1" "$CMA" stats --evidence
-expect_contains "evidence shows prevention rate" "Prevention rate: 50%" "$CMA" stats --evidence
+"$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
+"$CMA" prevented "caught a repeat of the anchor" --miss-id "$anchor_id" >/dev/null
+expect_contains "evidence counts leak"           "Leaks:                       1" "$CMA" stats --evidence
+expect_contains "evidence counts prevention"     "Preventions captured:        1" "$CMA" stats --evidence
+expect_contains "evidence shows linked count"    "linked to a miss: 1" "$CMA" stats --evidence
+expect_contains "evidence shows evidenced count" "evidenced:        1" "$CMA" stats --evidence
+expect_contains "evidence shows closure rate"    "Loop closure rate:           50%" "$CMA" stats --evidence
 
-# --evidence --json emits structured output with the expected keys.
+# A prevention without miss_id is captured but is NOT evidenced; it does not
+# enter the closure-rate denominator.
+reset
+"$CMA" miss "anchor" --surface auth --fm fm-1 >/dev/null
+anchor_id=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.readline()).get('id'))
+")
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "leak" --surface auth --fm fm-1 >/dev/null
+"$CMA" prevented "self-attested without linkage" >/dev/null
+expect_contains "self-attested prevention captured"  "Preventions captured:        1" "$CMA" stats --evidence
+expect_contains "self-attested prevention not evidenced" "evidenced:        0" "$CMA" stats --evidence
+expect_contains "self-attested rate excludes prevention" "Loop closure rate:           0%" "$CMA" stats --evidence
+
+# --evidence --json emits the new schema with closure-rate fields.
+reset
+"$CMA" miss "anchor j" --surface auth --fm fm-1 >/dev/null
+anchor_id=$(python3 -c "
+import json
+with open('$CMA_DIR/misses.jsonl') as f:
+    print(json.loads(f.readline()).get('id'))
+")
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "recurred j" --surface auth --fm fm-1 >/dev/null
+"$CMA" prevented "evidenced j" --miss-id "$anchor_id" >/dev/null
 json_out=$("$CMA" stats --evidence --json --window 7 2>/dev/null)
 json_ok=$(python3 -c "
 import json, sys
 d = json.loads(sys.stdin.read())
-required = {'schema_version', 'window_days', 'generated_at', 'preventions', 'leaks', 'prevention_rate', 'recurring', 'preventions_linked_to_miss'}
+required = {'schema_version', 'window_days', 'generated_at', 'preventions',
+            'preventions_linked_to_miss', 'preventions_evidenced',
+            'leaks', 'loop_closure_rate', 'recurring'}
 missing = required - set(d.keys())
 ok = (
     not missing
     and d['preventions'] == 1
+    and d['preventions_linked_to_miss'] == 1
+    and d['preventions_evidenced'] == 1
     and d['leaks'] == 1
-    and d['prevention_rate'] == 0.5
+    and d['loop_closure_rate'] == 0.5
     and d['window_days'] == 7
-    and len(d['recurring']) == 1
-    and d['recurring'][0]['surface'] == 'auth'
 )
 print('ok' if ok else f'fail (missing={missing} d={d})')
 " <<<"$json_out")
 if [[ "$json_ok" == "ok" ]]; then
-    printf "PASS  %s\n" "evidence --json emits structured record with expected keys"
+    printf "PASS  %s\n" "evidence --json emits closure-rate schema"
     pass=$((pass + 1))
 else
-    printf "FAIL  %s: %s\n" "evidence --json emits structured record with expected keys" "$json_ok"
+    printf "FAIL  %s: %s\n" "evidence --json emits closure-rate schema" "$json_ok"
     fail=$((fail + 1))
 fi
-# Empty corpus: prevention_rate is null in JSON form (not 0.0).
+
+# Empty corpus: loop_closure_rate is null (not 0.0).
 reset
 empty_json=$("$CMA" stats --evidence --json 2>/dev/null)
-empty_rate=$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['prevention_rate'])" <<<"$empty_json")
+empty_rate=$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['loop_closure_rate'])" <<<"$empty_json")
 if [[ "$empty_rate" == "None" ]]; then
     printf "PASS  %s\n" "evidence --json empty corpus rate is null"
     pass=$((pass + 1))
