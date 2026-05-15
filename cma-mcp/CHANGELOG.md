@@ -23,6 +23,14 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.1.2] - 2026-05-15
+
+### Changed
+
+- Documentation polish. README, CHANGELOG, and GitHub Release notes rewritten with the production-ready framing the surface deserves. No code changes; the wheel's modules and tool surface are byte-identical to 0.1.1.
+
+---
+
 ## [0.1.1] - 2026-05-15
 
 First public release.
