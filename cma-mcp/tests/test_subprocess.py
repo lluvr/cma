@@ -82,3 +82,39 @@ def test_cma_version_returns_string_or_none():
     """cma_version() never raises; returns string when cma exists, None otherwise."""
     out = cma_subprocess.cma_version()
     assert out is None or (isinstance(out, str) and len(out) > 0)
+
+
+def test_argv_budget_blocks_oversized_payload(cma_binary_available):
+    """
+    A payload that pushes argv past MAX_ARGV_BYTES must raise
+    CmaError(reason='input_too_large') BEFORE subprocess exec. This
+    prevents an adversarial MCP client from triggering OS-level
+    ARG_MAX errors that surface as generic 'unexpected' failures.
+    """
+    if not cma_binary_available:
+        pytest.skip("cma binary not on PATH")
+    oversized = "x" * (cma_subprocess.MAX_ARGV_BYTES + 1)
+    with pytest.raises(cma_subprocess.CmaError) as excinfo:
+        cma_subprocess.run_cma(["miss", oversized])
+    assert excinfo.value.reason == "input_too_large"
+    assert "argv exceeds" in excinfo.value.stderr
+
+
+def test_argv_budget_allows_payload_at_ceiling(cma_binary_available, isolated_cma_dir):
+    """
+    A payload just under the ceiling is still rejected only if it
+    pushes total argv over MAX_ARGV_BYTES. We pick a description
+    sized so that argv (binary + 'miss' + description) sums under
+    the cap, and assert the call does NOT raise input_too_large.
+    """
+    if not cma_binary_available:
+        pytest.skip("cma binary not on PATH")
+    binary_len = len(cma_subprocess.resolve_cma_binary()) + len("miss")
+    headroom = cma_subprocess.MAX_ARGV_BYTES - binary_len - 64
+    payload = "x" * headroom
+    try:
+        cma_subprocess.run_cma(["miss", payload])
+    except cma_subprocess.CmaError as exc:
+        assert exc.reason != "input_too_large", (
+            f"under-ceiling payload was rejected as oversized: {exc}"
+        )

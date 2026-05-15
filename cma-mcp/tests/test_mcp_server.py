@@ -89,6 +89,35 @@ def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher)
         )
 
 
+def test_every_string_field_has_max_length(fresh_dispatcher):
+    """
+    Every string input field must carry maxLength. An MCP client (or
+    a misbehaving agent) that sends an unbounded payload would either
+    fill the operator's data dir or trip the OS ARG_MAX limit on
+    subprocess exec. Bounded fields force a clean schema-level error
+    instead.
+    """
+    result = call_handler(fresh_dispatcher, "tools/list")
+    failures = []
+    for tool in result["tools"]:
+        for prop_name, prop in tool["inputSchema"].get("properties", {}).items():
+            if prop.get("type") != "string":
+                continue
+            # enum is a strictly tighter constraint than maxLength
+            # (value must be in a small fixed set); fields bounded by
+            # enum do not also need maxLength.
+            if "enum" in prop:
+                continue
+            if "maxLength" not in prop:
+                failures.append(f"{tool['name']}.{prop_name} missing maxLength")
+            elif not isinstance(prop["maxLength"], int) or prop["maxLength"] <= 0:
+                failures.append(
+                    f"{tool['name']}.{prop_name} maxLength is not a positive int: "
+                    f"{prop['maxLength']!r}"
+                )
+    assert not failures, "\n".join(failures)
+
+
 def test_resources_list_carries_four_resources(fresh_dispatcher):
     result = call_handler(fresh_dispatcher, "resources/list")
     uris = sorted(r["uri"] for r in result["resources"])

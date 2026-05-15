@@ -39,6 +39,15 @@ from dataclasses import dataclass
 # Per DECISIONS AD-003: every cma call carries this timeout.
 DEFAULT_TIMEOUT_SECONDS = 5
 
+# Upper bound on the total bytes passed in argv to the bash cma
+# subprocess. The OS-level ARG_MAX is typically ~2 MiB on Linux
+# x86_64 (and lower elsewhere); we hard-cap well below that so the
+# pre-flight check fires before exec attempts and surfaces a clean
+# error to the MCP caller. The schema-level maxLength bounds in
+# mcp_schema.py keep individual fields well under this; this check
+# guards the aggregate (multiple long fields in one call).
+MAX_ARGV_BYTES = 512 * 1024
+
 # The bash cma binary is resolved from PATH by default. Operators
 # can override with CMA_BIN to point at a specific cma checkout.
 _CMA_BIN_OVERRIDE = os.environ.get("CMA_BIN")
@@ -148,6 +157,21 @@ def run_cma(args: list[str], timeout: int | None = None) -> CmaResult:
     binary = resolve_cma_binary()
     argv = [binary] + list(args)
     t = timeout if timeout is not None else DEFAULT_TIMEOUT_SECONDS
+
+    argv_bytes = sum(len(a.encode("utf-8")) for a in argv) + len(argv)
+    if argv_bytes > MAX_ARGV_BYTES:
+        raise CmaError(
+            argv=argv,
+            returncode=None,
+            stdout="",
+            stderr=(
+                f"argv exceeds {MAX_ARGV_BYTES} bytes "
+                f"({argv_bytes} bytes); split the call or shorten the "
+                f"input. Per-field bounds are enforced at the schema "
+                f"layer; this guard is the aggregate ceiling."
+            ),
+            reason="input_too_large",
+        )
 
     try:
         proc = subprocess.run(

@@ -50,8 +50,38 @@ _FM_DESCRIPTION = (
 )
 
 
+# ── input size bounds ───────────────────────────────────────────────
+#
+# Every string field carries an upper bound so an adversarial or
+# malfunctioning MCP client cannot push payloads past the OS ARG_MAX
+# limit (typically ~2 MiB on Linux x86_64) when cma-mcp shells out to
+# bash cma. The bounds below leave headroom for argv overhead and
+# multiple fields per call.
+#
+# MAX_DESCRIPTION   one-line capture summaries. 4 KiB is generous.
+# MAX_TEXTURE       multi-line excerpts. 64 KiB covers realistic
+#                   conversation excerpts; longer payloads should be
+#                   stored externally and referenced by path.
+# MAX_SHORT_FIELD   labels, predicates, IDs. 2 KiB.
+MAX_DESCRIPTION = 4096
+MAX_TEXTURE = 65536
+MAX_SHORT_FIELD = 2048
+
+
 def _surface_field() -> dict:
-    return {"type": "string", "description": _SURFACE_DESCRIPTION}
+    return {
+        "type": "string",
+        "maxLength": MAX_SHORT_FIELD,
+        "description": _SURFACE_DESCRIPTION,
+    }
+
+
+def _fm_field() -> dict:
+    return {
+        "type": "string",
+        "maxLength": MAX_SHORT_FIELD,
+        "description": _FM_DESCRIPTION,
+    }
 
 
 # ── per-tool definitions ────────────────────────────────────────────
@@ -85,6 +115,7 @@ CMA_MISS = {
             "description": {
                 "type": "string",
                 "minLength": 8,
+                "maxLength": MAX_DESCRIPTION,
                 "description": (
                     "What failed, in the operator's own words. Phrase "
                     "actively ('Treated X as Y without verifying') "
@@ -94,9 +125,10 @@ CMA_MISS = {
                 ),
             },
             "surface": _surface_field(),
-            "fm": {"type": "string", "description": _FM_DESCRIPTION},
+            "fm": _fm_field(),
             "files": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Comma-separated list of files involved in the "
                     "failure. Used for surface auto-detection at "
@@ -105,6 +137,7 @@ CMA_MISS = {
             },
             "intended": {
                 "type": "string",
+                "maxLength": MAX_TEXTURE,
                 "description": (
                     "What was about to happen (the counterfactual). "
                     "Texture field; preserves the conditions of the "
@@ -114,6 +147,7 @@ CMA_MISS = {
             },
             "corrected": {
                 "type": "string",
+                "maxLength": MAX_TEXTURE,
                 "description": (
                     "What happened instead, after correction. Texture "
                     "field; pairs with `intended` to capture the "
@@ -122,6 +156,7 @@ CMA_MISS = {
             },
             "excerpt": {
                 "type": "string",
+                "maxLength": MAX_TEXTURE,
                 "description": (
                     "Multi-line excerpt of the conversation or session "
                     "that produced the miss. Newlines and quotes are "
@@ -163,6 +198,7 @@ CMA_DECISION = {
             "description": {
                 "type": "string",
                 "minLength": 15,
+                "maxLength": MAX_DESCRIPTION,
                 "description": (
                     "TOPIC: choice (rationale). Real-world decisions "
                     "like 'GIT: Commit only' (16 chars) are valid."
@@ -171,6 +207,7 @@ CMA_DECISION = {
             "surface": _surface_field(),
             "applies_when": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Predicate matched against context keywords at "
                     "surface time. Coarse predicates (surface name, "
@@ -208,11 +245,13 @@ CMA_REJECT = {
             "description": {
                 "type": "string",
                 "minLength": 8,
+                "maxLength": MAX_DESCRIPTION,
                 "description": "OPTION: reason for elimination.",
             },
             "surface": _surface_field(),
             "revisit_when": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Trigger that would warrant reconsidering this "
                     "rejection. Surfaces alongside the rejection so "
@@ -249,6 +288,7 @@ CMA_PREVENTED = {
             "description": {
                 "type": "string",
                 "minLength": 8,
+                "maxLength": MAX_DESCRIPTION,
                 "description": (
                     "What was almost done versus what was done "
                     "instead. The chain is most useful when explicit."
@@ -256,6 +296,7 @@ CMA_PREVENTED = {
             },
             "miss_id": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "ID of the original miss this prevention links to "
                     "(format: YYYYMMDD-HHMMSS-<8-hex>). Lets cma "
@@ -264,6 +305,7 @@ CMA_PREVENTED = {
             },
             "warning_id": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "ID of the surface event whose warning was heeded. "
                     "Optional; cma uses it to track which warnings "
@@ -310,6 +352,7 @@ CMA_DISTILL = {
             "description": {
                 "type": "string",
                 "minLength": 8,
+                "maxLength": MAX_DESCRIPTION,
                 "description": (
                     "Distilled rule (mode=default only). Phrased as a "
                     "permanent rule, not a one-off observation."
@@ -318,6 +361,7 @@ CMA_DISTILL = {
             "pattern": {
                 "type": "string",
                 "minLength": 1,
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Substring pattern (mode=retire only). Matches "
                     "against existing core learnings; matches are "
@@ -364,6 +408,7 @@ CMA_SURFACE = {
         "properties": {
             "surface": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Filter by domain area. Matches captures whose "
                     "stored surface equals this value, or whose "
@@ -373,6 +418,7 @@ CMA_SURFACE = {
             },
             "file": {
                 "type": "string",
+                "maxLength": MAX_SHORT_FIELD,
                 "description": (
                     "Filter by file path (or basename). Matches "
                     "captures whose `files` field includes this value."
