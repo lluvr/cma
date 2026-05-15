@@ -56,6 +56,38 @@ Captures are written to `~/.cma/` as JSON Lines files (one record per line, appe
 
 Run `cma --help` for the full command surface.
 
+## The compound loop in four commands
+
+cma's central claim is that captured failures become surfaced warnings, surfaced warnings change behavior, and the resulting evidence is computable. The full chain in one walkthrough:
+
+```bash
+# 1. Capture a failure so future similar work can see it.
+cma miss "claimed verified without testing the cross-tenant path" \
+    --surface auth --fm <failure-shape>
+#    → Captured miss 20260515-...-abcd1234
+
+# 2. Surface relevant prior captures before the next related action.
+#    The PreToolUse hook does this automatically; manual invocation
+#    works too. The surface event is logged for leak detection.
+cma surface --surface auth
+
+# 3. The warning fires, behavior changes, and the repeat is avoided.
+#    Capture that catch. Link to the original miss so cma can
+#    attribute the closure to a specific prior failure.
+cma prevented "almost claimed verified again; ran the cross-tenant test instead" \
+    --miss-id 20260515-...-abcd1234
+
+# 4. Read the evidence.
+cma stats --evidence
+#    Preventions captured:        1
+#      of which linked to a miss: 1
+#      of which evidenced:        1
+#    Leaks:                       0
+#    Loop closure rate:           100%  (1/1)
+```
+
+The closure rate counts only preventions evidenced by a surface event between the linked miss and the prevention. Operator self-attestation without that chain is captured but does not inflate the rate. `cma stats --evidence --json` emits the structured record for downstream consumers.
+
 ## Action-time injection
 
 cma surfaces relevant prior captures automatically when an operator (or AI assistant) is about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](ARCHITECTURE.md). Two reference integrations ship in this repository.
