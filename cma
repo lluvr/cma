@@ -916,7 +916,7 @@ warn_if_storage_risky() {
     local fs
     fs=$(df -T "$dir" 2>/dev/null | awk 'NR==2 {print tolower($2)}' || true)
     case "$fs" in
-        nfs*|nfs4|cifs|smbfs|fuse.sshfs|fuseblk)
+        nfs*|cifs|smbfs|fuse.sshfs|fuseblk)
             echo "cma: warning: $dir is on a $fs filesystem." >&2
             echo "cma: append atomicity is not guaranteed on network filesystems;" >&2
             echo "cma: see DATA.md (Storage requirements) for the rationale." >&2
