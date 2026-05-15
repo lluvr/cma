@@ -1178,7 +1178,8 @@ Setup:
   cma id <type>           Print the id of the most recent capture of <type>
                           (miss|decision|rejection|prevention|core),
                           optionally filtered by --surface. Useful for
-                          chaining: `cma prevented "..." --miss-id "$(cma id miss)"`.
+                          chaining a prevention to a recent miss. See
+                          README for the example.
 
 Other:
   cma --version
