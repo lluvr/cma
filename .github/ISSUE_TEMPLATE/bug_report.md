@@ -1,13 +1,19 @@
 ---
 name: Bug report
-about: Something cma-mcp does that does not match the documented behavior
+about: Something cma or cma-mcp does that does not match the documented behavior
 title: '[bug] '
 labels: bug
 ---
 
+## Component
+
+- [ ] bash cma (the CLI, hooks, shell wrappers)
+- [ ] cma-mcp (the MCP server)
+- [ ] Both
+
 ## Expected behavior
 
-<!-- What you expected to happen, with reference to README, docs/MCP_SERVER.md, or a specific tool/resource description. -->
+<!-- What you expected to happen, with reference to README, DESIGN.md, ARCHITECTURE.md, cma-mcp/docs/MCP_SERVER.md, or a specific primitive/tool. -->
 
 ## Actual behavior
 
@@ -15,14 +21,7 @@ labels: bug
 
 ## Reproduction
 
-<!-- Minimum steps to reproduce. Specific MCP client and version helps. -->
-
-## Install fingerprint
-
-```
-$ cma-mcp --version
-<paste output here>
-```
+<!-- Minimum steps to reproduce. For cma-mcp, the specific MCP client and version helps. -->
 
 ## bash cma version
 
@@ -31,16 +30,24 @@ $ cma --version
 <paste output here, or note "cma not installed">
 ```
 
+## cma-mcp install fingerprint (if cma-mcp is involved)
+
+```
+$ cma-mcp --version
+<paste JSON output here>
+```
+
 ## Environment
 
 - OS:
-- Python version:
-- MCP client (Claude Desktop / Cursor / Cline / etc.) and version:
+- Python version (if cma-mcp):
+- MCP client (Claude Desktop / Cursor / Cline / etc.) and version (if cma-mcp):
 
 ## Logs
 
 <!--
-cma-mcp logs to stderr. If your MCP client surfaces server stderr,
-paste the relevant lines here. If not, run with `CMA_MCP_LOG_LEVEL=DEBUG`
-and capture stderr separately.
+cma writes diagnostics to stderr; cma-mcp logs to stderr too. If
+your MCP client surfaces server stderr, paste the relevant lines
+here. For cma-mcp, you can set `CMA_MCP_LOG_LEVEL=DEBUG` for
+verbose logging.
 -->

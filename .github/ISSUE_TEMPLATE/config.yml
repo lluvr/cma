@@ -1,11 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security issue
-    url: mailto:hello@clarethium.com?subject=%5Bcma-mcp%20security%5D
+    url: mailto:hello@clarethium.com?subject=%5Bcma%20security%5D
     about: Email security issues directly per SECURITY.md. Do NOT open public issues for vulnerabilities.
-  - name: bash cma issue (the wrapped binary)
-    url: https://github.com/Clarethium/cma/issues
-    about: Issues with cma's seven primitives, hooks, or shell wrappers belong in the cma repo, not here.
   - name: Lodestone methodology question
     url: https://github.com/Clarethium/lodestone/issues
-    about: Methodology canon questions (FM catalog, surface protocols, compound practice) live with Lodestone, not cma-mcp.
+    about: Methodology canon questions (FM catalog, surface protocols, compound practice) live with Lodestone.

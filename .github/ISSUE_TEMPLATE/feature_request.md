@@ -1,38 +1,41 @@
 ---
 name: Feature request
-about: A capability cma-mcp could expose
+about: A capability cma or cma-mcp could expose
 title: '[feature] '
 labels: enhancement
 ---
 
-## What you want cma-mcp to do
+## Component
+
+- [ ] bash cma (the CLI, hooks, shell wrappers)
+- [ ] cma-mcp (the MCP server)
+- [ ] Both
+
+## What you want
 
 <!-- The capability, named in operator-facing terms. -->
 
 ## Why it matters
 
-<!--
-What does this enable that's not currently possible?
-- Is the capability already available in bash cma but not exposed
-  through cma-mcp? (Most likely answer: yes; cma-mcp is a thin
-  wrapper.)
-- Is the capability NOT in bash cma either? (If so, this is a cma
-  feature request, not a cma-mcp one. Open at
-  https://github.com/Clarethium/cma/issues instead.)
--->
+<!-- What does this enable that is not currently possible? Concrete use case helps. -->
 
 ## Proposed shape
 
 <!--
-Tool / resource name, parameters, returned payload shape. Mirror
-existing cma-mcp patterns where possible (three-section payload,
-snake_case fields, optional surface label).
+For bash cma: command surface (flags, output format, exit codes).
+Mirror DESIGN.md conventions (kebab-case flags, JSONL outputs where
+appropriate).
+
+For cma-mcp: tool / resource name, parameters, returned payload
+shape. Mirror existing cma-mcp patterns (three-section payload,
+snake_case fields, optional `surface` label, `maxLength` on every
+string field).
 -->
 
 ## Companion impact
 
 <!--
-Does this require a parallel change in cma (the bash binary), in
-docs/MCP_SERVER.md, or in any other Clarethium companion? If yes,
-name what.
+Does this require a parallel change in the other component, in
+DESIGN.md / ARCHITECTURE.md / DATA.md / docs/MCP_SERVER.md, or in
+any companion repo (Lodestone, Touchstone)? If yes, name what.
 -->

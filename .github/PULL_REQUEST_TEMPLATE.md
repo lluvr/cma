@@ -1,9 +1,11 @@
 <!--
-Thanks for contributing to cma-mcp. Read CONTRIBUTING.md and
-GOVERNANCE.md before opening a substantial change. Especially:
+Thanks for contributing. Read CONTRIBUTING.md and GOVERNANCE.md
+before opening a substantial change. Especially:
 
 - Sign every commit with DCO: `git commit -s`
-- Run pytest before pushing: `python3 -m pytest -q`
+- Run the relevant test suite before pushing:
+  - bash cma: `./test.sh`
+  - cma-mcp:  `python3 -m pytest -q` from `cma-mcp/`
 - Check whether your change contradicts a prior DECISIONS.md entry;
   if so, the PR description must name the contradiction.
 -->
@@ -12,13 +14,18 @@ GOVERNANCE.md before opening a substantial change. Especially:
 
 <!-- One short paragraph: what changed, why. -->
 
+## Component
+
+- [ ] bash cma (repository root)
+- [ ] cma-mcp (Python MCP wrapper)
+- [ ] Both
+- [ ] Cross-cutting (governance, license, citation, docs)
+
 ## Type
 
-<!-- Check one. -->
-
-- [ ] Bug fix (no schema change)
-- [ ] New tool, resource, or schema field (additive; minor SERVER_VERSION bump)
-- [ ] Schema-breaking change (major SERVER_VERSION bump)
+- [ ] Bug fix
+- [ ] New surface (additive; minor version bump for the touched component)
+- [ ] Surface-breaking change (major version bump)
 - [ ] Documentation only
 - [ ] Test addition / refactor
 - [ ] Architectural decision (DECISIONS.md entry added)
@@ -26,18 +33,20 @@ GOVERNANCE.md before opening a substantial change. Especially:
 ## Reviewer checklist
 
 - [ ] DCO sign-off on every commit (`git log` shows `Signed-off-by:` trailer)
-- [ ] `python3 -m pytest -q` passes locally
-- [ ] If surface changed: `mcp_schema.py`, `mcp_server.py`, the relevant test, and `docs/MCP_SERVER.md` all updated together
-- [ ] If payload shape changed: `tests/test_payload_determinism.py` updated
-- [ ] If runtime behavior changed: `CHANGELOG.md` `[Unreleased]` updated
-- [ ] No new runtime dependency added (cma-mcp's runtime stays stdlib-only by default)
+- [ ] Relevant test suite passes locally
+- [ ] If bash cma surface changed: `cma`, `test.sh`, `DESIGN.md`, and `ARCHITECTURE.md` (if action-time injection touched) updated together
+- [ ] If cma-mcp surface changed: `mcp_schema.py`, `mcp_server.py`, the relevant test, and `cma-mcp/docs/MCP_SERVER.md` updated together
+- [ ] If payload shape changed: `cma-mcp/tests/test_payload_determinism.py` updated
+- [ ] If runtime behavior changed: the relevant CHANGELOG `[Unreleased]` updated
+- [ ] No new runtime dependency added (bash cma: bash + python3 stdlib only; cma-mcp: Python stdlib only)
+- [ ] `bash scripts/canon_audit.sh` passes locally
 
 ## Companion-link impact
 
 <!--
-Does this change affect references to cma, Lodestone, Touchstone,
-or frame-check? If yes, name what coordinates with each
-companion repo. If no, write "none".
+Does this change affect references to Lodestone, Touchstone, or any
+other companion repo? If yes, name what coordinates with each. If
+no, write "none".
 -->
 
 ## DECISIONS
