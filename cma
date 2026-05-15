@@ -91,9 +91,12 @@ EOF
             ;;
         stats)
             cat <<'EOF'
-cma stats [--rejections] [--leaks] [--preventions] [--recurrence]
+cma stats [--rejections] [--leaks] [--preventions] [--recurrence] [--behavior]
+cma stats --evidence [--window <days>]
 
 Evidence dashboard. Default mode shows summary; flags select views.
+The --evidence view composes preventions and leaks into a single
+prevention-rate signal over a trailing window (default 30 days).
 EOF
             ;;
     esac
@@ -510,7 +513,8 @@ PYEOF
 }
 
 cmd_stats() {
-    local view="" recurrence_mode=false leaks_mode=false behavior_mode=false
+    local view="" recurrence_mode=false leaks_mode=false behavior_mode=false evidence_mode=false
+    local window_days=30
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --rejections) view="rejection"; shift ;;
@@ -518,9 +522,121 @@ cmd_stats() {
             --recurrence) recurrence_mode=true; shift ;;
             --leaks) leaks_mode=true; shift ;;
             --behavior) behavior_mode=true; shift ;;
+            --evidence) evidence_mode=true; shift ;;
+            --window)
+                if ! [[ "${2:-}" =~ ^[0-9]+$ ]] || [[ "${2:-0}" -lt 1 ]]; then
+                    echo "cma stats: --window requires a positive integer (days)" >&2; exit 1
+                fi
+                window_days="$2"; shift 2 ;;
             *) echo "cma stats: unknown flag: $1" >&2; usage_for stats; exit 1 ;;
         esac
     done
+
+    if $evidence_mode; then
+        python3 - "$CMA_DIR" "$window_days" <<'PYEOF'
+import json, os, sys
+from collections import Counter
+from datetime import datetime, timedelta, timezone
+
+data_dir = sys.argv[1]
+window_days = int(sys.argv[2])
+
+cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
+cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def load(path):
+    out = []
+    if not os.path.exists(path):
+        return out
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                out.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return out
+
+misses = load(os.path.join(data_dir, "misses.jsonl"))
+preventions = load(os.path.join(data_dir, "preventions.jsonl"))
+events = load(os.path.join(data_dir, "surface_events.jsonl"))
+
+def in_window(rec):
+    return rec.get("timestamp", "") >= cutoff_iso
+
+misses_w = [m for m in misses if in_window(m)]
+preventions_w = [p for p in preventions if in_window(p)]
+
+leaks = []
+for miss in misses_w:
+    miss_ts = miss.get("timestamp", "")
+    miss_surface = miss.get("surface", "")
+    miss_fm = miss.get("fm", "")
+    if not miss_surface and not miss_fm:
+        continue
+    for event in events:
+        if event.get("timestamp", "") >= miss_ts:
+            continue
+        for matched in event.get("matched", []):
+            if (matched.get("surface") == miss_surface and
+                matched.get("fm") == miss_fm and miss_surface):
+                leaks.append(miss)
+                break
+        else:
+            continue
+        break
+
+prevented_count = len(preventions_w)
+leak_count = len(leaks)
+denom = prevented_count + leak_count
+
+print("Compound practice evidence (trailing {} days)".format(window_days))
+print()
+print("  Preventions:     {}".format(prevented_count))
+print("  Leaks:           {}".format(leak_count))
+if denom == 0:
+    print("  Prevention rate: -- (no preventions or leaks in window)")
+else:
+    rate = prevented_count / denom
+    print("  Prevention rate: {:.0%}  ({}/{})".format(rate, prevented_count, denom))
+print()
+
+groups = Counter()
+for m in misses_w:
+    groups[(m.get("surface", ""), m.get("fm", ""))] += 1
+recurring = sorted(
+    [(k, v) for k, v in groups.items() if v >= 2],
+    key=lambda x: x[1], reverse=True
+)
+if recurring:
+    print("  Recurring patterns in window ({}):".format(len(recurring)))
+    for (s, f), n in recurring[:5]:
+        s = s if s else "(no surface)"
+        f = f if f else "(no fm)"
+        print("    {}x  surface={}  fm={}".format(n, s, f))
+    print()
+
+if prevented_count:
+    linked = sum(1 for p in preventions_w if p.get("miss_id"))
+    print("  Preventions with miss_id linkage: {}/{}".format(linked, prevented_count))
+    print()
+
+if denom == 0:
+    print("  No evidence yet. The signal computes once preventions or leaks")
+    print("  accumulate in the window. Run cma surface (or wire the hook) so")
+    print("  surface events exist before misses, which is what enables leak")
+    print("  detection. Capture preventions with cma prevented when a")
+    print("  surfaced warning changes behavior.")
+else:
+    print("  Prevention rate measures: of moments where the loop could close")
+    print("  (a relevant capture existed and was surfaced before the action),")
+    print("  what fraction closed (prevention captured) vs leaked (a miss")
+    print("  recurred despite the warning).")
+PYEOF
+        return 0
+    fi
 
     if $behavior_mode; then
         python3 - "$CMA_DIR" <<'PYEOF'
@@ -790,6 +906,7 @@ Operations:
   cma surface [--surface <s>] [--file <f>] [--type <t>] [--limit <n>]
   cma distill <learning> [--scope <s>] [--surface <s>] | --retire <p> | --review
   cma stats [--rejections] [--leaks] [--preventions] [--recurrence] [--behavior]
+  cma stats --evidence [--window <days>]
 
 Setup:
   cma init                Create the data directory with a README

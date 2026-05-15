@@ -416,6 +416,21 @@ expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stat
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
 expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log
 
+# stats --evidence
+reset
+expect_contains "evidence empty data"            "No evidence yet" "$CMA" stats --evidence
+expect_contains "evidence window flag accepted"  "trailing 7 days" "$CMA" stats --evidence --window 7
+expect_exit     "evidence rejects window 0"      1 "$CMA" stats --evidence --window 0
+expect_exit     "evidence rejects window non-numeric" 1 "$CMA" stats --evidence --window foo
+"$CMA" miss "leaky" --surface auth --fm fm-1 >/dev/null
+"$CMA" surface --surface auth >/dev/null
+sleep 1
+"$CMA" miss "recurred despite warning" --surface auth --fm fm-1 >/dev/null
+expect_contains "evidence counts leak"           "Leaks:           1" "$CMA" stats --evidence
+"$CMA" prevented "saw the warning, did the right thing" >/dev/null
+expect_contains "evidence counts prevention"     "Preventions:     1" "$CMA" stats --evidence
+expect_contains "evidence shows prevention rate" "Prevention rate: 50%" "$CMA" stats --evidence
+
 # stats --behavior
 reset
 expect_contains "behavior empty data"            "No misses" "$CMA" stats --behavior
