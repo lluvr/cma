@@ -19,9 +19,9 @@
 #   4. Configure PyPI Trusted Publishing for `cma-mcp` against this
 #      repo (https://docs.pypi.org/trusted-publishers/), adding the
 #      `testpypi` and `pypi` GitHub environments.
-#   5. Uncomment `publish-to-testpypi` below. Push tag
-#      `cma-mcp-X.Y.Z`. The workflow builds, validates, and uploads
-#      to TestPyPI.
+#   5. The `publish-to-testpypi` job below is uncommented (see
+#      diff against history for the gate flip). Pushing tag
+#      `cma-mcp-X.Y.Z` triggers the build + TestPyPI upload.
 #   6. Verify the TestPyPI install:
 #      `pipx run --index-url https://test.pypi.org/simple/ \
 #         --pip-args='--extra-index-url https://pypi.org/simple/' \
@@ -162,21 +162,21 @@ jobs:
           name: cma-mcp-dist
           path: cma-mcp/dist/*
 
-  # publish-to-testpypi:
-  #   name: Publish to TestPyPI
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   environment: testpypi
-  #   permissions:
-  #     id-token: write  # OIDC for Trusted Publishing (PEP 740)
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: cma-mcp-dist
-  #         path: dist/
-  #     - uses: pypa/gh-action-pypi-publish@release/v1
-  #       with:
-  #         repository-url: https://test.pypi.org/legacy/
+  publish-to-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write  # OIDC for Trusted Publishing (PEP 740)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: cma-mcp-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
 
   # publish-to-pypi:
   #   name: Publish to PyPI
