@@ -290,16 +290,14 @@ expect_exit "id with no captures exits 1"     1 "$CMA" id miss
 "$CMA" miss "first" --surface auth >/dev/null
 "$CMA" miss "second" --surface db >/dev/null
 last_id=$("$CMA" id miss)
-if [[ -n "$last_id" ]]; then
-    grep -q "$last_id" "$CMA_DIR/misses.jsonl" && {
-        printf "PASS  %s\n" "id miss returns a real miss id"
-        pass=$((pass + 1))
-    } || {
-        printf "FAIL  %s (id=%q not in misses.jsonl)\n" "id miss returns a real miss id" "$last_id"
-        fail=$((fail + 1))
-    }
-else
+if [[ -z "$last_id" ]]; then
     printf "FAIL  %s (empty output)\n" "id miss returns a real miss id"
+    fail=$((fail + 1))
+elif grep -q "$last_id" "$CMA_DIR/misses.jsonl"; then
+    printf "PASS  %s\n" "id miss returns a real miss id"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (id=%q not in misses.jsonl)\n" "id miss returns a real miss id" "$last_id"
     fail=$((fail + 1))
 fi
 # The second miss was on db; --surface auth should return the first.
