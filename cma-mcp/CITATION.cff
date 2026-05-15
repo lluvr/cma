@@ -36,8 +36,11 @@ keywords:
 license: Apache-2.0
 version: "0.1.2"
 date-released: "2026-05-15"
-doi: "10.5281/zenodo.20208926"
+doi: "10.5281/zenodo.20211591"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20211591"
+    description: "Versioned DOI for cma-mcp 0.1.2"
   - type: doi
     value: "10.5281/zenodo.20066625"
     description: "Concept DOI; always resolves to the latest cma-mcp release"
