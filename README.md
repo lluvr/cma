@@ -183,17 +183,9 @@ cma's action-time injection layer follows a five-stage architecture (interceptio
 
 ### Performance
 
-ARCHITECTURE.md Section 6 specifies <50ms typical latency for action-time injection. Measured against a synthetic 100-capture data set (`./bench.sh`):
+ARCHITECTURE.md Section 6 specifies <50ms typical latency for action-time injection. The `./bench.sh` harness measures each operation 100 times after 3 warmup runs against a synthetic 100-capture data set, and reports min / p50 / p95 / p99. The text run prints a table; `./bench.sh --json` emits a machine-readable record (operation name, percentile latencies, host kernel/CPU/filesystem, timestamp) suitable for tracking over time.
 
-| Operation | Median | p95 |
-|-----------|--------|-----|
-| `cma-pre --check` (no match) | 6ms | 10ms |
-| `cma-pre --check` (matched surface) | 36ms | 43ms |
-| `cma surface --surface <s>` | 27ms | 31ms |
-| `cma stats --recurrence` | 26ms | 31ms |
-| `cma stats` (default summary) | 8ms | 9ms |
-
-All operations stay under the 50ms target at p95. Cold-start invocations (first call in a fresh shell) may run higher; the wrapper warms up after a few hooks fire.
+On commodity Linux and macOS the hot operations (`cma-pre --check`, `cma surface`, `cma stats` default summary) come in at p95 under 50ms. p99 is noisier and occasionally crosses the target on busy hosts; the architecture target is "typical" latency, not worst-case. Sub-50ms work is inherently sample-sensitive; re-run on the target host before citing numbers, and prefer the JSON output over a single text run.
 
 ## Roadmap
 
