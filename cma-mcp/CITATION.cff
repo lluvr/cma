@@ -1,12 +1,9 @@
 cff-version: 1.2.0
 message: >-
-  cma-mcp 0.1.0 is pre-publish. PyPI upload and Zenodo DOI
-  allocation are pending; the date-released and DOI identifier
-  fields will be set at lift. To cite this work in its current
-  pre-publish state, reference this repository directly. The
-  methodology canon (Lodestone) and the executable companion (cma)
-  are separately citeable artifacts with their own canonical
-  references.
+  If you use cma-mcp in academic, applied, or compliance work,
+  please cite it using the metadata below. The methodology canon
+  (Lodestone) and the executable companion (cma) are separately
+  citeable artifacts with their own canonical references.
 title: "cma-mcp: Model Context Protocol distribution for the compound practice loop"
 type: software
 authors:
@@ -38,6 +35,18 @@ keywords:
   - clarethium
 license: Apache-2.0
 version: "0.1.1"
+date-released: "2026-05-15"
+doi: "10.5281/zenodo.20208926"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20208926"
+    description: "Versioned DOI for cma-mcp 0.1.1"
+  - type: doi
+    value: "10.5281/zenodo.20066625"
+    description: "Concept DOI; always resolves to the latest cma-mcp release"
+  - type: url
+    value: "https://pypi.org/project/cma-mcp/0.1.1/"
+    description: "PyPI distribution"
 references:
   - type: software
     title: "cma: executable compound practice loop"
