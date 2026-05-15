@@ -31,12 +31,73 @@ change.
 
 ---
 
-## [0.1.0] - pending publication
+## [0.1.1] - pending publication
 
-First public release. Version content is frozen; PyPI upload is
-gated on the lift checklist in the Notes section below. The date
-in this header updates to the actual publication date at lift
-time.
+### Fixed (discipline)
+
+- **0.1.0 yanked from PyPI.** The 0.1.0 wheel uploaded on
+  2026-05-07 carried strings in `mcp_compose.py`,
+  `mcp_resources.py`, `mcp_schema.py`, and in the PyPI
+  long_description that referenced files and vocabulary
+  inconsistent with `AGENTS.md` (the public-canon scope
+  declaration). The source was corrected on 2026-05-12 in commit
+  `1c0d472` (Discipline polish), but PyPI wheels are immutable;
+  the published 0.1.0 still carried the strings. 0.1.1 is the
+  corresponding clean build. Adopters on 0.1.0 should
+  `pip install -U cma-mcp` to pick up 0.1.1; the 0.1.0 wheel
+  remains accessible for explicit pinning but is no longer the
+  preferred install.
+
+### Added (since 0.1.0)
+
+These additions accumulated between 0.1.0's lift on 2026-05-07
+and 0.1.1. Each landed as its own commit on `main`; see the git
+log for full context.
+
+- Input bounds on every string field across the seven tool
+  schemas (`MAX_DESCRIPTION=4 KiB`, `MAX_TEXTURE=64 KiB`,
+  `MAX_SHORT_FIELD=2 KiB`). Fields constrained by enum are
+  exempt; the enum is the tighter constraint. A schema-invariant
+  test asserts the property; future tool additions cannot regress
+  the bound silently. Commit `8416401`.
+- `MAX_ARGV_BYTES=512 KiB` pre-flight guard in
+  `cma_subprocess.run_cma`. An over-budget payload raises
+  `CmaError(reason='input_too_large')` before exec, replacing the
+  generic OS `ARG_MAX` 'unexpected' failure with a clear,
+  actionable error. Commit `8416401`.
+- `cma_stats` view enum carries `evidence`, exposing bash cma's
+  new `cma stats --evidence` view through MCP. The single signal
+  that says whether the loop is closing is reachable from any
+  MCP-connected client. Commit `5707486`.
+- `cma_stats` input schema carries an integer `window` parameter
+  (1..3650, defaults to 30); the dispatcher forwards `--window N`
+  to the bash cma subprocess when `view='evidence'`. Operators
+  tune the trailing window from MCP without recompiling. Commit
+  `44cd046`.
+- End-to-end wire test exercising `cma_stats(view='evidence',
+  window=7)` over real stdio. The test pins `CMA_BIN` to the
+  canonical bash cma in this repo so the assertion does not
+  depend on which cma is earliest on the operator's PATH. Commit
+  `44cd046`.
+
+### Notes
+
+- 0.1.0 yanked rather than deleted. Existing pinned installs are
+  unaffected; new `pip install cma-mcp` resolves to 0.1.1.
+- Zenodo will mint a versioned DOI for 0.1.1; the concept DOI
+  continues to point at the latest version.
+- `pyproject.toml` version, `mcp_server.SERVER_VERSION`, and
+  `cma-mcp/CITATION.cff` version are aligned at `0.1.1` per the
+  pre-flight check in `publish-mcp.yml`.
+
+---
+
+## [0.1.0] - 2026-05-07 (yanked 2026-05-15)
+
+First public release. Yanked on 2026-05-15 in favor of 0.1.1; see
+the `### Fixed (discipline)` entry under the `[0.1.1]` block
+above for the reason. The 0.1.0 wheel remains downloadable for
+explicit pinning but is no longer the preferred install.
 
 ### Added
 
@@ -139,15 +200,13 @@ time.
 
 ### Notes
 
-- 0.1.0 is the first release. PyPI publication is gated on the DOI
-  allocation from Zenodo and a final pre-flight conformance pass
-  against the installed wheel. Until publication, install from
-  source: `pip install -e .` from this directory.
-- Versioning convention: PEP 440 pre-release markers (`.dev0`)
-  decorate the underlying semver M.m.p during the dev-build
-  window. At lift, the suffix drops and `pyproject.toml` aligns
-  character-for-character with `SERVER_VERSION` in
-  `mcp_server.py`.
+- 0.1.0 was the first public release on PyPI. Yanked on
+  2026-05-15 in favor of 0.1.1; reason is in the `[0.1.1]` block
+  above.
+- Versioning convention: `pyproject.toml` version,
+  `mcp_server.SERVER_VERSION`, and `cma-mcp/CITATION.cff` version
+  align character-for-character at tag-push time. The
+  `publish-mcp.yml` verify-tag step hard-fails on drift.
 
 ---
 

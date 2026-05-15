@@ -27,15 +27,12 @@ contribution) lives at the repository root.
 
 ## Status
 
-cma-mcp 0.1.0 is pre-publish. The wheel has not yet uploaded to
-PyPI; install from source per the Quickstart below until
-publication lands. The lift checklist (Zenodo DOI allocation, PyPI
-Trusted Publishing setup, pre-flight conformance pass) is
-documented in the Notes section of
-[CHANGELOG.md](CHANGELOG.md) and serves as the single source of
-truth for what gates publication. When `cma-mcp` ships to PyPI
-the install becomes `pip install cma-mcp` and the rest of this
-README applies unchanged.
+cma-mcp 0.1.1 is the current release line. 0.1.0 was uploaded to
+PyPI on 2026-05-07 and yanked on 2026-05-15; the reason and
+upgrade path are documented in the `[0.1.1]` block of
+[CHANGELOG.md](CHANGELOG.md). Adopters install with
+`pip install cma-mcp`, which resolves to 0.1.1 (yanked versions
+are excluded from default resolution).
 
 ## What this is
 
