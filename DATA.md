@@ -179,9 +179,23 @@ The current schema version is `1.0`. There are currently no announced schema cha
 
 ## 4. Atomicity and durability
 
-cma writes records via a single `write()` syscall on the encoded record bytes. POSIX guarantees atomicity for `write()` calls up to `PIPE_BUF` (typically 4096 bytes on Linux). Records exceeding `PIPE_BUF` (rare; possible with long `excerpt` fields) may interleave under concurrent writes from multiple cma processes.
+cma writes records via a single `write()` syscall on the encoded record bytes. POSIX guarantees `O_APPEND` writes are atomic up to `PIPE_BUF` (typically 4096 bytes on Linux); in practice the Linux and macOS kernels serialize append writes at the inode level for the full buffer, so records well beyond 4 KiB also land atomically under concurrent writers. The bash test suite exercises 200 concurrent processes writing 64 KiB records; all records land valid.
 
-For single-operator usage with manual or hook-driven captures, concurrent-write risk is negligible. Future versions may add `fcntl.flock`-based locking for multi-process scenarios.
+Future versions may add `fcntl.flock`-based locking if multi-host scenarios become load-bearing; the current single-host single-operator case relies on kernel append serialization.
+
+### Storage requirements
+
+The atomicity guarantee assumes a local POSIX filesystem. cma is reliable on:
+
+- **Local block-device filesystems**: ext4, xfs, btrfs, zfs, apfs, hfs+, ntfs (read-write tier-1 platforms only).
+- **tmpfs**: fine for ephemeral testing; not durable.
+
+cma is NOT reliable on:
+
+- **Network filesystems**: NFS (without `flock` support), CIFS / SMB, sshfs and similar FUSE-over-network mounts. Append semantics depend on the server implementation and locking handshake.
+- **Cloud-sync directories**: Dropbox, iCloud Drive, OneDrive, Google Drive, pCloud. The sync agent watches and rewrites files; concurrent writes from the sync agent and cma can corrupt records or create conflict copies.
+
+`cma init` emits a warning when `$CMA_DIR` matches a known cloud-sync path or a network filesystem type. The warning is advisory; cma still initializes the directory. The expected fix is to set `CMA_DIR` to a local path (e.g., `~/.cma` on the local drive) and let backups handle replication.
 
 ## 5. Tolerant reads
 
@@ -195,7 +209,7 @@ The data directory is purely append-only JSONL. Backup is straightforward:
 
 - **Snapshot**: copy the entire `~/.cma/` directory.
 - **Incremental**: git-track the directory and commit periodically. The append-only structure makes diffs informative.
-- **Synced**: store on a synced filesystem (Dropbox, iCloud, etc.). Concurrent writes across machines may interleave; prefer one machine writing at a time.
+- **Replicated**: rsync or restic to a backup target on a schedule. Do NOT host `$CMA_DIR` itself on a cloud-sync directory; see "Storage requirements" above.
 
 The data is plain text JSONL; any tooling that handles JSONL handles cma data.
 

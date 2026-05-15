@@ -895,8 +895,38 @@ PYEOF
 # Help and dispatch
 # ---------------------------------------------------------------------------
 
+warn_if_storage_risky() {
+    # Append atomicity is reliable on local POSIX filesystems but
+    # weaker on network filesystems (NFS without flock, SMB) and on
+    # cloud-sync directories that watch+rewrite files (Dropbox,
+    # iCloud Drive, OneDrive, Google Drive). Warn rather than block
+    # so operators can override after reading the rationale in
+    # DATA.md.
+    local dir="$1"
+    case "$dir" in
+        *Dropbox*|*"iCloud Drive"*|*OneDrive*|*"Google Drive"*|*GoogleDrive*|*pCloudDrive*|*Sync/*)
+            echo "cma: warning: $dir looks like a cloud-sync path." >&2
+            echo "cma: append atomicity is not guaranteed on synced directories;" >&2
+            echo "cma: see DATA.md (Storage requirements) for the rationale." >&2
+            return 0
+            ;;
+    esac
+    # Try to detect a network filesystem type via df (best-effort;
+    # not all systems support -T). Silent on failure.
+    local fs
+    fs=$(df -T "$dir" 2>/dev/null | awk 'NR==2 {print tolower($2)}' || true)
+    case "$fs" in
+        nfs*|nfs4|cifs|smbfs|fuse.sshfs|fuseblk)
+            echo "cma: warning: $dir is on a $fs filesystem." >&2
+            echo "cma: append atomicity is not guaranteed on network filesystems;" >&2
+            echo "cma: see DATA.md (Storage requirements) for the rationale." >&2
+            ;;
+    esac
+}
+
 cmd_init() {
     mkdir -p "$CMA_DIR"
+    warn_if_storage_risky "$CMA_DIR"
     cat > "$CMA_DIR/README.md" <<EOF
 # cma data directory
 

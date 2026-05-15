@@ -244,6 +244,31 @@ expect_exit "init is idempotent" 0 env CMA_DIR="$init_dir" "$CMA" init
 expect_contains "init README references DATA.md" "DATA.md" cat "$init_dir/README.md"
 rm -rf "$(dirname "$init_dir")"
 
+# init warns on cloud-sync-shaped paths but still succeeds.
+sync_dir=$(mktemp -d -p /tmp Dropbox-XXXXXX)
+expect_exit "init succeeds on Dropbox-shaped path" 0 env CMA_DIR="$sync_dir" "$CMA" init
+warn_out=$(env CMA_DIR="$sync_dir" "$CMA" init 2>&1 >/dev/null)
+if [[ "$warn_out" == *"cloud-sync"* ]]; then
+    printf "PASS  %s\n" "init warns on cloud-sync-shaped path"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (no warning emitted)\n" "init warns on cloud-sync-shaped path"
+    fail=$((fail + 1))
+fi
+rm -rf "$sync_dir"
+
+# init is silent on normal local paths.
+local_dir=$(mktemp -d)
+silent_check=$(env CMA_DIR="$local_dir" "$CMA" init 2>&1 >/dev/null)
+if [[ -z "$silent_check" ]]; then
+    printf "PASS  %s\n" "init silent on local filesystem"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (stderr=%q)\n" "init silent on local filesystem" "$silent_check"
+    fail=$((fail + 1))
+fi
+rm -rf "$local_dir"
+
 reset
 expect_exit "decision succeeds"                  0 "$CMA" decision "TOPIC: choice (rationale)" --surface infra
 expect_exit "decision with applies-when"         0 "$CMA" decision "X" --applies-when "surface=docs"
