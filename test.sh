@@ -282,6 +282,49 @@ expect_exit "prevented succeeds"                 0 "$CMA" prevented "almost X, d
 expect_exit "prevented with miss-id"             0 "$CMA" prevented "x" --miss-id abc123
 
 # ---------------------------------------------------------------------------
+# cma id helper
+# ---------------------------------------------------------------------------
+
+reset
+expect_exit "id with no captures exits 1"     1 "$CMA" id miss
+"$CMA" miss "first" --surface auth >/dev/null
+"$CMA" miss "second" --surface db >/dev/null
+last_id=$("$CMA" id miss)
+if [[ -n "$last_id" ]]; then
+    grep -q "$last_id" "$CMA_DIR/misses.jsonl" && {
+        printf "PASS  %s\n" "id miss returns a real miss id"
+        pass=$((pass + 1))
+    } || {
+        printf "FAIL  %s (id=%q not in misses.jsonl)\n" "id miss returns a real miss id" "$last_id"
+        fail=$((fail + 1))
+    }
+else
+    printf "FAIL  %s (empty output)\n" "id miss returns a real miss id"
+    fail=$((fail + 1))
+fi
+# The second miss was on db; --surface auth should return the first.
+auth_id=$("$CMA" id miss --surface auth)
+db_id=$("$CMA" id miss --surface db)
+if [[ -n "$auth_id" && -n "$db_id" && "$auth_id" != "$db_id" ]]; then
+    printf "PASS  %s\n" "id miss --surface filters by surface"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (auth=%q db=%q)\n" "id miss --surface filters by surface" "$auth_id" "$db_id"
+    fail=$((fail + 1))
+fi
+# Composability: pipe id into prevented --miss-id
+"$CMA" prevented "caught the auth one" --miss-id "$("$CMA" id miss --surface auth)" >/dev/null
+expect_contains "prevented composed from cma id" "auth_id" sh -c "python3 -c \"
+import json
+with open('$CMA_DIR/preventions.jsonl') as f:
+    for line in f:
+        rec = json.loads(line)
+        if 'caught the auth' in rec.get('description', ''):
+            print('auth_id' if rec.get('miss_id') == '$auth_id' else 'mismatch')
+\""
+expect_exit "id with unknown type fails"      1 "$CMA" id bogus
+
+# ---------------------------------------------------------------------------
 # JSON validity (each capture writes valid JSONL)
 # ---------------------------------------------------------------------------
 
@@ -427,7 +470,10 @@ expect_contains "recurrence empty data"          "No misses" "$CMA" stats --recu
 expect_contains "recurrence single miss not recurring" "no patterns are recurring" "$CMA" stats --recurrence
 "$CMA" miss "y" --surface auth --fm fm-1 >/dev/null
 expect_contains "recurrence detects pattern"     "2x" "$CMA" stats --recurrence
+expect_contains "recurrence default scope all time" "all time" "$CMA" stats --recurrence
 expect_contains "recurrence frames as not closing" "not closing the loop" "$CMA" stats --recurrence
+expect_contains "recurrence --window scopes header"  "trailing 7 days" "$CMA" stats --recurrence --window 7
+expect_exit     "recurrence --window 0 rejected"     1 "$CMA" stats --recurrence --window 0
 
 # Recurrence + preventions: catch-rate annotation appears when a prevention
 # links to a miss in the recurring pair.

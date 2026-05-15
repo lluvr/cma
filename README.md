@@ -64,7 +64,6 @@ cma's central claim is that captured failures become surfaced warnings, surfaced
 # 1. Capture a failure so future similar work can see it.
 cma miss "claimed verified without testing the cross-tenant path" \
     --surface auth --fm <failure-shape>
-#    → Captured miss 20260515-...-abcd1234
 
 # 2. Surface relevant prior captures before the next related action.
 #    The PreToolUse hook does this automatically; manual invocation
@@ -72,10 +71,11 @@ cma miss "claimed verified without testing the cross-tenant path" \
 cma surface --surface auth
 
 # 3. The warning fires, behavior changes, and the repeat is avoided.
-#    Capture that catch. Link to the original miss so cma can
-#    attribute the closure to a specific prior failure.
+#    Link the prevention to the original miss so cma can attribute
+#    the closure. `cma id miss` returns the most recent miss id;
+#    use it to chain without scrolling back through terminal output.
 cma prevented "almost claimed verified again; ran the cross-tenant test instead" \
-    --miss-id 20260515-...-abcd1234
+    --miss-id "$(cma id miss --surface auth)"
 
 # 4. Read the evidence.
 cma stats --evidence
