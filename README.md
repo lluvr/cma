@@ -21,7 +21,7 @@ The full surface is specified in [DESIGN.md](DESIGN.md). Additive features (acti
 
 ## Quick start
 
-**Requirements:** bash 3.2 or newer (Linux, macOS native, and Windows-WSL all work; the `cma` binary uses no bash 4+ features so macOS's system `/bin/bash` is sufficient), and `python3` (used only for JSON escaping). No package-manager dependencies.
+**Requirements:** bash 3.2 or newer (Linux, macOS native, and Windows-WSL all work; the `cma` binary uses no bash 4+ features so macOS's system `/bin/bash` is sufficient), and `python3` 3.10 or newer. Python is used for JSON encoding and JSONL queries; it is a hard runtime dependency, not a package-manager dependency. CI exercises Python 3.10, 3.11, and 3.12.
 
 Clone the repository and add the script to your `PATH`:
 

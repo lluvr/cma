@@ -8,9 +8,21 @@ on:
 
 jobs:
   test:
+    # cma shells out to python3 for JSON encoding and JSONL queries.
+    # The Python version matters: we test against the three lines
+    # most adopters will have on a current OS.
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Verify python3 available
         run: python3 --version
