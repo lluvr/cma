@@ -100,7 +100,15 @@ Two hooks for Claude Code: a `PreToolUse` hook for per-action surfacing and a `S
 
 **Session-priming context** (`hooks/claude-code-session-start.sh`): at the start of each session, surfaces recurring failure patterns and active rejections so the assistant has orientation before the first tool call. Configurable via `CMA_SESSION_START_SECTIONS` (default `recurrence,rejections`; set to `all` for `recurrence,rejections,behavior`).
 
-Install both:
+Install both hooks with one command:
+
+```bash
+cma install-hook --claude-code
+```
+
+This merges the SessionStart and PreToolUse blocks into `~/.claude/settings.json` (or `./.claude/settings.json` with `--scope project`). It is idempotent, preserves any other hooks you have configured, and writes a backup of the prior file at `settings.json.bak`. Preview without writing via `--dry-run`.
+
+If you prefer to wire it manually, the JSON blocks the command produces look like:
 
 ```json
 {

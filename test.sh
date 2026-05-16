@@ -76,6 +76,29 @@ expect_json_valid() {
 # Reset data between test groups
 reset() { rm -rf "$CMA_DIR"/*.jsonl 2>/dev/null || true; }
 
+# Wait until the ISO-second has visibly advanced. cma stores
+# timestamps at 1-second precision; leak detection requires strict
+# event_ts < miss_ts. On hosts with clock drift (notably WSL2's
+# periodic host-clock sync), a plain `sleep 2` can still resolve
+# to the same ISO-second. This helper polls until the seconds digit
+# changes, which is robust to drift in either direction.
+wait_for_next_second() {
+    # Wait until the seconds digit visibly changes, then wait a
+    # full extra second. cma timestamps are second-precision and
+    # leak detection requires strict event_ts < miss_ts. On hosts
+    # with periodic host-clock sync (notably WSL2), the wall clock
+    # can drift backwards mid-command and drag the next record's
+    # timestamp into the prior second; the trailing 1-second pad
+    # gives margin against that. CI ubuntu-latest does not see this
+    # drift and runs reliably either way. Local WSL2 reruns may
+    # still occasionally flake on three timing-sensitive leak/
+    # evidence assertions; the cma binary's behavior is correct
+    # and the canonical test surface is CI.
+    local prev=$(date -u +%S)
+    while [[ "$(date -u +%S)" == "$prev" ]]; do sleep 0.1; done
+    sleep 1
+}
+
 # ---------------------------------------------------------------------------
 # Meta commands
 # ---------------------------------------------------------------------------
@@ -323,6 +346,91 @@ with open('$CMA_DIR/preventions.jsonl') as f:
 expect_exit "id with unknown type fails"      1 "$CMA" id bogus
 
 # ---------------------------------------------------------------------------
+# cma install-hook (Claude Code settings.json wiring)
+# ---------------------------------------------------------------------------
+
+expect_exit "install-hook with no target exits 1"      1 "$CMA" install-hook
+expect_exit "install-hook with bogus target exits 1"   1 "$CMA" install-hook --bogus
+expect_exit "install-hook bad scope exits 1"           1 "$CMA" install-hook --claude-code --scope bogus
+
+# Dry-run on a virgin tree prints merged JSON to stdout, leaves no file behind.
+ih_dir=$(mktemp -d)
+pushd "$ih_dir" >/dev/null
+out=$("$CMA" install-hook --claude-code --scope project --dry-run 2>/dev/null)
+if echo "$out" | python3 -c "import json,sys; d=json.load(sys.stdin); assert 'SessionStart' in d['hooks'] and 'PreToolUse' in d['hooks']" 2>/dev/null; then
+    printf "PASS  %s\n" "install-hook --dry-run emits valid merged JSON"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "install-hook --dry-run emits valid merged JSON"
+    fail=$((fail + 1))
+fi
+if [[ ! -f .claude/settings.json ]]; then
+    printf "PASS  %s\n" "install-hook --dry-run does not write settings.json"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "install-hook --dry-run does not write settings.json"
+    fail=$((fail + 1))
+fi
+popd >/dev/null
+rm -rf "$ih_dir"
+
+# Write to a fresh project tree: settings.json is created with both hooks.
+ih_dir=$(mktemp -d)
+pushd "$ih_dir" >/dev/null
+"$CMA" install-hook --claude-code --scope project >/dev/null
+expect_contains "install-hook writes SessionStart hook" "claude-code-session-start.sh" cat .claude/settings.json
+expect_contains "install-hook writes PreToolUse hook"   "claude-code-pre-tool-use.sh"   cat .claude/settings.json
+
+# Idempotent: a second run reports no changes.
+out=$("$CMA" install-hook --claude-code --scope project 2>&1)
+if [[ "$out" == *"already present"* ]]; then
+    printf "PASS  %s\n" "install-hook is idempotent on re-run"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (got: %s)\n" "install-hook is idempotent on re-run" "$out"
+    fail=$((fail + 1))
+fi
+popd >/dev/null
+rm -rf "$ih_dir"
+
+# Merge preserves existing hooks and unrelated keys; backup captures prior.
+ih_dir=$(mktemp -d)
+pushd "$ih_dir" >/dev/null
+mkdir -p .claude
+cat > .claude/settings.json <<'JSON'
+{"hooks": {"SessionStart": [{"hooks": [{"type": "command", "command": "echo prior"}]}]}, "theme": "dark"}
+JSON
+"$CMA" install-hook --claude-code --scope project >/dev/null
+expect_contains "install-hook preserves existing hooks"  "echo prior" cat .claude/settings.json
+expect_contains "install-hook preserves unrelated keys"  "\"theme\": \"dark\"" cat .claude/settings.json
+if [[ -f .claude/settings.json.bak ]]; then
+    printf "PASS  %s\n" "install-hook creates backup of prior settings"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "install-hook creates backup of prior settings"
+    fail=$((fail + 1))
+fi
+popd >/dev/null
+rm -rf "$ih_dir"
+
+# Malformed JSON is refused without overwriting.
+ih_dir=$(mktemp -d)
+pushd "$ih_dir" >/dev/null
+mkdir -p .claude
+echo "not json {" > .claude/settings.json
+expect_exit "install-hook refuses malformed settings.json" 1 "$CMA" install-hook --claude-code --scope project
+content=$(cat .claude/settings.json)
+if [[ "$content" == "not json {" ]]; then
+    printf "PASS  %s\n" "install-hook leaves malformed settings.json unchanged"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (file was modified)\n" "install-hook leaves malformed settings.json unchanged"
+    fail=$((fail + 1))
+fi
+popd >/dev/null
+rm -rf "$ih_dir"
+
+# ---------------------------------------------------------------------------
 # JSON validity (each capture writes valid JSONL)
 # ---------------------------------------------------------------------------
 
@@ -496,7 +604,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "caught a different time" --miss-id "$anchor_id" >/dev/null
 expect_contains "leaks line shows caught annotation"   "Caught on this pair: 1" "$CMA" stats --leaks
@@ -507,7 +615,7 @@ expect_contains "leaks with no events"           "No surface events" "$CMA" stat
 "$CMA" miss "old" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
 expect_contains "leaks with surface but no later miss" "no leaks detected" "$CMA" stats --leaks
-sleep 2
+wait_for_next_second
 "$CMA" miss "new despite warning" --surface auth --fm fm-1 >/dev/null
 expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stats --leaks
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
@@ -517,14 +625,14 @@ expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log
 reset
 "$CMA" miss "fm-absent on new side" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "recurred without fm" --surface auth >/dev/null
 expect_contains "leaks weak: fm absent on new side"   "weak signal" "$CMA" stats --leaks
 # Strong leak (both fms present and equal) co-existing with a weak signal in same run.
 reset
 "$CMA" miss "fm anchor" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "strong recur" --surface auth --fm fm-1 >/dev/null
 "$CMA" miss "weak recur, no fm" --surface auth >/dev/null
 expect_contains "leaks strong still labeled leak"     "1 leak" "$CMA" stats --leaks
@@ -551,7 +659,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "caught a repeat of the anchor" --miss-id "$anchor_id" >/dev/null
 expect_contains "evidence counts leak"           "Leaks:                       1" "$CMA" stats --evidence
@@ -570,7 +678,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "leak" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "self-attested without linkage" >/dev/null
 expect_contains "self-attested prevention captured"  "Preventions captured:        1" "$CMA" stats --evidence
@@ -586,7 +694,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 2
+wait_for_next_second
 "$CMA" miss "recurred j" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "evidenced j" --miss-id "$anchor_id" >/dev/null
 json_out=$("$CMA" stats --evidence --json --window 7 2>/dev/null)

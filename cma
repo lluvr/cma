@@ -1124,6 +1124,126 @@ sys.stdout.write(best.get("id", "") + "\n")
 PYEOF
 }
 
+cmd_install_hook() {
+    # Wire cma's action-time injection hooks into the operator's
+    # Claude Code settings.json. Idempotent: re-running detects
+    # existing cma hooks and skips. Preserves any other hooks the
+    # operator has already configured. With --dry-run, prints the
+    # merged JSON to stdout without writing.
+    local target="" scope="user" dry_run=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --claude-code) target="claude-code"; shift ;;
+            --scope)
+                if [[ "${2:-}" != "user" && "${2:-}" != "project" ]]; then
+                    echo "cma install-hook: --scope must be 'user' or 'project'" >&2; exit 1
+                fi
+                scope="$2"; shift 2 ;;
+            --dry-run) dry_run=true; shift ;;
+            *) echo "cma install-hook: unknown flag: $1" >&2
+               echo "Usage: cma install-hook --claude-code [--scope user|project] [--dry-run]" >&2
+               exit 1 ;;
+        esac
+    done
+
+    if [[ -z "$target" ]]; then
+        echo "cma install-hook: target required" >&2
+        echo "Usage: cma install-hook --claude-code [--scope user|project] [--dry-run]" >&2
+        exit 1
+    fi
+
+    local settings_path
+    case "$scope" in
+        user)    settings_path="$HOME/.claude/settings.json" ;;
+        project) settings_path=".claude/settings.json" ;;
+    esac
+
+    local cma_dir
+    cma_dir=$(dirname "$(realpath "$0")")
+    local session_hook="$cma_dir/hooks/claude-code-session-start.sh"
+    local pretool_hook="$cma_dir/hooks/claude-code-pre-tool-use.sh"
+
+    if [[ ! -f "$session_hook" ]]; then
+        echo "cma install-hook: session-start hook not found at $session_hook" >&2
+        exit 1
+    fi
+    if [[ ! -f "$pretool_hook" ]]; then
+        echo "cma install-hook: pre-tool-use hook not found at $pretool_hook" >&2
+        exit 1
+    fi
+
+    local mode="write"
+    $dry_run && mode="dry"
+
+    python3 - "$settings_path" "$session_hook" "$pretool_hook" "$mode" <<'PYEOF'
+import json, os, shutil, sys
+
+settings_path, session_hook, pretool_hook, mode = sys.argv[1:]
+
+existing = {}
+if os.path.exists(settings_path):
+    try:
+        with open(settings_path) as f:
+            text = f.read().strip()
+        if text:
+            existing = json.loads(text)
+    except json.JSONDecodeError as e:
+        print(f"cma install-hook: cannot parse {settings_path}: {e}", file=sys.stderr)
+        print("  Fix the file (or remove it) and re-run; no changes made.", file=sys.stderr)
+        sys.exit(1)
+
+hooks = existing.setdefault("hooks", {})
+session_list = hooks.setdefault("SessionStart", [])
+pretool_list = hooks.setdefault("PreToolUse", [])
+
+def has_cma_hook(hook_list, hook_path):
+    for group in hook_list:
+        for h in group.get("hooks", []):
+            if hook_path in h.get("command", ""):
+                return True
+    return False
+
+added = []
+if not has_cma_hook(session_list, session_hook):
+    session_list.append({
+        "hooks": [{"type": "command", "command": f"bash {session_hook}"}]
+    })
+    added.append("SessionStart")
+if not has_cma_hook(pretool_list, pretool_hook):
+    pretool_list.append({
+        "hooks": [{"type": "command", "command": f"bash {pretool_hook}"}]
+    })
+    added.append("PreToolUse")
+
+merged_json = json.dumps(existing, indent=2)
+
+if mode == "dry":
+    print(merged_json)
+    if not added:
+        print(f"# Hooks already present in {settings_path}; no changes would be written.",
+              file=sys.stderr)
+    else:
+        print(f"# Would add {', '.join(added)} to {settings_path}",
+              file=sys.stderr)
+    sys.exit(0)
+
+if not added:
+    print(f"cma install-hook: hooks already present in {settings_path}; no changes.")
+    sys.exit(0)
+
+os.makedirs(os.path.dirname(settings_path) or ".", exist_ok=True)
+if os.path.exists(settings_path):
+    shutil.copy(settings_path, settings_path + ".bak")
+with open(settings_path, "w") as f:
+    f.write(merged_json + "\n")
+
+print(f"cma install-hook: wired {', '.join(added)} into {settings_path}")
+if os.path.exists(settings_path + ".bak"):
+    print(f"  backup of prior contents: {settings_path}.bak")
+print("  Claude Code reads settings.json at session start; restart Claude Code to pick up the change.")
+PYEOF
+}
+
 cmd_init() {
     mkdir -p "$CMA_DIR"
     warn_if_storage_risky "$CMA_DIR"
@@ -1180,6 +1300,11 @@ Setup:
                           optionally filtered by --surface. Useful for
                           chaining a prevention to a recent miss. See
                           README for the example.
+  cma install-hook --claude-code [--scope user|project] [--dry-run]
+                          Merge cma's SessionStart and PreToolUse hooks
+                          into Claude Code's settings.json (default
+                          ~/.claude/settings.json). Idempotent and
+                          non-destructive; preserves other hooks.
 
 Other:
   cma --version
@@ -1202,8 +1327,9 @@ case "${1:-}" in
     surface)     shift; cmd_surface "$@" ;;
     distill)     shift; cmd_distill "$@" ;;
     stats)       shift; cmd_stats "$@" ;;
-    id)          shift; cmd_id "$@" ;;
-    init)        shift; cmd_init "$@" ;;
+    id)            shift; cmd_id "$@" ;;
+    init)          shift; cmd_init "$@" ;;
+    install-hook)  shift; cmd_install_hook "$@" ;;
     --version|-v) echo "cma $VERSION" ;;
     --help|-h|help|"") cmd_help ;;
     *)
