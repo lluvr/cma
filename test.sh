@@ -94,7 +94,8 @@ wait_for_next_second() {
     # still occasionally flake on three timing-sensitive leak/
     # evidence assertions; the cma binary's behavior is correct
     # and the canonical test surface is CI.
-    local prev=$(date -u +%S)
+    local prev
+    prev=$(date -u +%S)
     while [[ "$(date -u +%S)" == "$prev" ]]; do sleep 0.1; done
     sleep 1
 }
@@ -355,7 +356,7 @@ expect_exit "install-hook bad scope exits 1"           1 "$CMA" install-hook --c
 
 # Dry-run on a virgin tree prints merged JSON to stdout, leaves no file behind.
 ih_dir=$(mktemp -d)
-pushd "$ih_dir" >/dev/null
+pushd "$ih_dir" >/dev/null || exit 1
 out=$("$CMA" install-hook --claude-code --scope project --dry-run 2>/dev/null)
 if echo "$out" | python3 -c "import json,sys; d=json.load(sys.stdin); assert 'SessionStart' in d['hooks'] and 'PreToolUse' in d['hooks']" 2>/dev/null; then
     printf "PASS  %s\n" "install-hook --dry-run emits valid merged JSON"
@@ -371,12 +372,12 @@ else
     printf "FAIL  %s\n" "install-hook --dry-run does not write settings.json"
     fail=$((fail + 1))
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 rm -rf "$ih_dir"
 
 # Write to a fresh project tree: settings.json is created with both hooks.
 ih_dir=$(mktemp -d)
-pushd "$ih_dir" >/dev/null
+pushd "$ih_dir" >/dev/null || exit 1
 "$CMA" install-hook --claude-code --scope project >/dev/null
 expect_contains "install-hook writes SessionStart hook" "claude-code-session-start.sh" cat .claude/settings.json
 expect_contains "install-hook writes PreToolUse hook"   "claude-code-pre-tool-use.sh"   cat .claude/settings.json
@@ -390,12 +391,12 @@ else
     printf "FAIL  %s (got: %s)\n" "install-hook is idempotent on re-run" "$out"
     fail=$((fail + 1))
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 rm -rf "$ih_dir"
 
 # Merge preserves existing hooks and unrelated keys; backup captures prior.
 ih_dir=$(mktemp -d)
-pushd "$ih_dir" >/dev/null
+pushd "$ih_dir" >/dev/null || exit 1
 mkdir -p .claude
 cat > .claude/settings.json <<'JSON'
 {"hooks": {"SessionStart": [{"hooks": [{"type": "command", "command": "echo prior"}]}]}, "theme": "dark"}
@@ -410,12 +411,12 @@ else
     printf "FAIL  %s\n" "install-hook creates backup of prior settings"
     fail=$((fail + 1))
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 rm -rf "$ih_dir"
 
 # Malformed JSON is refused without overwriting.
 ih_dir=$(mktemp -d)
-pushd "$ih_dir" >/dev/null
+pushd "$ih_dir" >/dev/null || exit 1
 mkdir -p .claude
 echo "not json {" > .claude/settings.json
 expect_exit "install-hook refuses malformed settings.json" 1 "$CMA" install-hook --claude-code --scope project
@@ -427,7 +428,7 @@ else
     printf "FAIL  %s (file was modified)\n" "install-hook leaves malformed settings.json unchanged"
     fail=$((fail + 1))
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 rm -rf "$ih_dir"
 
 # ---------------------------------------------------------------------------
