@@ -29,7 +29,7 @@ Every record begins with `schema_version`, `type`, `id`, and `timestamp`. Type-s
 | `schema_version` | string | Schema version. Currently `"1.0"`. Future schema changes gate migrations against this. |
 | `type` | string | Record type: `miss`, `decision`, `rejection`, `prevention`, `core`, `retirement`, `surface_event`. |
 | `id` | string | Unique record ID, format `YYYYMMDD-HHMMSS-<8-hex>`. UTC timestamp + random suffix. |
-| `timestamp` | string | ISO 8601 UTC, format `YYYY-MM-DDTHH:MM:SSZ`. |
+| `timestamp` | string | ISO 8601 UTC, microsecond precision: `YYYY-MM-DDTHH:MM:SS.NNNNNNZ`. Older records may carry second precision (`YYYY-MM-DDTHH:MM:SSZ`); readers normalize before lexicographic comparison so mixed-precision corpora order correctly. |
 | `description` | string | One-line statement of what the record captures. Required on captures; not present on retirement and surface_event records. |
 
 ### 2.2 Miss

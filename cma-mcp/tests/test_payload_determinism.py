@@ -147,7 +147,10 @@ def test_provenance_timestamp_is_iso8601_zulu():
         cma_stderr="",
     )
     ts = payload["provenance"]["timestamp"]
-    # YYYY-MM-DDTHH:MM:SSZ
-    assert len(ts) == 20
+    # YYYY-MM-DDTHH:MM:SS.NNNNNNZ (microsecond ISO 8601 UTC)
     assert ts.endswith("Z")
     assert ts[4] == "-" and ts[7] == "-" and ts[10] == "T"
+    # Round-trip through datetime to confirm it parses as ISO 8601
+    from datetime import datetime
+    parsed = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    assert parsed.microsecond is not None

@@ -28,8 +28,9 @@ _LEVEL_NUM = _LEVELS.get(_LEVEL, 20)
 
 
 def _now_iso() -> str:
-    """Return UTC ISO-8601 timestamp at second resolution."""
-    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    """Return UTC ISO-8601 timestamp at microsecond resolution."""
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _emit(level: str, event: str, fields: dict[str, Any]) -> None:

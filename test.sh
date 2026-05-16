@@ -83,21 +83,13 @@ reset() { rm -rf "$CMA_DIR"/*.jsonl 2>/dev/null || true; }
 # to the same ISO-second. This helper polls until the seconds digit
 # changes, which is robust to drift in either direction.
 wait_for_next_second() {
-    # Wait until the seconds digit visibly changes, then wait a
-    # full extra second. cma timestamps are second-precision and
-    # leak detection requires strict event_ts < miss_ts. On hosts
-    # with periodic host-clock sync (notably WSL2), the wall clock
-    # can drift backwards mid-command and drag the next record's
-    # timestamp into the prior second; the trailing 1-second pad
-    # gives margin against that. CI ubuntu-latest does not see this
-    # drift and runs reliably either way. Local WSL2 reruns may
-    # still occasionally flake on three timing-sensitive leak/
-    # evidence assertions; the cma binary's behavior is correct
-    # and the canonical test surface is CI.
-    local prev
-    prev=$(date -u +%S)
-    while [[ "$(date -u +%S)" == "$prev" ]]; do sleep 0.1; done
-    sleep 1
+    # cma now writes microsecond-precision timestamps, so an event
+    # and a subsequent miss can land in the same wall-clock second
+    # but still satisfy event_ts < miss_ts. A short sleep is enough
+    # to guarantee strict ordering even when host-clock sync (WSL2)
+    # drifts the wall clock backwards mid-command. 100 ms is well
+    # above typical drift and keeps the test suite fast.
+    sleep 0.1
 }
 
 # ---------------------------------------------------------------------------

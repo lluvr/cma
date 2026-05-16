@@ -40,9 +40,18 @@ CORE_LIMIT = 30
 
 
 def _cutoff_iso(days: int) -> str:
-    """Return ISO-8601 timestamp `days` ago in UTC."""
+    """Return ISO-8601 timestamp `days` ago in UTC, microsecond precision."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-    return cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return cutoff.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def _norm_ts(ts: str) -> str:
+    """Pad second-precision timestamps to microsecond so mixed-precision
+    corpora compare lexicographically. New records use microsecond
+    precision; legacy records (no `.`) get `.000000` injected."""
+    if not ts:
+        return ""
+    return ts if "." in ts else ts.replace("Z", ".000000Z")
 
 
 def _filter_within_days(records: list[dict], days: int) -> list[dict]:
@@ -50,13 +59,13 @@ def _filter_within_days(records: list[dict], days: int) -> list[dict]:
     cutoff = _cutoff_iso(days)
     return [
         r for r in records
-        if isinstance(r.get("timestamp"), str) and r["timestamp"] >= cutoff
+        if isinstance(r.get("timestamp"), str) and _norm_ts(r["timestamp"]) >= cutoff
     ]
 
 
 def _newest_first(records: list[dict]) -> list[dict]:
     """Sort records newest-first by timestamp; missing-last."""
-    return sorted(records, key=lambda r: r.get("timestamp", ""), reverse=True)
+    return sorted(records, key=lambda r: _norm_ts(r.get("timestamp", "")), reverse=True)
 
 
 # ── cma://decisions ────────────────────────────────────────────────

@@ -64,7 +64,9 @@ def configure_provenance(
 
 
 def _now_iso() -> str:
-    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    """UTC ISO-8601 with microsecond resolution."""
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def base_provenance() -> dict[str, Any]:

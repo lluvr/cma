@@ -17,18 +17,6 @@ mkdir -p "$CMA_DIR"
 # Helpers
 # ---------------------------------------------------------------------------
 
-new_id() {
-    printf "%s-%s" "$(date -u +%Y%m%d-%H%M%S)" "$(head -c 4 /dev/urandom | xxd -p)"
-}
-
-json_escape() {
-    python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"
-}
-
-iso_now() {
-    date -u +%Y-%m-%dT%H:%M:%SZ
-}
-
 usage_for() {
     case "$1" in
         miss)
@@ -115,41 +103,45 @@ write_capture() {
     local file="$2"
     local description="$3"
     shift 3
-    # Remaining args are key/value pairs
+    # Remaining args are key/value pairs.
+    #
+    # The record's id and timestamp are generated inside the same
+    # python invocation that writes the record, so they share a
+    # single `datetime.now()` reading. This prevents id-vs-timestamp
+    # skew that can arise when the wall clock drifts between two
+    # separate clock reads (notably WSL2 host-clock sync). The
+    # whole record lands in one append-mode `write()` syscall.
+    python3 - "$CMA_DIR/$file" "$SCHEMA_VERSION" "$type" "$description" "$@" <<'PYEOF'
+import json, os, secrets, sys
+from datetime import datetime, timezone
 
-    local id timestamp
-    id=$(new_id)
-    timestamp=$(iso_now)
+path, schema_version, type_, description = sys.argv[1:5]
+extras = sys.argv[5:]
 
-    # Compose the entire JSON record, then append it via a single write()
-    # syscall. POSIX append (>>) is atomic for writes up to PIPE_BUF
-    # (typically 4096 bytes on Linux). Texture fields (excerpt, intended,
-    # corrected) can exceed this. Using python3's f.write of the full
-    # record is a single write() syscall, the best we can do without
-    # explicit file locking, and is atomic for the common case.
-    local record
-    record=$(
-        printf '{"schema_version":"%s","type":%s,"id":"%s","timestamp":"%s","description":%s' \
-            "$SCHEMA_VERSION" "$(json_escape "$type")" "$id" "$timestamp" "$(json_escape "$description")"
-        while [[ $# -gt 1 ]]; do
-            local key="$1" value="$2"
-            shift 2
-            [[ -n "$value" ]] && printf ',%s:%s' "$(json_escape "$key")" "$(json_escape "$value")"
-        done
-        printf '}'
-    )
+now = datetime.now(timezone.utc)
+timestamp = now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+rec_id = "{}-{}".format(now.strftime("%Y%m%d-%H%M%S"), secrets.token_hex(4))
 
-    # Bash command substitution strips trailing newlines; we add the JSONL
-    # record terminator inside the python writer to ensure each record is
-    # one line, atomically.
-    python3 -c '
-import sys
-path, data = sys.argv[1], sys.argv[2]
+rec = {
+    "schema_version": schema_version,
+    "type": type_,
+    "id": rec_id,
+    "timestamp": timestamp,
+    "description": description,
+}
+
+# Pair-flatten remaining argv into the record. Empty values are
+# dropped so optional fields do not pollute the record.
+for i in range(0, len(extras) - 1, 2):
+    key, value = extras[i], extras[i + 1]
+    if value:
+        rec[key] = value
+
 with open(path, "ab") as f:
-    f.write((data + "\n").encode("utf-8"))
-' "$CMA_DIR/$file" "$record"
+    f.write((json.dumps(rec) + "\n").encode("utf-8"))
 
-    echo "Captured $type $id"
+print(f"Captured {type_} {rec_id}")
+PYEOF
 }
 
 cmd_miss() {
@@ -322,12 +314,14 @@ filtered = filtered[:limit]
 # Log the surface event so cma stats --leaks can later detect failures
 # that occurred despite a relevant warning being surfaced.
 if should_log:
-    event_id = "{}-{}".format(time.strftime("%Y%m%d-%H%M%S", time.gmtime()), os.urandom(4).hex())
+    from datetime import datetime, timezone
+    _now = datetime.now(timezone.utc)
+    event_id = "{}-{}".format(_now.strftime("%Y%m%d-%H%M%S"), os.urandom(4).hex())
     event = {
         "schema_version": "1.0",
         "type": "surface_event",
         "id": event_id,
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "timestamp": _now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "filter_surface": surface_filter,
         "filter_file": file_filter,
         "filter_type": type_filter,
@@ -484,10 +478,12 @@ if not matched:
     print("No active core learnings matched: {}".format(pattern))
     sys.exit(0)
 
-now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+from datetime import datetime, timezone
+_now = datetime.now(timezone.utc)
+now = _now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 with open(core_path, "a") as f:
     for rec in matched:
-        retire_id = "{}-{}".format(time.strftime("%Y%m%d-%H%M%S", time.gmtime()), os.urandom(4).hex())
+        retire_id = "{}-{}".format(_now.strftime("%Y%m%d-%H%M%S"), os.urandom(4).hex())
         retirement = {
             "type": "retirement",
             "id": retire_id,
@@ -550,7 +546,15 @@ window_days = int(sys.argv[2])
 output_format = sys.argv[3]  # "prose" or "json"
 
 cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
-cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+# Records written by older builds may use second-precision
+# timestamps. Normalize before any lexicographic comparison so
+# mixed-format corpora order correctly.
+def norm_ts(ts):
+    if not ts:
+        return ""
+    return ts if "." in ts else ts.replace("Z", ".000000Z")
 
 def load(path):
     out = []
@@ -572,20 +576,20 @@ preventions = load(os.path.join(data_dir, "preventions.jsonl"))
 events = load(os.path.join(data_dir, "surface_events.jsonl"))
 
 def in_window(rec):
-    return rec.get("timestamp", "") >= cutoff_iso
+    return norm_ts(rec.get("timestamp", "")) >= cutoff_iso
 
 misses_w = [m for m in misses if in_window(m)]
 preventions_w = [p for p in preventions if in_window(p)]
 
 leaks = []
 for miss in misses_w:
-    miss_ts = miss.get("timestamp", "")
+    miss_ts = norm_ts(miss.get("timestamp", ""))
     miss_surface = miss.get("surface", "")
     miss_fm = miss.get("fm", "")
     if not miss_surface and not miss_fm:
         continue
     for event in events:
-        if event.get("timestamp", "") >= miss_ts:
+        if norm_ts(event.get("timestamp", "")) >= miss_ts:
             continue
         for matched in event.get("matched", []):
             if (matched.get("surface") == miss_surface and
@@ -613,13 +617,13 @@ for prev in preventions_w:
     m = miss_by_id.get(target)
     if m is None:
         continue
-    miss_ts = m.get("timestamp", "")
-    prev_ts = prev.get("timestamp", "")
+    miss_ts = norm_ts(m.get("timestamp", ""))
+    prev_ts = norm_ts(prev.get("timestamp", ""))
     if not miss_ts or not prev_ts or miss_ts >= prev_ts:
         continue
     surfaced_between = False
     for event in events:
-        ev_ts = event.get("timestamp", "")
+        ev_ts = norm_ts(event.get("timestamp", ""))
         if not (miss_ts <= ev_ts < prev_ts):
             continue
         for matched in event.get("matched", []):
@@ -794,6 +798,14 @@ def load_jsonl(path):
         print("cma: skipped {} corrupted line(s) in {}".format(corrupted, os.path.basename(path)), file=sys.stderr)
     return records
 
+# Records written by older builds may use second-precision
+# timestamps. Normalize before any lexicographic comparison so
+# mixed-format corpora order correctly.
+def norm_ts(ts):
+    if not ts:
+        return ""
+    return ts if "." in ts else ts.replace("Z", ".000000Z")
+
 misses = load_jsonl(os.path.join(data_dir, "misses.jsonl"))
 events = load_jsonl(os.path.join(data_dir, "surface_events.jsonl"))
 preventions = load_jsonl(os.path.join(data_dir, "preventions.jsonl"))
@@ -825,7 +837,7 @@ if not events:
 leaks = []
 weak_leaks = []
 for miss in misses:
-    miss_ts = miss.get("timestamp", "")
+    miss_ts = norm_ts(miss.get("timestamp", ""))
     miss_surface = miss.get("surface", "")
     miss_fm = miss.get("fm", "")
     if not miss_surface and not miss_fm:
@@ -833,7 +845,7 @@ for miss in misses:
     strong_hit = None
     weak_hit = None
     for event in events:
-        event_ts = event.get("timestamp", "")
+        event_ts = norm_ts(event.get("timestamp", ""))
         if event_ts >= miss_ts:
             continue  # event after miss
         for matched in event.get("matched", []):
@@ -916,9 +928,14 @@ window_days = int(sys.argv[2])
 
 if window_days > 0:
     cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
-    cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 else:
     cutoff_iso = ""  # match everything
+
+def norm_ts(ts):
+    if not ts:
+        return ""
+    return ts if "." in ts else ts.replace("Z", ".000000Z")
 
 groups = Counter()
 total = 0
@@ -937,7 +954,7 @@ if os.path.exists(misses_path):
             except json.JSONDecodeError:
                 corrupted += 1
                 continue
-            if cutoff_iso and rec.get("timestamp", "") < cutoff_iso:
+            if cutoff_iso and norm_ts(rec.get("timestamp", "")) < cutoff_iso:
                 continue
             key = (rec.get("surface", ""), rec.get("fm", ""))
             groups[key] += 1
