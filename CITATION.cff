@@ -34,6 +34,15 @@ keywords:
   - clarethium
 license: Apache-2.0
 version: "1.0.0"
+date-released: "2026-05-16"
+doi: "10.5281/zenodo.20232904"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20232904"
+    description: "Versioned DOI for cma 1.0.0"
+  - type: doi
+    value: "10.5281/zenodo.20066625"
+    description: "Concept DOI; resolves to the latest release in this repository (cma or cma-mcp)"
 references:
   - type: software
     title: "cma-mcp: Model Context Protocol distribution for the cma compound practice loop"

@@ -43,7 +43,7 @@ identifiers:
     description: "Versioned DOI for cma-mcp 0.1.2"
   - type: doi
     value: "10.5281/zenodo.20066625"
-    description: "Concept DOI; always resolves to the latest cma-mcp release"
+    description: "Concept DOI; resolves to the latest release in this repository (cma or cma-mcp)"
   - type: url
     value: "https://pypi.org/project/cma-mcp/"
     description: "PyPI distribution"
