@@ -8,7 +8,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-cma 1.0 reference implementation. The surface defined in [DESIGN.md](DESIGN.md) is locked and complete; the formal `cma-1.0.0` tag lands separately from the `cma-mcp` release cadence.
+(no entries yet)
+
+---
+
+## [1.0.0] - 2026-05-15
+
+cma 1.0 reference implementation. The surface defined in [DESIGN.md](DESIGN.md) is locked and complete.
 
 ### Surface
 

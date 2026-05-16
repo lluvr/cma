@@ -496,7 +496,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "caught a different time" --miss-id "$anchor_id" >/dev/null
 expect_contains "leaks line shows caught annotation"   "Caught on this pair: 1" "$CMA" stats --leaks
@@ -507,7 +507,7 @@ expect_contains "leaks with no events"           "No surface events" "$CMA" stat
 "$CMA" miss "old" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
 expect_contains "leaks with surface but no later miss" "no leaks detected" "$CMA" stats --leaks
-sleep 1
+sleep 2
 "$CMA" miss "new despite warning" --surface auth --fm fm-1 >/dev/null
 expect_contains "leaks detects miss after surfaced warning" "1 leak" "$CMA" stats --leaks
 expect_contains "leaks shows the miss"           "new despite warning" "$CMA" stats --leaks
@@ -517,14 +517,14 @@ expect_exit     "surface --no-log skips logging" 0 "$CMA" surface --no-log
 reset
 "$CMA" miss "fm-absent on new side" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "recurred without fm" --surface auth >/dev/null
 expect_contains "leaks weak: fm absent on new side"   "weak signal" "$CMA" stats --leaks
 # Strong leak (both fms present and equal) co-existing with a weak signal in same run.
 reset
 "$CMA" miss "fm anchor" --surface auth --fm fm-1 >/dev/null
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "strong recur" --surface auth --fm fm-1 >/dev/null
 "$CMA" miss "weak recur, no fm" --surface auth >/dev/null
 expect_contains "leaks strong still labeled leak"     "1 leak" "$CMA" stats --leaks
@@ -551,7 +551,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "leaked despite warning" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "caught a repeat of the anchor" --miss-id "$anchor_id" >/dev/null
 expect_contains "evidence counts leak"           "Leaks:                       1" "$CMA" stats --evidence
@@ -570,7 +570,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "leak" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "self-attested without linkage" >/dev/null
 expect_contains "self-attested prevention captured"  "Preventions captured:        1" "$CMA" stats --evidence
@@ -586,7 +586,7 @@ with open('$CMA_DIR/misses.jsonl') as f:
     print(json.loads(f.readline()).get('id'))
 ")
 "$CMA" surface --surface auth >/dev/null
-sleep 1
+sleep 2
 "$CMA" miss "recurred j" --surface auth --fm fm-1 >/dev/null
 "$CMA" prevented "evidenced j" --miss-id "$anchor_id" >/dev/null
 json_out=$("$CMA" stats --evidence --json --window 7 2>/dev/null)
