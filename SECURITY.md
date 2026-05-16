@@ -70,3 +70,30 @@ Their combined threat surface is limited:
   with the operator's filesystem permissions can already read or
   modify `~/.cma/` directly. cma-mcp does not add or subtract from
   that surface.
+
+## Supply-chain attestation
+
+cma-mcp wheels uploaded to PyPI carry PEP 740 attestations: each
+file is signed via Sigstore using the GitHub Actions identity of
+the publishing workflow, and the signature is logged in the public
+Sigstore transparency log (rekor.sigstore.dev). Adopters who want
+to verify a downloaded wheel before installing can fetch the
+provenance bundle from PyPI's integrity endpoint:
+
+```
+https://pypi.org/integrity/cma-mcp/<version>/<filename>/provenance
+```
+
+The returned JSON identifies the publisher as `Clarethium/cma`,
+workflow `publish-mcp.yml`, environment `pypi`. Verification
+tooling such as [`pypi-attestation-models`](https://pypi.org/project/pypi-attestation-models/)
+can validate the bundle and confirm the wheel was produced by
+this repository's release workflow rather than swapped at the
+registry layer.
+
+This protection is automatic for adopters using `pip install`
+against a PyPI index that enforces attestation checks. It does
+not change the threat model for cma-mcp itself (which still runs
+locally and trusts its operator), but it tightens the chain
+between this repository and the wheel an adopter actually
+installs.
