@@ -5,7 +5,7 @@
 [![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Capture what each piece of work teaches — failures, decisions, the paths you ruled out — and get the relevant ones back the moment you need them. cma is the command-line companion to [Lodestone](https://github.com/Clarethium/lodestone).
+Capture what each piece of work teaches: failures, decisions, the paths you ruled out. Get the relevant ones back the moment you need them. cma is the command-line companion to [Lodestone](https://github.com/Clarethium/lodestone).
 
 ## What this is
 
