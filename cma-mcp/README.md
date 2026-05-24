@@ -154,8 +154,8 @@ because cma-mcp shells out to the bash cma binary. Routing every
 tool call through the same canonical binary on every platform is
 how cma-mcp avoids drift; a parallel Python implementation would
 require keeping two surface definitions in sync forever. If you
-run an MCP-compatible AI client on Windows, you are
-reasonably expected to have WSL available.
+run an MCP-compatible AI client on Windows, you likely already
+have WSL available.
 
 ## Install fingerprint
 

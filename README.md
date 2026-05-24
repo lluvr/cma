@@ -176,9 +176,10 @@ The bash CLI and shell hooks above cover Claude Code and any
 shell environment. For builders reaching the loop
 through other MCP-compatible AI clients (Claude Desktop, Cursor,
 Cline, Continue.dev), the same compound practice loop ships as a
-Python MCP server at [`cma-mcp/`](cma-mcp/). Subprocess wrapper
-around this binary; methodology-agnostic substrate; three-section
-payload discipline.
+Python MCP server at [`cma-mcp/`](cma-mcp/). It is a subprocess
+wrapper around this binary, keeps the methodology-agnostic
+substrate intact, and preserves the three-section payload
+discipline.
 
 ```bash
 pip install cma-mcp
@@ -194,7 +195,7 @@ the wrapper are recorded in [DECISIONS.md](DECISIONS.md).
 ./test.sh
 ```
 
-Tests cover all capture verbs (normal and edge cases including special characters, missing arguments, unknown flags) and the operational-verb stubs.
+Tests cover all capture verbs (normal and edge cases including special characters, missing arguments, unknown flags) and the operational verbs (`surface`, `distill`, `stats`).
 
 ## The Clarethium body
 

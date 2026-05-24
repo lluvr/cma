@@ -44,9 +44,9 @@ logic actively works against.
 
 **Why frame-check's separate-repo pattern doesn't apply.** That
 project *uses* Touchstone as a substrate; Touchstone evolves
-independently. cma-mcp wraps cma. Treating frame-check's
-two-repo shape as a general convention was an early misread; the
-correction landed in this commit's predecessor.
+independently. cma-mcp wraps cma. An earlier draft treated frame-check's
+two-repo shape as a general convention; this entry records the
+correction.
 
 **Trade-off accepted.** Repo size grows with both Python and bash
 content. Contributor population is slightly more mixed. Independent

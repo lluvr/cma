@@ -73,7 +73,7 @@ Query strategy (default):
 2. Else if file_path is detected, query with `--file <basename>`.
 3. Else skip the query entirely (no actionable filter; would dump all recent captures, which is noise).
 
-Query result limit: a small number (default 3). The point is to surface the most relevant matches, not to dump the archive.
+Query result limit: a small number. The `cma surface` command default is 10, but the action-time hook passes `--limit 3` to surface only the most relevant matches, not to dump the archive.
 
 The query is read-only from your perspective. Logging happens as a side effect of `cma surface`, not as additional work for the integration.
 
