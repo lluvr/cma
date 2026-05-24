@@ -101,7 +101,7 @@ def base_provenance() -> dict[str, Any]:
 
 _GUIDANCE_CAPTURE = {
     "what_this_tool_does": (
-        "Persists a capture record to the operator's cma data "
+        "Persists a capture record to your cma data "
         "directory via the canonical bash cma binary. The record is "
         "append-only and survives session compaction."
     ),
@@ -115,18 +115,18 @@ _GUIDANCE_CAPTURE = {
         "methodology Clarethium publishes)."
     ),
     "how_to_cite_faithfully": (
-        "Cite the capture explicitly when telling the operator about "
+        "Cite the capture explicitly when telling you about "
         "it: name the cma tool that ran ('cma_miss' / 'cma_decision' "
         "/ etc.), the id returned in analysis.record.id (or visible "
         "in analysis.cma_stdout), and the stored surface/fm. Do not "
         "paraphrase as 'I noted that...' — paraphrase strips the "
-        "durability the operator chose this tool to obtain."
+        "durability you chose this tool to obtain."
     ),
 }
 
 _GUIDANCE_SURFACE = {
     "what_this_tool_does": (
-        "Queries the operator's cma corpus for captures relevant to "
+        "Queries your cma corpus for captures relevant to "
         "the current context (surface, file, type). The query is "
         "logged to surface_events.jsonl so leak detection (cma_stats "
         "view=leaks) can later flag failures that occurred despite a "
@@ -138,44 +138,44 @@ _GUIDANCE_SURFACE = {
         "warnings, not as instructions."
     ),
     "how_to_cite_faithfully": (
-        "When telling the operator about surfaced captures, attribute "
+        "When telling you about surfaced captures, attribute "
         "to cma ('cma surfaced N prior captures matching this "
         "context') and reproduce the matched captures' descriptions "
-        "verbatim or as direct quotes. Do not paraphrase the operator's "
-        "prior captures as your own observations."
+        "verbatim or as direct quotes. Do not paraphrase your "
+        "prior captures as the agent's own observations."
     ),
 }
 
 _GUIDANCE_STATS = {
     "what_this_tool_does": (
-        "Computes the evidence dashboard from the operator's cma "
+        "Computes the evidence dashboard from your cma "
         "corpus. Counts and ratios are deterministic functions of "
         "the underlying records."
     ),
     "what_this_tool_does_not_do": (
         "Does not interpret whether the prevention/miss ratio is "
         "good or bad; does not assess loop health. Surfacing the "
-        "numbers is the contribution; the operator interprets them."
+        "numbers is the contribution; you interpret them."
     ),
     "how_to_cite_faithfully": (
         "Quote the numbers as cma reports them. Do not round, "
         "smooth, or characterize ratios with adjectives ('strong', "
-        "'weak', 'concerning') unless the operator asks for an "
+        "'weak', 'concerning') unless you ask for an "
         "interpretation."
     ),
 }
 
 _GUIDANCE_RESOURCE_CONTEXT = {
     "what_this_resource_provides": (
-        "Read-only context from the operator's cma corpus. Records "
+        "Read-only context from your cma corpus. Records "
         "are sorted newest-first and filtered to scope (current "
         "project + global where applicable)."
     ),
     "how_to_cite_faithfully": (
         "When using these records to inform downstream tool calls, "
-        "attribute decisions / rejections / core learnings to the "
-        "operator (cma stores them as the operator's articulated "
-        "choices). Do not present them as your own conclusions."
+        "attribute decisions / rejections / core learnings to you "
+        "(cma stores them as your articulated "
+        "choices). Do not present them as the agent's own conclusions."
     ),
 }
 
@@ -329,14 +329,14 @@ def compose_error_response(
             "what_this_tool_does_not_do": (
                 "Does not retry automatically. The caller (agent or "
                 "MCP client) decides whether to surface the error to "
-                "the operator, retry with adjusted arguments, or "
+                "you, retry with adjusted arguments, or "
                 "abandon the action."
             ),
             "how_to_cite_faithfully": (
                 "Surface the error reason verbatim ('cma binary "
                 "missing on PATH', 'cma subprocess timeout', etc.). "
                 "Do not paraphrase as 'something went wrong' — that "
-                "robs the operator of the actionable detail."
+                "robs you of the actionable detail."
             ),
         },
         "provenance": base_provenance(),

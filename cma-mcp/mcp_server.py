@@ -87,7 +87,7 @@ SERVER_INSTRUCTIONS = (
     "cma-mcp is methodology-agnostic: vocabulary lives in Lodestone "
     "(https://github.com/Clarethium/lodestone). Three-section payload "
     "(analysis + agent_guidance + provenance) on every response; "
-    "preserve attribution when relaying tool output to the operator."
+    "preserve attribution when relaying tool output to you."
 )
 
 
@@ -482,8 +482,8 @@ def _emit_version_fingerprint() -> None:
     """
     Print a single-line install fingerprint covering server_version,
     protocol, git_sha (with +dirty flag), cma_binary_version, python,
-    and script path. Lets an operator confirm the cma-mcp install
-    configured in their MCP client is the expected one.
+    and script path. Lets you confirm the cma-mcp install
+    configured in your MCP client is the expected one.
     """
     fingerprint = {
         "server_name": SERVER_NAME,

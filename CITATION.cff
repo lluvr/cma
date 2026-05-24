@@ -17,7 +17,7 @@ url: "https://github.com/Clarethium/cma"
 abstract: >-
   cma is the executable companion to Lodestone, Clarethium's
   canonical methodology for AI-coupled work. cma runs the
-  compound practice loop on the operator's local machine: it
+  compound practice loop on your local machine: it
   captures failures, surfaces relevant prior context at the moment
   of action, tracks decisions and rejected alternatives, detects
   recurrence, and captures preventions. Action-time injection ships
@@ -59,7 +59,7 @@ references:
       as a subprocess. See cma-mcp/CITATION.cff for its citable
       form.
   - type: article
-    title: "Lodestone: canonical operator methodology for AI-coupled work"
+    title: "Lodestone: canonical methodology for AI-coupled work"
     authors:
       - family-names: Lucic
         given-names: Lovro

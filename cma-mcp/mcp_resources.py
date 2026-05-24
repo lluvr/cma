@@ -11,13 +11,13 @@ will. cma-mcp ships four:
 
 Reads bypass the bash cma subprocess and parse JSONL directly via
 cma_jsonl. The exception is `cma://stats`, which shells out to
-`cma stats` so the summary text matches what an operator would see
-in their terminal; the subprocess wrapping discipline keeps the
+`cma stats` so the summary text matches what you would see
+in your terminal; the subprocess wrapping discipline keeps the
 resource output and the CLI output identical by construction.
 
 cma 1.0 is single-project (per-project scoping is on cma's roadmap
 beyond 1.0). cma-mcp follows: no project filtering at v0.1; all
-records in the operator's `~/.cma/` surface to the operator's MCP
+records in your `~/.cma/` surface to your MCP
 clients. When cma adds project scoping, cma-mcp will follow.
 """
 
@@ -165,8 +165,8 @@ def read_stats() -> dict:
     """
     Default stats summary.
 
-    Shells out to `cma stats` so the summary text matches what an
-    operator would see in their terminal. Other views (leaks,
+    Shells out to `cma stats` so the summary text matches what you
+    would see in your terminal. Other views (leaks,
     recurrence, behavior, etc.) go through the cma_stats tool with a
     `view` argument.
     """

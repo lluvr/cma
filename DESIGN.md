@@ -4,7 +4,7 @@ This document locks the surface API for cma 1.0. Implementation follows from thi
 
 ## Purpose
 
-cma is the executable companion to [Lodestone](https://github.com/Clarethium/lodestone). It runs the compound practice loop on the operator's local machine: capture failures, surface relevant prior context at the moment of action, track decisions and rejected alternatives, detect recurrence, and capture preventions.
+cma is the executable companion to [Lodestone](https://github.com/Clarethium/lodestone). It runs the compound practice loop on your local machine: capture failures, surface relevant prior context at the moment of action, track decisions and rejected alternatives, detect recurrence, and capture preventions.
 
 This document specifies the seven primitives that compose the cma surface, the relationships between them, and how the surface maps to the vocabulary defined in Lodestone.
 
@@ -40,7 +40,7 @@ cma miss <description>
 
 **Output:** Confirmation with the captured description, surface, fm, and a unique miss ID. If a similar miss exists in the last 90 days, output flags the recurrence and indicates which warning weight has been incremented.
 
-**Surfacing trigger:** Recorded misses surface when the current operator action matches the miss context (surface, file, or keyword overlap).
+**Surfacing trigger:** Recorded misses surface when the current action matches the miss context (surface, file, or keyword overlap).
 
 ### cma decision
 
@@ -56,7 +56,7 @@ cma decision <description>
 
 - `<description>` (required, positional). Format: "TOPIC: choice (rationale)". The TOPIC is the decision domain; the choice is what was decided; the rationale is the why.
 - `--surface` (optional). The domain area where this decision applies.
-- `--applies-when` (optional). Predicate for re-surfacing. When the predicate matches the current operator action, the decision is surfaced as relevant. Coarse predicates (surface, file pattern) are sufficient for v1.
+- `--applies-when` (optional). Predicate for re-surfacing. When the predicate matches the current action, the decision is surfaced as relevant. Coarse predicates (surface, file pattern) are sufficient for v1.
 
 **Output:** Confirmation with the captured decision and a unique decision ID.
 
@@ -206,9 +206,9 @@ Reference-implementation polish identified in the audit will land as additive fe
 
 ## Output and storage
 
-cma is a local tool. All captures are stored in the operator's local data directory (default: `~/.cma/`). The captures are private to the operator. The cma toolkit is open source; the operator's data is not.
+cma is a local tool. All captures are stored in your local data directory (default: `~/.cma/`). The captures are private to you. The cma toolkit is open source; your data is not.
 
-This separation matches the Lodestone-versus-personal-practice distinction: the methodology is canonical and shared; what an operator captures while running it stays local.
+This separation matches the Lodestone-versus-personal-practice distinction: the methodology is canonical and shared; what you capture while running it stays local.
 
 ## Implementation status
 

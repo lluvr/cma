@@ -5,7 +5,7 @@ This module is the single source of truth for cma-mcp's tool surface.
 Each tool entry mirrors a bash cma primitive (see cma's DESIGN.md);
 the schema describes the input shape an MCP client passes; the
 description teaches the agent both how to invoke the tool and when
-to invoke it (operator says X, OR the agent itself recognizes a
+to invoke it (you say X, OR the agent itself recognizes a
 capture-worthy moment).
 
 Field-name discipline: snake_case in MCP schema (e.g.,
@@ -16,12 +16,12 @@ these to bash cma's CLI flag form (`--applies-when`, `--revisit-when`,
 Surface labels are open-ended. cma's data substrate stores `surface`
 as an opaque string; the canonical examples (`auth`, `db`, `docs`,
 `ui`, `infra`, `general`, `git`) are listed in the field description
-but operators may pass any short label that fits their work.
+but you may pass any short label that fits your work.
 
 `fm` (failure-mode) is opaque per DECISIONS AD-006. cma-mcp does not
 bundle a failure-mode catalog. Tool descriptions reference Lodestone
 as the canonical methodology that owns the FM-1..10 vocabulary;
-operators using a different methodology pass that methodology's tag
+if you use a different methodology, pass that methodology's tag
 through as opaque data.
 """
 
@@ -40,11 +40,11 @@ _SURFACE_DESCRIPTION = (
 )
 
 _FM_DESCRIPTION = (
-    "Failure-mode tag, opaque to cma. When the operator uses a "
+    "Failure-mode tag, opaque to cma. When you use a "
     "methodology with a canonical catalog (such as Lodestone's "
     "FM-1..10, see https://github.com/Clarethium/lodestone), pass "
     "that tag here as a string. cma-mcp does not bundle the catalog "
-    "itself. If unset, cma falls back to the operator's "
+    "itself. If unset, cma falls back to your "
     "CMA_FM_CLASSIFIER plugin (if configured) or stores the miss "
     "with no fm."
 )
@@ -92,7 +92,7 @@ CMA_MISS = {
     "description": (
         "Capture a failure: a specific moment where work fell short of "
         "intent and is likely to recur. Wraps `cma miss`.\n\n"
-        "Invoke when (a) the operator says 'record a miss', 'log this', "
+        "Invoke when (a) you say 'record a miss', 'log this', "
         "'this was wrong', or similar, OR (b) you yourself notice a "
         "miss worth surfacing in future similar work.\n\n"
         "Description should preserve enough specifics that the same "
@@ -117,7 +117,7 @@ CMA_MISS = {
                 "minLength": 8,
                 "maxLength": MAX_DESCRIPTION,
                 "description": (
-                    "What failed, in the operator's own words. Phrase "
+                    "What failed, in your own words. Phrase "
                     "actively ('Treated X as Y without verifying') "
                     "rather than passively. Specific enough that the "
                     "same shape of failure would be recognizable next "
@@ -171,12 +171,12 @@ CMA_DECISION = {
     "name": "cma_decision",
     "title": "Record an architectural or strategic decision",
     "description": (
-        "Capture a non-trivial choice the operator wants surfaced in "
+        "Capture a non-trivial choice you want surfaced in "
         "future similar work. Wraps `cma decision`.\n\n"
         "Format: 'TOPIC: choice (rationale)'. The TOPIC is the decision "
         "domain; the choice is what was decided; the rationale is the "
         "why.\n\n"
-        "Invoke when (a) the operator articulates a decision, OR "
+        "Invoke when (a) you articulate a decision, OR "
         "(b) you yourself are about to commit to or recommend a "
         "non-trivial choice (pattern, architecture, security stance, "
         "configuration philosophy) whose rationale matters more than "
@@ -227,7 +227,7 @@ CMA_REJECT = {
         "compaction and prevents silently rebuilding what was "
         "deliberately not built. Wraps `cma reject`.\n\n"
         "Format: 'OPTION: reason for elimination'.\n\n"
-        "Invoke when (a) the operator states a rejection, OR (b) you "
+        "Invoke when (a) you state a rejection, OR (b) you "
         "yourself recognize that you have just eliminated an option "
         "whose rationale is non-obvious enough that a future you "
         "(or another model) might rebuild it without context.\n\n"
@@ -255,7 +255,7 @@ CMA_REJECT = {
                 "description": (
                     "Trigger that would warrant reconsidering this "
                     "rejection. Surfaces alongside the rejection so "
-                    "operators see the reopen condition in context."
+                    "you see the reopen condition in context."
                 ),
             },
         },
@@ -272,9 +272,9 @@ CMA_PREVENTED = {
         "Wraps `cma prevented`.\n\n"
         "Invoke immediately after the catch, while the chain (warning "
         "→ recognition → different choice) is still legible. "
-        "Triggered by either (a) operator request, OR (b) your own "
-        "recognition that you almost did something a warning had "
-        "named, and you stopped.\n\n"
+        "Triggered by either (a) a request from you, OR (b) the agent's own "
+        "recognition that it almost did something a warning had "
+        "named, and it stopped.\n\n"
         "Description names what was almost done versus what was done "
         "instead. If the warning came from a specific prior miss, "
         "pass that miss's id as `miss_id` so cma can compute the "
@@ -332,7 +332,7 @@ CMA_DISTILL = {
         "  `pattern` (substring matched against existing learnings).\n"
         "- `review`: read-only preview of patterns that would warrant "
         "  distillation. No other arguments.\n\n"
-        "Invoke when the operator articulates a distilled learning, "
+        "Invoke when you articulate a distilled learning, "
         "or when reviewing recurring miss patterns and wanting to "
         "promote one to permanent surfacing."
     ),
@@ -465,8 +465,8 @@ CMA_STATS = {
         "- `behavior`: behavior pivots from texture-preserved misses "
         "  (those captured with `intended` and `corrected`). Surfaces "
         "  patterns where surfaced warnings consistently changed "
-        "  operator behavior.\n\n"
-        "Invoke when the operator wants quantitative evidence the "
+        "  behavior.\n\n"
+        "Invoke when you want quantitative evidence the "
         "loop is closing, or when the agent is evaluating which "
         "captures matter most for the current work."
     ),
@@ -527,7 +527,7 @@ RESOURCES: list[dict[str, Any]] = [
         "name": "decisions",
         "title": "Active decisions in scope",
         "description": (
-            "Architectural and strategic decisions the operator has "
+            "Architectural and strategic decisions you have "
             "captured, filtered to those in scope for the current "
             "project (plus global-scope decisions). Sorted by recency."
         ),
@@ -538,7 +538,7 @@ RESOURCES: list[dict[str, Any]] = [
         "name": "rejections",
         "title": "Active rejections",
         "description": (
-            "Options the operator has explicitly rejected and the "
+            "Options you have explicitly rejected and the "
             "reason. Filtered to the current project. Sorted by "
             "recency."
         ),

@@ -10,7 +10,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 
-- `cma install-hook --claude-code [--scope user|project] [--dry-run]` merges cma's `SessionStart` and `PreToolUse` hook blocks into Claude Code's `settings.json`. Idempotent; preserves any other hooks the operator has configured; writes a `.bak` of the prior file. `--dry-run` prints the merged JSON to stdout without writing.
+- `cma install-hook --claude-code [--scope user|project] [--dry-run]` merges cma's `SessionStart` and `PreToolUse` hook blocks into Claude Code's `settings.json`. Idempotent; preserves any other hooks you have configured; writes a `.bak` of the prior file. `--dry-run` prints the merged JSON to stdout without writing.
 
 ---
 

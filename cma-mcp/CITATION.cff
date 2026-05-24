@@ -21,7 +21,7 @@ abstract: >-
   implementation; vocabulary, methodology, and the loop's design live
   in Lodestone (the methodology canon) and cma (the bash reference
   implementation). cma-mcp's contribution is reach: bringing the same
-  capture-and-surface discipline to operator environments where the
+  capture-and-surface discipline to environments where the
   cma CLI's shell hooks do not run.
 keywords:
   - mcp
@@ -58,11 +58,11 @@ references:
     license: Apache-2.0
     notes: "The canonical bash reference implementation that cma-mcp wraps. cma-mcp invokes its CLI as a subprocess; the data substrate (`~/.cma/*.jsonl`) is shared between cma and cma-mcp."
   - type: article
-    title: "Lodestone: canonical operator methodology for AI-coupled work"
+    title: "Lodestone: canonical methodology for AI-coupled work"
     authors:
       - family-names: Lucic
         given-names: Lovro
         orcid: "https://orcid.org/0009-0008-9976-6933"
     url: "https://github.com/Clarethium/lodestone"
     license: CC-BY-4.0
-    notes: "The methodology canon. Defines stance, the loop, calibration, altitude, failure shapes, quality levels, surface protocols, and compound practice (Section VIII). cma-mcp is methodology-agnostic at the substrate level; operators tag captures with a methodology's vocabulary (Lodestone's FM-1..10 or otherwise) by passing it through as opaque strings."
+    notes: "The methodology canon. Defines stance, the loop, calibration, altitude, failure shapes, quality levels, surface protocols, and compound practice (Section VIII). cma-mcp is methodology-agnostic at the substrate level; you tag captures with a methodology's vocabulary (Lodestone's FM-1..10 or otherwise) by passing it through as opaque strings."

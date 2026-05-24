@@ -10,7 +10,7 @@ JSON-RPC framing over stdio between the MCP client and cma-mcp.
 This benchmark measures cma-mcp's actual wire-level round-trip
 latency: the MCP client writes one JSON-RPC line on cma-mcp's stdin
 and reads one JSON-RPC line back from cma-mcp's stdout. The result
-is the operator's actual cost: "how much does an MCP call cost
+is your actual cost: "how much does an MCP call cost
 compared to running cma directly".
 
 Run from cma-mcp/:
@@ -18,7 +18,7 @@ Run from cma-mcp/:
 
 Requires the cma binary on PATH (the wrapper spawns it). Uses a
 disposable CMA_DIR populated with 100 synthetic captures so results
-do not depend on the operator's corpus.
+do not depend on your corpus.
 
 The benchmark spawns one cma-mcp subprocess for the whole run (the
 expected MCP-client lifecycle) and reuses it across all measured
@@ -29,7 +29,7 @@ calls. Each tool call goes through:
         → three-section payload composition
         → JSON-RPC over stdout → client
 
-so the reported latency captures the full operator-experienced cost.
+so the reported latency captures the full cost you experience.
 """
 
 from __future__ import annotations

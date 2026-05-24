@@ -80,8 +80,8 @@ The `cli()` entry point in `mcp_server.py` routes by argument:
 | Invocation | Path | Use |
 |---|---|---|
 | `cma-mcp` | builds dispatcher, runs `Dispatcher.serve()` blocking on stdin | normal MCP client startup |
-| `cma-mcp --version` | `_emit_version_fingerprint()` prints one-line JSON, exits | operator confirms which install is wired up |
-| `cma-mcp --test` | `_emit_test_payload()` runs a canned `cma_stats` against the operator's `~/.cma/`, prints the full three-section payload, exits | offline pipeline check without an MCP client handshake |
+| `cma-mcp --version` | `_emit_version_fingerprint()` prints one-line JSON, exits | you confirm which install is wired up |
+| `cma-mcp --test` | `_emit_test_payload()` runs a canned `cma_stats` against your `~/.cma/`, prints the full three-section payload, exits | offline pipeline check without an MCP client handshake |
 | `cma-mcp --help` | argparse default | discoverability |
 
 Unknown flags exit non-zero with a usage message — the CLI never
@@ -109,7 +109,7 @@ silently swallows misconfiguration.
     _build_capture_argv("miss", arguments, ["surface","fm","files",
     "intended","corrected","excerpt"]). The result is an argv list
     like ["miss", "<description>", "--surface", "auth", "--fm",
-    "FM-3"]. Operator-supplied values land in distinct argv slots
+    "FM-3"]. Values you supply land in distinct argv slots
     only — never concatenated into a shell-interpreted string
     (DECISIONS AD-004).
 
@@ -196,8 +196,8 @@ Three rules govern every cma invocation. They are enforced
 structurally, not by review.
 
 1. **argv-array, never shell=True** (DECISIONS AD-004).
-   `subprocess.run([cma_binary, *argv], shell=False)`. Operator-
-   supplied strings land in single argv slots. cma's argument
+   `subprocess.run([cma_binary, *argv], shell=False)`. Strings you
+   supply land in single argv slots. cma's argument
    parser treats them as data; bash does not interpolate them.
    The argv-injection-resistance test in
    `tests/test_subprocess.py` writes a malicious filename
@@ -217,8 +217,8 @@ structurally, not by review.
    "install": "https://github.com/Clarethium/cma#readme"}`.
    No silent skip.
 
-The cma binary path resolution: `shutil.which("cma")`. Operators
-who need a non-default path set the `CMA_BINARY` environment
+The cma binary path resolution: `shutil.which("cma")`. If you
+need a non-default path, set the `CMA_BINARY` environment
 variable and `cma_subprocess.run_cma` uses it. (Tests cover both
 paths.)
 
@@ -226,7 +226,7 @@ paths.)
 
 ## JSONL read tolerance
 
-`cma_jsonl.py` reads the operator's data directly for the four
+`cma_jsonl.py` reads your data directly for the four
 read-only resource URIs (`cma://decisions`, `cma://rejections`,
 `cma://core`, `cma://stats`). The reader is **tolerant** — DECISIONS
 AD-002 — and reports the parse-trust signal in `provenance`:
@@ -311,7 +311,7 @@ in CI.
 - **No MCP SDK dependency.** Manual JSON-RPC keeps the runtime
   surface to the Python standard library.
 - **No methodology vocabulary bundled.** `--fm` is opaque.
-  Operators tag with their methodology's catalog (Lodestone's
+  You tag with your methodology's catalog (Lodestone's
   FM-1..10 or otherwise).
 - **No transports beyond stdio.** SSE / WebSocket / HTTP are out of
   scope; gateways exist for multi-client deployment. DECISIONS
@@ -333,7 +333,7 @@ schema) touches **four files together**:
 2. `mcp_server.py` — add the `_handle_*` dispatcher and wire it.
 3. `tests/test_mcp_server.py` — add a conformance test that
    exercises the surface.
-4. `docs/MCP_SERVER.md` — document the operator-facing reference.
+4. `docs/MCP_SERVER.md` — document the reference.
 
 A PR that moves only one of the four is incomplete. Reviewers will
 ask for the others. See [`CONTRIBUTING.md`](../../CONTRIBUTING.md)

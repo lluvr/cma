@@ -88,9 +88,9 @@ implementation: `auth`, `db`, `docs`, `ui`, `infra`, `general`,
 
 `cma_miss` and `cma_prevented` accept `fm` as an optional opaque
 string. cma-mcp does not bundle Lodestone's FM-1..10 catalog
-(DECISIONS AD-006); operators using a methodology with a canonical
-catalog (such as Lodestone) pass that methodology's tag here.
-Operators who want autoclassification at capture time wire the
+(DECISIONS AD-006); if you use a methodology with a canonical
+catalog (such as Lodestone), pass that methodology's tag here.
+If you want autoclassification at capture time, wire the
 `CMA_FM_CLASSIFIER` plugin per cma's CLI convention; cma-mcp
 inherits the wiring transparently.
 

@@ -2,10 +2,10 @@
 # cma-pre: action-time injection wrapper for shell environments.
 #
 # Implements the five-stage architecture from ARCHITECTURE.md:
-#   1. Interception:    invoked by shell preexec hook OR operator manually
+#   1. Interception:    invoked by shell preexec hook OR manually
 #   2. Context extract: parses command line for trigger + surface heuristics
 #   3. Query:           calls `cma surface` with derived filters
-#   4. Injection:       writes results to stderr (visible to operator)
+#   4. Injection:       writes results to stderr (visible to you)
 #   5. Logging:         handled inside `cma surface` itself
 #
 # Usage:
@@ -68,7 +68,7 @@ cmd_name="${cmd_name##*/}"
 
 # Trigger filter: which commands warrant surfacing.
 # Default list covers editors, version control, language toolchains, build tools.
-# Operators can override by setting CMA_PRE_TRIGGERS to a space-separated list.
+# You can override by setting CMA_PRE_TRIGGERS to a space-separated list.
 default_triggers="vim nvim vi nano emacs code subl micro hx helix kakoune git npm yarn pnpm cargo make gradle mvn bazel python python3 node ruby go rustc gcc clang"
 triggers="${CMA_PRE_TRIGGERS:-$default_triggers}"
 

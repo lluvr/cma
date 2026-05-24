@@ -293,8 +293,8 @@ def test_tools_call_cma_stats_round_trips_three_section_payload(
 ):
     """Full-stack invocation: client → cma-mcp dispatch → bash cma
     subprocess → mcp_compose → JSON-RPC reply. Pins the empty-corpus
-    case (no captures yet) so the test does not depend on the
-    operator's data."""
+    case (no captures yet) so the test does not depend on your
+    data."""
     if not cma_binary_available:
         pytest.skip("cma binary not on PATH")
     with wire_server(tmp_path) as server:
@@ -327,7 +327,7 @@ def test_tools_call_cma_stats_evidence_forwards_window(
     """End-to-end: cma_stats(view='evidence', window=7) must translate
     into `cma stats --evidence --window 7` at the subprocess layer.
     Without the wiring the window parameter is silently dropped on
-    the floor and operators always get the 30-day default.
+    the floor and you always get the 30-day default.
 
     Pin the canonical bash cma via CMA_BIN so the assertion does not
     depend on which cma happens to be earliest on PATH.

@@ -132,7 +132,7 @@ reset
     --surface auth --fm fm-1 \
     --intended "patch the symptom" \
     --corrected "fix root cause" \
-    --excerpt "operator: do X. assistant: Y." >/dev/null
+    --excerpt "builder: do X. assistant: Y." >/dev/null
 texture_check=$(python3 -c "
 import json
 with open('$CMA_DIR/misses.jsonl') as f:

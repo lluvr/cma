@@ -41,7 +41,7 @@ First public release.
 - Seven tools mirroring bash cma's primitives: `cma_miss`, `cma_decision`, `cma_reject`, `cma_prevented`, `cma_distill` (modes: `default` / `retire` / `review`), `cma_surface` (instrumented; logs `surface_events.jsonl` for leak detection), `cma_stats` (views: `default` / `evidence` / `leaks` / `recurrence` / `preventions` / `rejections` / `behavior`; integer `window` parameter scopes the evidence view).
 - Four read-only resources for context inheritance: `cma://decisions`, `cma://rejections`, `cma://core`, `cma://stats`.
 - Three-section payload (`analysis` + `agent_guidance` + `provenance`) on every tool response and resource read. Tests pin the structure.
-- Methodology-agnostic substrate (AD-006): `fm` is an opaque string. cma-mcp bundles no methodology vocabulary; operators pass their methodology's tag through.
+- Methodology-agnostic substrate (AD-006): `fm` is an opaque string. cma-mcp bundles no methodology vocabulary; you pass your methodology's tag through.
 - Schema-version handling (AD-002): records with `schema_version: "1.0"` are native; legacy records parse leniently; unknown versions surface in `provenance`.
 - Subprocess wrapper around the canonical bash cma binary (AD-004): argv-array (no shell interpolation), 5-second per-call timeout (AD-003), and a 512 KiB argv byte-budget pre-flight guard that surfaces `input_too_large` cleanly before exec.
 - Schema-level input bounds on every string field: `MAX_DESCRIPTION` 4 KiB, `MAX_TEXTURE` 64 KiB, `MAX_SHORT_FIELD` 2 KiB. Enum-constrained fields are exempt (the enum is tighter). A schema-invariant test asserts the property; future tool additions cannot regress the bound silently.

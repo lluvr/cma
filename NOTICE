@@ -35,10 +35,10 @@ External works referenced
 
 Reference methodology lives in Lodestone
 (https://github.com/Clarethium/lodestone), licensed CC-BY 4.0.
-Neither cma nor cma-mcp bundles Lodestone content. Operators who
+Neither cma nor cma-mcp bundles Lodestone content. If you
 tag captures with a methodology's failure-mode vocabulary (such as
-Lodestone's FM-1..10) are responsible for citing that methodology
-in their own work.
+Lodestone's FM-1..10), you are responsible for citing that methodology
+in your own work.
 
 Verification substrate referenced in design documents is Touchstone
 (https://github.com/Clarethium/touchstone), Apache 2.0 (library)
@@ -47,7 +47,7 @@ and CC-BY 4.0 (Standard).
 Companion projects in the Clarethium body
 -----------------------------------------
 
-- Lodestone: canonical operator methodology (CC-BY 4.0)
+- Lodestone: canonical methodology (CC-BY 4.0)
 - Touchstone: model-independent measurement substrate
 - frame-check: applied vehicle, sibling MCP using Touchstone
   (https://github.com/Clarethium/frame-check)

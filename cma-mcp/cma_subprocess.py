@@ -11,7 +11,7 @@ here too.
 Discipline (DECISIONS AD-003, AD-004):
 
 - Every call uses subprocess.run with shell=False and an argv array.
-  Operator input never gets concatenated into a shell-interpreted
+  Your input never gets concatenated into a shell-interpreted
   string, so argument injection is structurally impossible.
 - Every call carries a 5-second timeout. A hung cma process must not
   hang the MCP server.
@@ -48,7 +48,7 @@ DEFAULT_TIMEOUT_SECONDS = 5
 # guards the aggregate (multiple long fields in one call).
 MAX_ARGV_BYTES = 512 * 1024
 
-# The bash cma binary is resolved from PATH by default. Operators
+# The bash cma binary is resolved from PATH by default. You
 # can override with CMA_BIN to point at a specific cma checkout.
 _CMA_BIN_OVERRIDE = os.environ.get("CMA_BIN")
 
@@ -61,7 +61,7 @@ class CmaError(Exception):
     ----------
     argv : list of str
         The full argv that was attempted. Always starts with the
-        resolved cma binary path. Useful for debugging in operator
+        resolved cma binary path. Useful for debugging in your
         logs.
     returncode : int or None
         The cma process exit status. None if the process did not
@@ -70,7 +70,7 @@ class CmaError(Exception):
         Captured stdout up to the failure point. May be empty.
     stderr : str
         Captured stderr up to the failure point. cma writes
-        operator-facing diagnostics here.
+        diagnostics here.
     reason : str
         One of: "missing_binary", "timeout", "non_zero_exit",
         "unexpected".
@@ -232,12 +232,12 @@ def cma_version() -> str | None:
       2. Fall back to parsing `cma help` for a `Version X.Y.Z` line
          (handles forks or older cma installs that use subcommand-only
          syntax without a `--version` flag).
-      3. Return None when neither probe succeeds (graceful: operators
+      3. Return None when neither probe succeeds (graceful: you
          see `cma_binary_version: null` in the install fingerprint
          rather than a crash).
 
-    Used by `cma-mcp --version` to show operators which cma binary
-    their MCP server is wrapping. The function never raises; failure
+    Used by `cma-mcp --version` to show you which cma binary
+    your MCP server is wrapping. The function never raises; failure
     surfaces as None.
     """
     # Primary probe: --version flag.
