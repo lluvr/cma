@@ -35,7 +35,7 @@ history.
 
 Most MCP servers expose new capability. cma-mcp exposes an
 existing capability (bash cma's seven primitives) to a wider set
-of operator environments: Claude Desktop, Cursor, Cline,
+of environments: Claude Desktop, Cursor, Cline,
 Continue.dev, and any other MCP-compatible client. The contribution
 is reach. Drift is the named enemy: cma-mcp invokes the canonical
 bash cma binary as a subprocess for every captured action, so
@@ -137,8 +137,8 @@ reimplement cma's seven primitives in Python. See
 
 **Methodology-agnostic substrate.** cma stores `--fm` (failure
 mode) as an opaque string. cma-mcp does not bundle any
-methodology's failure-mode catalog. Operators tag captures with
-their methodology's vocabulary (Lodestone's FM-1..10 or otherwise)
+methodology's failure-mode catalog. You tag captures with
+your methodology's vocabulary (Lodestone's FM-1..10 or otherwise)
 by passing the tag through; for autoclassification, set
 `CMA_FM_CLASSIFIER` per cma's plugin convention.
 
@@ -149,12 +149,12 @@ standard library. (Test-time deps: pytest.)
 
 ## Platform support
 
-Linux and macOS native. Windows operators run cma-mcp under WSL
+Linux and macOS native. On Windows, run cma-mcp under WSL
 because cma-mcp shells out to the bash cma binary. Routing every
 tool call through the same canonical binary on every platform is
 how cma-mcp avoids drift; a parallel Python implementation would
-require keeping two surface definitions in sync forever. Any
-operator running an MCP-compatible AI client on Windows is
+require keeping two surface definitions in sync forever. If you
+run an MCP-compatible AI client on Windows, you are
 reasonably expected to have WSL available.
 
 ## Install fingerprint
@@ -164,8 +164,8 @@ reasonably expected to have WSL available.
 Emits a one-line JSON fingerprint with `server_version`,
 `protocol_version`, `git_sha` (with `+dirty` flag if the working
 tree has uncommitted changes), `cma_binary_version` (probed from
-`cma --version`), `python` version, and `script` path. Lets an
-operator confirm the cma-mcp install configured in their MCP
+`cma --version`), `python` version, and `script` path. Lets you
+confirm the cma-mcp install configured in your MCP
 client is the expected one.
 
 ## Offline sanity check
@@ -173,7 +173,7 @@ client is the expected one.
     cma-mcp --test
 
 Prints the full three-section payload for a `cma_stats` (default
-view) call against the operator's `~/.cma/` data. Useful to verify
+view) call against your `~/.cma/` data. Useful to verify
 pipeline wiring and that the cma binary is reachable.
 
 ## Documentation

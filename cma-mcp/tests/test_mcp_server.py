@@ -106,7 +106,7 @@ def test_cma_stats_view_enum_includes_evidence(fresh_dispatcher):
 def test_cma_stats_carries_window_parameter(fresh_dispatcher):
     """
     The evidence view runs over a trailing window (default 30 days).
-    Operators need to tune the window without recompiling; the
+    You need to tune the window without recompiling; the
     cma_stats tool must expose window so MCP-connected agents can
     pass it through.
     """
@@ -122,7 +122,7 @@ def test_every_string_field_has_max_length(fresh_dispatcher):
     """
     Every string input field must carry maxLength. An MCP client (or
     a misbehaving agent) that sends an unbounded payload would either
-    fill the operator's data dir or trip the OS ARG_MAX limit on
+    fill your data dir or trip the OS ARG_MAX limit on
     subprocess exec. Bounded fields force a clean schema-level error
     instead.
     """

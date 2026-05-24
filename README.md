@@ -5,11 +5,11 @@
 [![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Executable compound practice loop. The terminal-side companion to [Lodestone](https://github.com/Clarethium/lodestone).
+Capture what each piece of work teaches — failures, decisions, the paths you ruled out — and get the relevant ones back the moment you need them. cma is the command-line companion to [Lodestone](https://github.com/Clarethium/lodestone).
 
 ## What this is
 
-cma is the operator's tool for running the compound practice loop on the local machine. It captures failures, surfaces warnings at the moment of action, tracks decisions, and detects recurrence patterns. It is the executable instantiation of the practice defined in Lodestone.
+cma runs the compound practice loop on your machine: it captures failures as they happen, surfaces the relevant ones at the moment you are about to act again, tracks decisions, and flags when a failure is recurring. It is the executable instantiation of the practice defined in Lodestone.
 
 The methodology lives in Lodestone. cma is what running that methodology looks like in a terminal.
 
@@ -50,7 +50,7 @@ cma miss "missed validation in middleware" \
 
 The texture fields (`--excerpt`, `--intended`, `--corrected`) preserve the conditions of the failure so future surfacing can match by situation, not just keywords.
 
-The `--fm` value is an opaque string from the operator's perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
+The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 
 Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](DATA.md).
 
@@ -86,11 +86,11 @@ cma stats --evidence
 #    Loop closure rate:           100%  (1/1)
 ```
 
-The closure rate counts only preventions evidenced by a surface event between the linked miss and the prevention. Operator self-attestation without that chain is captured but does not inflate the rate. `cma stats --evidence --json` emits the structured record for downstream consumers.
+The closure rate counts only preventions evidenced by a surface event between the linked miss and the prevention. Self-attestation without that chain is captured but does not inflate the rate. `cma stats --evidence --json` emits the structured record for downstream consumers.
 
 ## Action-time injection
 
-cma surfaces relevant prior captures automatically when an operator (or AI assistant) is about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](ARCHITECTURE.md). Two reference integrations ship in this repository.
+cma surfaces relevant prior captures automatically when you (or an AI assistant) are about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](ARCHITECTURE.md). Two reference integrations ship in this repository.
 
 ### Claude Code
 
@@ -173,7 +173,7 @@ Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stat
 ## MCP distribution (cma-mcp)
 
 The bash CLI and shell hooks above cover Claude Code and any
-shell-environment operator. For operators reaching the loop
+shell environment. For builders reaching the loop
 through other MCP-compatible AI clients (Claude Desktop, Cursor,
 Cline, Continue.dev), the same compound practice loop ships as a
 Python MCP server at [`cma-mcp/`](cma-mcp/). Subprocess wrapper
@@ -214,7 +214,7 @@ For automatic classification at capture time, set `CMA_FM_CLASSIFIER` to a comma
 ```bash
 export CMA_FM_CLASSIFIER=/path/to/your-classifier
 
-cma miss "the operator skipped verification before deploying"
+cma miss "skipped verification before deploying"
 # Classifier auto-tags the --fm value based on the description.
 ```
 

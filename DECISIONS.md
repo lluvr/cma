@@ -95,8 +95,8 @@ an example methodology but do not enumerate it.
 
 **Rationale.** Methodology vocabulary lives in
 Lodestone; bundling a frozen copy in cma-mcp couples release cadence
-and inverts canon-vs-companion separation. Operators who want the FM
-catalog read Lodestone directly; operators who want autoclassification
+and inverts canon-vs-companion separation. If you want the FM
+catalog, read Lodestone directly; if you want autoclassification,
 wire `CMA_FM_CLASSIFIER` per cma's plugin convention.
 
 ---
@@ -109,8 +109,8 @@ wire `CMA_FM_CLASSIFIER` per cma's plugin convention.
 transports are explicitly out of scope for v0.1.
 
 **Rationale.** Stdio is the universally supported transport across MCP
-clients (Claude Desktop, Cursor, Cline, Continue.dev). Operators who
-need multi-client server-side deployment can use one of the
+clients (Claude Desktop, Cursor, Cline, Continue.dev). If you
+need multi-client server-side deployment, you can use one of the
 forthcoming MCP gateway projects. Adding transports inside cma-mcp
 would expand the surface beyond its distribution-wrapper role.
 
@@ -121,12 +121,12 @@ would expand the surface beyond its distribution-wrapper role.
 **Date:** 2026-05-06
 
 **Decision.** Every bash cma invocation goes through
-`subprocess.run([...], shell=False)` with an argv array. Operator
+`subprocess.run([...], shell=False)` with an argv array. Your
 input never gets concatenated into a shell-interpreted string.
 
 **Rationale.** Argument injection is the most likely abuse path for a
 local MCP server. The argv-array discipline makes injection
-structurally impossible: any operator-supplied string lands in a
+structurally impossible: any string you supply lands in a
 single `argv[i]` slot and bash cma's argument parser treats it as
 data, not as code.
 

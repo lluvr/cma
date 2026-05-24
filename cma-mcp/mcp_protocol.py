@@ -173,7 +173,7 @@ class Dispatcher:
             handler = self._notification_handlers.get(req.method)
             if handler is None:
                 # Notifications without handlers are silently ignored
-                # per JSON-RPC 2.0; log so operators can debug.
+                # per JSON-RPC 2.0; log so you can debug.
                 mcp_log.debug("notification_ignored", method=req.method)
                 return
             try:

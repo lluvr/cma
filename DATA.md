@@ -48,7 +48,7 @@ Captures a failure. Written by `cma miss`.
   "files": "src/auth/jwt.ts",
   "intended": "patch only the failing test",
   "corrected": "trace upstream defect, fix at root",
-  "excerpt": "operator: ...\nassistant: ..."
+  "excerpt": "builder: ...\nassistant: ..."
 }
 ```
 
@@ -181,7 +181,7 @@ The current schema version is `1.0`. There are currently no announced schema cha
 
 cma writes records via a single `write()` syscall on the encoded record bytes. POSIX guarantees `O_APPEND` writes are atomic up to `PIPE_BUF` (typically 4096 bytes on Linux); in practice the Linux and macOS kernels serialize append writes at the inode level for the full buffer, so records well beyond 4 KiB also land atomically under concurrent writers. The bash test suite exercises 200 concurrent processes writing 64 KiB records; all records land valid.
 
-Future versions may add `fcntl.flock`-based locking if multi-host scenarios become load-bearing; the current single-host single-operator case relies on kernel append serialization.
+Future versions may add `fcntl.flock`-based locking if multi-host scenarios become load-bearing; the current single-host single-builder case relies on kernel append serialization.
 
 ### Storage requirements
 
@@ -220,9 +220,9 @@ When cma 2.0 ships, migration tooling will:
 1. Read records of any prior schema version.
 2. Apply any field renames, type conversions, or structural changes.
 3. Write a new file alongside the original (e.g., `misses.jsonl.v2`) without modifying the original.
-4. Atomically swap the new file into place after operator confirmation.
+4. Atomically swap the new file into place after your confirmation.
 
-Operators choosing to stay on schema 1.0 can do so indefinitely; cma 2.0 readers will continue to parse 1.0 records.
+If you choose to stay on schema 1.0, you can do so indefinitely; cma 2.0 readers will continue to parse 1.0 records.
 
 ## 8. References
 

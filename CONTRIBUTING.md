@@ -28,7 +28,7 @@ cma/
 ├── test.sh, bench.sh            bash test and benchmark harnesses
 ├── DESIGN.md ARCHITECTURE.md DATA.md   cma's surface, architecture, schema
 ├── CHANGELOG.md                 cma's release history
-├── README.md                    cma operator-facing overview
+├── README.md                    cma overview
 ├── cma-mcp/                     Python MCP distribution wrapper
 │   ├── mcp_server.py mcp_*.py cma_*.py   flat-modules wheel layout
 │   ├── tests/                   pytest suite
@@ -95,7 +95,7 @@ files together:
 1. `mcp_schema.py` (input/output schema)
 2. `mcp_server.py` (dispatch)
 3. `tests/test_mcp_server.py` (conformance test)
-4. `docs/MCP_SERVER.md` (operator-facing reference)
+4. `docs/MCP_SERVER.md` (reference)
 
 A PR that moves only one of the four is incomplete. Reviewers will
 ask for the others.
@@ -111,7 +111,7 @@ Surface changes also bump `SERVER_VERSION` in `mcp_server.py`:
 `cma_subprocess.py` wraps bash cma's CLI. New cma flags or behaviors
 land here when:
 
-- cma releases a new flag that operators want exposed via MCP
+- cma releases a new flag that you want exposed via MCP
 - a defensive timeout, retry, or error-shape adjustment is needed
 
 Extensions must respect AD-004 (argv-array, never shell=True) and

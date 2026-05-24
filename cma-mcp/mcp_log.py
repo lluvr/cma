@@ -2,8 +2,8 @@
 Stderr logging helper.
 
 cma-mcp logs to stderr because stdio is reserved for the MCP protocol
-itself. MCP clients capture stderr separately; operators inspecting
-the logs use their client's MCP-server logs view.
+itself. MCP clients capture stderr separately; if you inspect
+the logs, use your client's MCP-server logs view.
 
 Format: ISO-8601 UTC timestamp + level + key=value pairs. Single
 line per event. Timestamps are normalized to second resolution to

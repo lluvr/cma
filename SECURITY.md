@@ -13,8 +13,8 @@ This policy covers both components in this repository: bash cma
 | cma-mcp   | < 0.1   | No  |
 
 Security fixes land on the latest minor release line of each
-component; older minor releases are not backported. Operators
-tracking security posture should pin to the latest published
+component; older minor releases are not backported. If you
+track security posture, pin to the latest published
 artifact and update on each minor release.
 
 ## Reporting a vulnerability
@@ -34,10 +34,10 @@ disclosure or coordinated release of a fix, whichever comes first.
 
 ## Threat model
 
-Both components run locally on the operator's machine. The bash
+Both components run locally on your machine. The bash
 cma CLI runs in an interactive terminal session (or as a hook
 invoked by Claude Code, zsh, or bash-preexec). cma-mcp runs as an
-MCP server (stdio transport) spawned by the operator's MCP client.
+MCP server (stdio transport) spawned by your MCP client.
 Their combined threat surface is limited:
 
 1. **Untrusted input from MCP clients.** Tool arguments and resource
@@ -52,8 +52,8 @@ Their combined threat surface is limited:
    directory, and resource URIs do not accept arbitrary filesystem
    paths.
 3. **Subprocess execution.** cma-mcp invokes the `cma` bash binary
-   from the operator's `PATH`. Operators are responsible for
-   confirming the `cma` binary on their `PATH` is the canonical one
+   from your `PATH`. You are responsible for
+   confirming the `cma` binary on your `PATH` is the canonical one
    (run `cma --version` and verify the SHA against the
    [Clarethium/cma](https://github.com/Clarethium/cma) release).
 4. **No network calls.** cma-mcp performs zero network I/O. No
@@ -62,12 +62,12 @@ Their combined threat surface is limited:
 
 ## Out of scope
 
-- Protection against a malicious MCP client. An operator who
-  deliberately wires their MCP client to an untrusted server is
+- Protection against a malicious MCP client. If you
+  deliberately wire your MCP client to an untrusted server, that is
   outside this threat model. cma-mcp is the server; the trust
-  boundary is the operator's local machine.
+  boundary is your local machine.
 - Protection against malicious local processes. A process running
-  with the operator's filesystem permissions can already read or
+  with your filesystem permissions can already read or
   modify `~/.cma/` directly. cma-mcp does not add or subtract from
   that surface.
 
@@ -94,6 +94,6 @@ registry layer.
 This protection is automatic for adopters using `pip install`
 against a PyPI index that enforces attestation checks. It does
 not change the threat model for cma-mcp itself (which still runs
-locally and trusts its operator), but it tightens the chain
+locally and trusts you), but it tightens the chain
 between this repository and the wheel an adopter actually
 installs.

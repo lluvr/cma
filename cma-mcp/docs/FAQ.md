@@ -1,6 +1,6 @@
 # cma-mcp FAQ
 
-Common questions about cma-mcp, ordered roughly by where operators
+Common questions about cma-mcp, ordered roughly by where you
 hit them in setup. For symptoms-and-fixes, see
 [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
@@ -30,18 +30,18 @@ model.
 
 In `~/.cma/` (the canonical location used by bash cma). cma-mcp
 never owns or relocates data; it shells out to bash cma which writes
-to the operator's `~/.cma/` per its DATA.md schema. On WSL, that is
+to your `~/.cma/` per its DATA.md schema. On WSL, that is
 the WSL home (`/home/<user>/.cma/`), not the Windows side.
 
-The operator can override via `CMA_DIR=/some/other/path` and bash
+You can override via `CMA_DIR=/some/other/path` and bash
 cma honors it — cma-mcp passes the env through subprocess
 inheritance.
 
 ### Is cma-mcp methodology-specific?
 
-No. cma stores `--fm` as an opaque string. Operators using
-[Lodestone](https://github.com/Clarethium/lodestone) tag captures
-with FM-1..10; operators using a different methodology tag with
+No. cma stores `--fm` as an opaque string. If you use
+[Lodestone](https://github.com/Clarethium/lodestone), tag captures
+with FM-1..10; if you use a different methodology, tag with
 that catalog. cma-mcp does not validate, expand, or interpret the
 tag. Tool descriptions reference Lodestone as the canonical
 methodology but bundle no vocabulary (DECISIONS AD-006).
@@ -91,8 +91,8 @@ script as the only entry point.
 ### Why isn't there a Windows-native install?
 
 bash cma is the canonical implementation and uses `/bin/bash`.
-Windows operators run cma-mcp under WSL, which gives them the same
-binary on `PATH`. Operators on a pure Windows host with no WSL
+On Windows, run cma-mcp under WSL, which gives you the same
+binary on `PATH`. On a pure Windows host with no WSL, you
 cannot run cma-mcp today; that is the deliberate trade-off between
 canonical-binary alignment and standalone Python reach. Routing
 every tool call through the same canonical binary keeps cma-mcp
@@ -214,7 +214,7 @@ Lodestone separately if you reference its vocabulary.
 
 ## Where things live
 
-- **Operator-facing reference:** [`MCP_SERVER.md`](MCP_SERVER.md) —
+- **Reference:** [`MCP_SERVER.md`](MCP_SERVER.md) —
   every tool argument, every resource URI, the exact response
   shapes.
 - **Architecture map:** [`ARCHITECTURE.md`](ARCHITECTURE.md) —

@@ -605,8 +605,8 @@ leak_count = len(leaks)
 
 # Loop-closure evidence: a prevention is evidence the loop fired
 # only when a surface event for the linked miss occurred between
-# the miss timestamp and the prevention timestamp. Operator
-# self-attestation without a surfaced warning is captured (the
+# the miss timestamp and the prevention timestamp.
+# Self-attestation without a surfaced warning is captured (the
 # total count above) but does not inflate the closure rate.
 miss_by_id = {m.get("id"): m for m in misses if m.get("id")}
 evidenced_preventions = []
@@ -691,7 +691,7 @@ if closure_denom == 0:
     print("  No loop-closure evidence yet. A prevention is evidenced when")
     print("  the miss it links to (via --miss-id) was surfaced by cma between")
     print("  the miss's capture and the prevention's capture. Without that")
-    print("  chain, a prevention is operator self-attestation and is counted")
+    print("  chain, a prevention is self-attestation and is counted")
     print("  above but does not enter the closure rate. Wire the hook (or run")
     print("  cma surface manually) so surface events exist, and link each")
     print("  prevention with cma prevented --miss-id <id>.")
@@ -766,9 +766,9 @@ for (surface, fm), records in sorted_groups:
         print("    corrected: {}".format(truncate(corrected)))
     print()
 
-print("Behavior-layer analysis: each group shows where the operator had to pivot")
+print("Behavior-layer analysis: each group shows where you had to pivot")
 print("from an initial impulse to a different action. Recurring pivots indicate")
-print("patterns where surfaced warnings consistently change operator behavior.")
+print("patterns where surfaced warnings consistently change behavior.")
 PYEOF
         return 0
     fi
@@ -1058,7 +1058,7 @@ warn_if_storage_risky() {
     # weaker on network filesystems (NFS without flock, SMB) and on
     # cloud-sync directories that watch+rewrite files (Dropbox,
     # iCloud Drive, OneDrive, Google Drive). Warn rather than block
-    # so operators can override after reading the rationale in
+    # so you can override after reading the rationale in
     # DATA.md.
     local dir="$1"
     case "$dir" in
@@ -1084,8 +1084,8 @@ warn_if_storage_risky() {
 
 cmd_id() {
     # Print the id of the most recent capture matching the filters.
-    # Useful for piping into --miss-id / --warning-id / --retire so an
-    # operator does not have to scroll back through terminal output.
+    # Useful for piping into --miss-id / --warning-id / --retire so you
+    # do not have to scroll back through terminal output.
     #
     #   cma prevented "caught it" --miss-id "$(cma id miss)"
     #   cma prevented "caught it" --miss-id "$(cma id miss --surface auth)"
@@ -1142,10 +1142,10 @@ PYEOF
 }
 
 cmd_install_hook() {
-    # Wire cma's action-time injection hooks into the operator's
+    # Wire cma's action-time injection hooks into your
     # Claude Code settings.json. Idempotent: re-running detects
-    # existing cma hooks and skips. Preserves any other hooks the
-    # operator has already configured. With --dry-run, prints the
+    # existing cma hooks and skips. Preserves any other hooks you
+    # have already configured. With --dry-run, prints the
     # merged JSON to stdout without writing.
     local target="" scope="user" dry_run=false
     while [[ $# -gt 0 ]]; do

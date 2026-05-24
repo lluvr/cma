@@ -13,7 +13,7 @@ labels: enhancement
 
 ## What you want
 
-<!-- The capability, named in operator-facing terms. -->
+<!-- The capability, in terms of what you want to do. -->
 
 ## Why it matters
 
