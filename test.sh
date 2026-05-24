@@ -83,13 +83,18 @@ reset() { rm -rf "$CMA_DIR"/*.jsonl 2>/dev/null || true; }
 # to the same ISO-second. This helper polls until the seconds digit
 # changes, which is robust to drift in either direction.
 wait_for_next_second() {
-    # cma now writes microsecond-precision timestamps, so an event
-    # and a subsequent miss can land in the same wall-clock second
-    # but still satisfy event_ts < miss_ts. A short sleep is enough
-    # to guarantee strict ordering even when host-clock sync (WSL2)
-    # drifts the wall clock backwards mid-command. 100 ms is well
-    # above typical drift and keeps the test suite fast.
-    sleep 0.1
+    # Leak detection requires strict event_ts < miss_ts. Poll until the
+    # wall-clock second advances past the starting second, so an event and
+    # a subsequent miss are separated by a full second boundary. A fixed
+    # 100 ms sleep was insufficient: WSL2 host-clock sync can drift the
+    # wall clock backwards mid-test, collapsing the ordering and
+    # intermittently failing the evidence/leak assertions. Polling to the
+    # next second gives a ~1 s margin that survives that drift.
+    local start
+    start=$(date +%s)
+    while [ "$(date +%s)" -le "$start" ]; do
+        sleep 0.05
+    done
 }
 
 # ---------------------------------------------------------------------------
