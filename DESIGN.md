@@ -1,6 +1,6 @@
 # cma Design 1.0
 
-This document locks the surface API for cma 1.0. Implementation follows from this specification. Changes to this document follow the Suggestion process pattern (issue, discussion, pull request) once governance is in place; for now the design is finalized by the author.
+This document locks the surface API for cma 1.0. Implementation follows from this specification. Changes to this document follow the project's governance process: issue, discussion, pull request.
 
 ## Purpose
 
@@ -162,6 +162,7 @@ cma stats
     [--leaks]
     [--preventions]
     [--recurrence]
+    [--behavior]
 ```
 
 **Modes:**
@@ -171,32 +172,15 @@ cma stats
 - **`--leaks` view** — failures that occurred despite an active warning. Each leak increments the warning's weight.
 - **`--preventions` view** — captured preventions with linked misses. Evidence of the loop closing.
 - **`--recurrence` view** — failure shapes ordered by recurrence rate. Identifies preventions that are not working.
+- **`--behavior` view** — behavior-layer signals from misses carrying intended/corrected texture, grouped by surface and failure mode.
 
 **Output:** Tabular text with optional filters. Designed for human reading, not piping.
 
 **Replaces:** the prior `cma rejections` (now `--rejections` view) and `cma leaks` (now `--leaks` view).
 
-## Migration from the working version
-
-| Working version | cma 1.0 |
-|-----------------|---------|
-| `cma decision "..." [surface]` | `cma decision "..." --surface <s>` |
-| `cma reject "..." [surface] [trigger]` | `cma reject "..." --surface <s> --revisit-when <t>` |
-| `cma miss "..." [surface] [files] [fm]` | `cma miss "..." --surface <s> --files <f> --fm <fm>` |
-| `cma distill "..." [scope] [surface]` | `cma distill "..." --scope <s> --surface <s>` |
-| `cma retire <pattern>` | `cma distill --retire <pattern>` |
-| `cma review` | `cma distill --review` |
-| `cma context <surface> [file] [limit]` | `cma surface --surface <s> --file <f> --limit <n>` |
-| `cma prevented "..." [miss-id]` | `cma prevented "..." --miss-id <id>` |
-| `cma rejections` | `cma stats --rejections` |
-| `cma stats` | `cma stats` |
-| `cma leaks` | `cma stats --leaks` |
-
-Eleven verbs collapse to seven. Positional arguments become named flags. The conceptual distinctions between capture types are preserved.
-
 ## Out of scope for 1.0
 
-Reference-implementation polish identified in the audit will land as additive features without changing this surface:
+Reference-implementation polish will land as additive features without changing this surface:
 
 - **Texture preservation on misses** (conversation excerpt, intended action, corrected action) — added as additional optional fields on `cma miss`. The basic signature does not change.
 - **Counterfactual capture** — same as above.
@@ -208,10 +192,8 @@ Reference-implementation polish identified in the audit will land as additive fe
 
 cma is a local tool. All captures are stored in your local data directory (default: `~/.cma/`). The captures are private to you. The cma toolkit is open source; your data is not.
 
-This separation matches the Lodestone-versus-personal-practice distinction: the methodology is canonical and shared; what you capture while running it stays local.
+This separation mirrors the methodology itself: it is canonical and shared, while what you capture while running it stays local.
 
 ## Implementation status
 
-This design locks the cma 1.0 surface. Implementation work involves porting the existing working version of cma to this surface. Functional behavior is preserved; argument styles and command names are sharpened.
-
-The reference implementation lands in this repository under the Apache-2.0 license as it is ported.
+This design locks the cma 1.0 surface. The reference implementation in this repository conforms to it: functional behavior follows the specification, with argument styles and command names as defined above. It is published under the Apache-2.0 license.
