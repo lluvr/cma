@@ -20,8 +20,10 @@ artifact and update on each minor release.
 ## Reporting a vulnerability
 
 If you find a security issue in either component, do not open a
-public GitHub issue. Email `lovro.lucic@gmail.com` with
-`[cma security]` in the subject line. Include:
+public GitHub issue. Instead, use GitHub's private vulnerability
+reporting: open the repository **Security** tab and click **Report a
+vulnerability** (<https://github.com/Clarethium/cma/security/advisories/new>).
+Include:
 
 - Affected component (cma or cma-mcp) and version
   (`cma --version` or `cma-mcp --version`)

@@ -25,7 +25,6 @@ across calls (after timestamp normalization).
 
 from __future__ import annotations
 
-import time
 from typing import Any
 
 from cma_subprocess import cma_version
