@@ -41,7 +41,7 @@ Response:
           "tools":     {"listChanged": false},
           "resources": {"listChanged": false, "subscribe": false}
         },
-        "serverInfo": {"name": "cma-mcp", "version": "0.1.0"},
+        "serverInfo": {"name": "cma-mcp", "version": "0.1.2"},
         "instructions": "cma-mcp distributes the cma compound practice loop ..."
       }
     }
@@ -187,7 +187,7 @@ Server version follows semver:
 
     {
       "server_name": "cma-mcp",
-      "server_version": "0.1.0",
+      "server_version": "0.1.2",
       "protocol_version": "2024-11-05",
       "git_sha": "abc12345" or "abc12345+dirty" or null,
       "cma_binary_version": "<output of cma --version>" or null,

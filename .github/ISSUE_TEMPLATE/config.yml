@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security issue
-    url: mailto:lovro.lucic@gmail.com?subject=%5Bcma%20security%5D
-    about: Email security issues directly per SECURITY.md. Do NOT open public issues for vulnerabilities.
+    url: https://github.com/Clarethium/cma/security/advisories/new
+    about: Report security issues via GitHub private vulnerability reporting per SECURITY.md. Do NOT open public issues for vulnerabilities.
   - name: Lodestone methodology question
     url: https://github.com/Clarethium/lodestone/issues
     about: Methodology canon questions (FM catalog, surface protocols, compound practice) live with Lodestone.
