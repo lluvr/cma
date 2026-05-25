@@ -259,6 +259,6 @@ OS: <Linux/macOS/Windows-WSL distribution + version>
 MCP client: <Claude Desktop X.Y.Z / Cursor / Cline / etc.>
 ```
 
-Security issues go to `hello@clarethium.com` per
+Security issues use GitHub's private vulnerability reporting; see
 [SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md),
 not the public issue tracker.

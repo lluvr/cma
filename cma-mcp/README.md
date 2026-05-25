@@ -217,5 +217,5 @@ Bug reports and feature requests at
 Use the `cma-mcp` label or include `[cma-mcp]` in the title to
 disambiguate from bash cma issues.
 
-Security issues go to `hello@clarethium.com` per
+Security issues use GitHub's private vulnerability reporting; see
 [SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md).

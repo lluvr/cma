@@ -176,5 +176,5 @@ A PR that lands meets all of the following:
 Bug reports, feature requests, and protocol questions go to
 [GitHub Issues](https://github.com/Clarethium/cma/issues). For
 issues specific to one component, prefix the title with `[cma]`
-or `[cma-mcp]` so triage can disambiguate. Security issues go to
-`hello@clarethium.com` per `SECURITY.md`.
+or `[cma-mcp]` so triage can disambiguate. Security issues use
+GitHub's private vulnerability reporting; see `SECURITY.md`.
