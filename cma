@@ -229,7 +229,7 @@ cmd_prevented() {
 }
 
 # ---------------------------------------------------------------------------
-# Operational verbs (stubbed for v1.0-dev)
+# Operational verbs: surface, distill, stats
 # ---------------------------------------------------------------------------
 
 cmd_surface() {
