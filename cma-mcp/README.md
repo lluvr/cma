@@ -27,7 +27,7 @@ contribution) lives at the repository root.
 
 ## Status
 
-cma-mcp 0.1.1 is the current release. `pip install cma-mcp` pulls
+cma-mcp 0.1.2 is the current release. `pip install cma-mcp` pulls
 it from PyPI. See [CHANGELOG.md](CHANGELOG.md) for the release
 history.
 

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [
-    {name = "Lovro Lucic", email = "lovro.lucic@gmail.com"},
+    {name = "Lovro Lucic", email = "11740211+lluvr@users.noreply.github.com"},
 ]
 keywords = [
     "mcp",
