@@ -204,7 +204,7 @@ cma sits alongside two open reference artifacts published by Clarethium:
 - **[Touchstone](https://github.com/Clarethium/touchstone)** validates work against quality standards.
 - **[Lodestone](https://github.com/Clarethium/lodestone)** orients practice.
 
-cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here.
+cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here. Experiments and findings are published at [blog.clarethium.com](https://blog.clarethium.com).
 
 ## Methodology integration
 
