@@ -38,7 +38,7 @@
 
 set -u
 
-VERSION='2026-05-12-empire-bigram-private-files-strategy-dd-pystring-concat-selftest'
+VERSION='2026-07-03-reframe-person-context-allowlist'
 
 # ── Path allowlist (§5b) ────────────────────────────────────────────
 EXCLUDES=(
@@ -104,7 +104,7 @@ PAT_WEB_APP_LIVE_IMPORTS='\b(from|import) (security|annotator|observatory|teleme
 
 # ── Pattern family: OPERATOR_PATHS (FM-PCD-7) ───────────────────────
 # Personal machine paths and operator-private repo URLs.
-PAT_OPERATOR_PATHS='/home/user|/Users/user|examplehost(\.localdomain)?|~/\.claude/projects|\.claude/projects/-home-user|github\.com/lluvr/frame-check\b'
+PAT_OPERATOR_PATHS='/home/user|/Users/user|examplehost(\.localdomain)?|~/\.claude/projects|\.claude/projects/-home-user|github\.com/lluvr/example-private-repo\b'
 
 # ── Pattern family: OPERATIONAL_STATE (FM-PCD-6) ────────────────────
 # Runtime state files from the live web deploy. None of these have
@@ -143,7 +143,7 @@ VAULT_BARE_ALLOWLIST='password vault|bank vault|secrets vault|secrets-vault|hash
 # (e.g., a comment in a frame catalog entry that happens to contain
 # the word "consensus"). Specific allowlist lines for known benign
 # uses of `consensus` (the English word) and `mirror` (mirror image).
-WEB_APP_MODULE_ALLOWLIST='consensus (verdict|went|on|across|exists|doesn|that|but|mechanism|proxy|and|is|using|now)|scientific consensus|expert consensus|reader consensus|rater consensus|cross-(provider|family) consensus|cross-provider consensus|library_consensus|Re-compute consensus|_consensus|^# Consensus|verifier consensus|inter-LLM consensus|consensus research|the consensus|broke the consensus|community consensus|editor body consensus|path to consensus|by .* consensus|consensus or strong|mirror (image|the methodology|review)|examples?\.md|reframe (the question|the document)|architectural reframe|consistency check|\bobservatory\b\s+(state|topics|daemon|paused|offline)|telemetry\.|telemetry tagging|telemetry events|telemetry schema|telemetry path|downstream telemetry|corpus telemetry|telemetry queries|structural telemetry|telemetry_opt_in|telemetry pipeline|telemetry patterns|production telemetry|verification.*telemetry|telemetry and audit|Tier B telemetry|to telemetry|record telemetry|surface in|saved_analyses / saved_compare|"reframe", "topic_generation"|verification, consensus|telemetry\)|for telemetry pass|:[[:space:]]*#[[:space:]]+Consensus[[:space:]]*$|domain_baselines\.py|\bno telemetry\b|\bzero telemetry\b|telemetry, no\s+(remote|external|outbound|inbound)|telemetry of any (form|kind)|telemetry collection'
+WEB_APP_MODULE_ALLOWLIST='consensus (verdict|went|on|across|exists|doesn|that|but|mechanism|proxy|and|is|using|now)|scientific consensus|expert consensus|reader consensus|rater consensus|cross-(provider|family) consensus|cross-provider consensus|library_consensus|Re-compute consensus|_consensus|^# Consensus|verifier consensus|inter-LLM consensus|consensus research|the consensus|broke the consensus|community consensus|editor body consensus|path to consensus|by .* consensus|consensus or strong|mirror (image|the methodology|review)|examples?\.md|reframe (the question|the document|her|his|their|its)|architectural reframe|consistency check|\bobservatory\b\s+(state|topics|daemon|paused|offline)|telemetry\.|telemetry tagging|telemetry events|telemetry schema|telemetry path|downstream telemetry|corpus telemetry|telemetry queries|structural telemetry|telemetry_opt_in|telemetry pipeline|telemetry patterns|production telemetry|verification.*telemetry|telemetry and audit|Tier B telemetry|to telemetry|record telemetry|surface in|saved_analyses / saved_compare|"reframe", "topic_generation"|verification, consensus|telemetry\)|for telemetry pass|:[[:space:]]*#[[:space:]]+Consensus[[:space:]]*$|domain_baselines\.py|\bno telemetry\b|\bzero telemetry\b|telemetry, no\s+(remote|external|outbound|inbound)|telemetry of any (form|kind)|telemetry collection'
 
 # Strategic-extended allowlist: specific contexts where the bigram is
 # legitimate (quoted excerpts, methodology paper).
