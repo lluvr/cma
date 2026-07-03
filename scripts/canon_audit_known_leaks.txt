@@ -75,7 +75,7 @@ Operator memory directory at ~/.claude/projects/-home-llucic-frame-check/memory/
 Trace path /Users/lovro/dev/frame-check on macOS.
 Hostname: llucic@Powerhouse.localdomain
 Bare hostname Powerhouse appears in the env.
-Repo URL https://github.com/lluvr/frame-check is the dev tree.
+Repo URL https://github.com/lluvr/frame-check-web is the dev tree.
 
 ## family: OPERATIONAL_STATE
 The web app reads cost_budget.json on every request.
@@ -178,15 +178,6 @@ Empire bet is on compounding methodology.
 Result publishes to docs/internal/DISTRIBUTION_FAITHFULNESS_<date>.md with the captured snapshots.
 See docs/internal/AUDIT_FINDINGS.md for the prior version of this analysis.
 
-## family: VAULT (legacy)
-Library is vault-faithful: regex preserved as-is.
-Boundaries are vault-validated against EXP-095 data.
-Vault behaviour: text before first ## heading is excluded.
-The vault's precision threshold for entities is total < 5.
-This implementation pins vault notes for posterity.
-Outputs live in JSON files in the vault EXP-095 directory.
-This baseline comes from the vault implementation.
-
 ## family: RIGID (operator practitioner-term retirement, 2026-05-24)
 The operator methodology section defines the stance.
 This follows operator discipline across model generations.
@@ -195,3 +186,12 @@ Output depends on the operator's disposition toward the work.
 A pilot across multi-operator cohorts validates the annex.
 Frames operator-AI work as a coupled cognitive system.
 Stance is the operator's stance prior to method.
+
+## family: VAULT (legacy)
+Library is vault-faithful: regex preserved as-is.
+Boundaries are vault-validated against EXP-095 data.
+Vault behaviour: text before first ## heading is excluded.
+The vault's precision threshold for entities is total < 5.
+This implementation pins vault notes for posterity.
+Outputs live in JSON files in the vault EXP-095 directory.
+This baseline comes from the vault implementation.
