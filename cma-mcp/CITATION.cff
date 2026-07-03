@@ -1,9 +1,7 @@
 cff-version: 1.2.0
 message: >-
   If you use cma-mcp in academic, applied, or compliance work,
-  please cite it using the metadata below. The methodology canon
-  (Lodestone) and the executable companion (cma) are separately
-  citeable artifacts with their own canonical references.
+  please cite it using the metadata below.
 title: "cma-mcp: Model Context Protocol distribution for the compound practice loop"
 type: software
 authors:
@@ -11,16 +9,14 @@ authors:
     given-names: Lovro
     orcid: "https://orcid.org/0009-0008-9976-6933"
     website: "https://blog.clarethium.com"
-repository-code: "https://github.com/Clarethium/cma"
-url: "https://github.com/Clarethium/cma/tree/main/cma-mcp"
+url: "https://pypi.org/project/cma-mcp/"
 abstract: >-
   cma-mcp is the Model Context Protocol server that exposes the cma
   compound practice loop to any MCP-compatible AI client (Claude
   Desktop, Cursor, Cline, Continue.dev, and others). The server is a
   thin distribution wrapper around the canonical cma reference
-  implementation; vocabulary, methodology, and the loop's design live
-  in Lodestone (the methodology canon) and cma (the bash reference
-  implementation). cma-mcp's contribution is reach: bringing the same
+  implementation, the command-line tool it invokes as a subprocess.
+  cma-mcp's contribution is reach: bringing the same
   capture-and-surface discipline to environments where the
   cma CLI's shell hooks do not run.
 keywords:
@@ -30,20 +26,19 @@ keywords:
   - failure-capture
   - decision-tracking
   - prevention
-  - lodestone
   - cma
   - clarethium
 license: Apache-2.0
-version: "0.1.2"
-date-released: "2026-05-15"
-doi: "10.5281/zenodo.20211591"
+version: "0.1.4"
+date-released: "2026-07-03"
+doi: "10.5281/zenodo.20066625"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20066625"
+    description: "Concept DOI; resolves to the latest release"
   - type: doi
     value: "10.5281/zenodo.20211591"
     description: "Versioned DOI for cma-mcp 0.1.2"
-  - type: doi
-    value: "10.5281/zenodo.20066625"
-    description: "Concept DOI; resolves to the latest release in this repository (cma or cma-mcp)"
   - type: url
     value: "https://pypi.org/project/cma-mcp/"
     description: "PyPI distribution"
@@ -54,15 +49,5 @@ references:
       - family-names: Lucic
         given-names: Lovro
         orcid: "https://orcid.org/0009-0008-9976-6933"
-    url: "https://github.com/Clarethium/cma"
     license: Apache-2.0
-    notes: "The canonical bash reference implementation that cma-mcp wraps. cma-mcp invokes its CLI as a subprocess; the data substrate (`~/.cma/*.jsonl`) is shared between cma and cma-mcp."
-  - type: article
-    title: "Lodestone: canonical methodology for AI-coupled work"
-    authors:
-      - family-names: Lucic
-        given-names: Lovro
-        orcid: "https://orcid.org/0009-0008-9976-6933"
-    url: "https://github.com/Clarethium/lodestone"
-    license: CC-BY-4.0
-    notes: "The methodology canon. Defines stance, the loop, calibration, altitude, failure shapes, quality levels, surface protocols, and compound practice (Section VIII). cma-mcp is methodology-agnostic at the substrate level; you tag captures with a methodology's vocabulary (Lodestone's FM-1..10 or otherwise) by passing it through as opaque strings."
+    notes: "The canonical reference implementation that cma-mcp wraps. cma-mcp invokes its CLI as a subprocess; the data substrate (`~/.cma/*.jsonl`) is shared between cma and cma-mcp."

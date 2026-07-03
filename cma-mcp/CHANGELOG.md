@@ -23,6 +23,28 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.1.4] - 2026-07-03
+
+### Changed
+
+- Project URLs reduced to the one public destination (the blog). The previous set pointed at a source repository that is no longer publicly reachable, so every link on the PyPI page was dead for adopters.
+- `CITATION.cff` cleaned the same way: dead repository URLs removed, the concept DOI is now the primary `doi:`, and the methodology reference with an unreachable URL was dropped.
+- Version locations realigned (`pyproject.toml`, `SERVER_VERSION`, `CITATION.cff`); 0.1.3 had left `SERVER_VERSION` and the citation metadata at 0.1.2. No tool-surface changes; the server code is unchanged apart from the version constant.
+
+---
+
+## [0.1.3] - 2026-06-01
+
+Recorded retroactively. This release was published to PyPI from a
+working tree that was not committed at the time; the corresponding
+source landed in the repository as part of the 0.1.4 preparation.
+
+### Changed
+
+- README rewritten to stand alone without repository links, since the source repository is not publicly reachable. Package description refreshed to match.
+
+---
+
 ## [0.1.2] - 2026-05-15
 
 ### Changed
