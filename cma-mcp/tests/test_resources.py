@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 
+from conftest import days_ago
+
 import cma_jsonl
 import mcp_resources
 
@@ -54,7 +56,7 @@ def test_corrupt_lines_are_skipped_and_counted(isolated_cma_dir):
         "schema_version": "1.0",
         "type": "decision",
         "id": "20260601-080000-corrup99",
-        "timestamp": "2026-06-01T08:00:00Z",
+        "timestamp": days_ago(2),
         "description": "VALID: a real decision body that satisfies validation",
     }
     with open(decisions_path, "w", encoding="utf-8") as fh:
@@ -73,7 +75,7 @@ def test_unknown_schema_version_surfaces_in_provenance(isolated_cma_dir):
         "schema_version": "9.9",
         "type": "decision",
         "id": "20260601-080000-future99",
-        "timestamp": "2026-06-01T08:00:00Z",
+        "timestamp": days_ago(2),
         "description": "FROM_FUTURE: a record the parser does not know",
     }
     with open(decisions_path, "w", encoding="utf-8") as fh:
@@ -88,7 +90,7 @@ def test_legacy_record_no_schema_version_parses_leniently(isolated_cma_dir):
     legacy = {
         "type": "decision",
         "id": "20251201-080000-legacy00",
-        "timestamp": "2025-12-01T08:00:00Z",
+        "timestamp": days_ago(2),
         "description": "LEGACY: a record from before schema_version was introduced",
     }
     with open(decisions_path, "w", encoding="utf-8") as fh:

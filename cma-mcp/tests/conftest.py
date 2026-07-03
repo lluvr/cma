@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import shutil
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -36,6 +37,18 @@ def isolated_cma_dir(tmp_path, monkeypatch):
     yield tmp_path
 
 
+def days_ago(n: int) -> str:
+    """ISO-8601 UTC timestamp n days in the past.
+
+    Fixture seeds use relative timestamps so records never age out of
+    the resources' lookback windows. The previous fixed seeds rotted:
+    the 2026-05-03 rejection aged past REJECTIONS_LOOKBACK_DAYS (30)
+    in June 2026 and silently broke the suite.
+    """
+    stamp = datetime.now(timezone.utc) - timedelta(days=n)
+    return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 @pytest.fixture
 def seeded_cma_dir(isolated_cma_dir):
     """
@@ -49,7 +62,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "miss",
                 "id": "20260501-100000-aaaa1111",
-                "timestamp": "2026-05-01T10:00:00Z",
+                "timestamp": days_ago(6),
                 "description": "claimed verified without testing the cross-tenant write path",
                 "surface": "auth",
                 "fm": "FM-3",
@@ -60,7 +73,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "decision",
                 "id": "20260502-110000-bbbb2222",
-                "timestamp": "2026-05-02T11:00:00Z",
+                "timestamp": days_ago(5),
                 "description": "AUTH: JWT over sessions because stateless scales horizontally",
                 "surface": "auth",
                 "applies_when": "auth jwt",
@@ -71,7 +84,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "rejection",
                 "id": "20260503-120000-cccc3333",
-                "timestamp": "2026-05-03T12:00:00Z",
+                "timestamp": days_ago(4),
                 "description": "GraphQL: overhead for this project",
                 "surface": "api",
                 "revisit_when": "if mobile clients are added",
@@ -82,7 +95,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "prevention",
                 "id": "20260504-130000-dddd4444",
-                "timestamp": "2026-05-04T13:00:00Z",
+                "timestamp": days_ago(3),
                 "description": "almost claimed verified, ran the cross-tenant test instead",
                 "miss_id": "20260501-100000-aaaa1111",
             },
@@ -92,7 +105,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "core",
                 "id": "20260301-090000-eeee5555",
-                "timestamp": "2026-03-01T09:00:00Z",
+                "timestamp": days_ago(20),
                 "description": "Always check JWT expiration in auth middleware",
                 "scope": "general",
                 "surface": "auth",
@@ -101,7 +114,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "core",
                 "id": "20260302-090000-ffff6666",
-                "timestamp": "2026-03-02T09:00:00Z",
+                "timestamp": days_ago(19),
                 "description": "Centralize model identifiers to config; never hardcode",
                 "scope": "general",
                 "surface": "general",
@@ -110,7 +123,7 @@ def seeded_cma_dir(isolated_cma_dir):
                 "schema_version": "1.0",
                 "type": "retirement",
                 "id": "20260401-100000-9999aaaa",
-                "timestamp": "2026-04-01T10:00:00Z",
+                "timestamp": days_ago(10),
                 "retires": "20260302-090000-ffff6666",
                 "pattern": "model identifiers",
             },
