@@ -1,35 +1,22 @@
 # cma-mcp
 
-[![tests-mcp](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml)
-[![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/cma-mcp/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/Clarethium/cma/blob/main/LICENSE)
-[![Companions](https://img.shields.io/badge/org-Clarethium-blue.svg)](https://github.com/Clarethium)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-The Model Context Protocol distribution layer for [cma](https://github.com/Clarethium/cma#readme),
-Clarethium's executable compound practice loop.
+The Model Context Protocol layer for cma, an executable compound
+practice loop: capture failures, surface them at the moment of action,
+track decisions and rejections, and check whether warnings actually
+prevented repeats.
 
-## Where this lives
-
-cma-mcp is one component of the [cma project](https://github.com/Clarethium/cma).
-The repository root holds the canonical bash cma reference
-implementation; this `cma-mcp/` subdirectory holds the Python
-wrapper that exposes the same loop to MCP-compatible AI clients.
-The two components release independently:
-
-- **bash cma**: see the [parent README](https://github.com/Clarethium/cma#readme) for the CLI
-  surface, install, and Claude Code / shell hook integrations.
-- **cma-mcp**: this README, focused on the PyPI installation and
-  MCP client configuration.
-
-Cross-cutting governance (license, citation, security,
-contribution) lives at the repository root.
+cma-mcp wraps the canonical `cma` command-line tool and exposes its
+seven primitives to MCP-compatible AI clients. It does not reimplement
+the loop; it shells out to the `cma` binary, so it never diverges from
+the reference implementation.
 
 ## Status
 
-cma-mcp 0.1.2 is the current release. `pip install cma-mcp` pulls
-it from PyPI. See [CHANGELOG.md](CHANGELOG.md) for the release
-history.
+cma-mcp 0.1.2 is the current release. `pip install cma-mcp` pulls it
+from PyPI. The changelog is bundled with the wheel (`CHANGELOG.md`).
 
 ## What this is
 
@@ -44,26 +31,18 @@ from the 1.0 reference implementation.
 
 ## Quickstart
 
-cma-mcp wraps the canonical bash cma binary. Install bash cma first
-from the [parent repository](https://github.com/Clarethium/cma#readme), then confirm it is on
-`PATH`:
+cma-mcp shells out to the `cma` command-line tool, so that binary must
+be installed and on your `PATH` first. Confirm it:
 
     cma --help
 
-Install cma-mcp:
+Then install cma-mcp:
 
     pip install cma-mcp
 
 The `cma-mcp` console script lands on PATH after install. Confirm:
 
     cma-mcp --version
-
-For local development against an editable checkout, swap the
-install for:
-
-    git clone https://github.com/Clarethium/cma.git
-    cd cma/cma-mcp
-    pip install -e .
 
 Point your MCP client at the installed entry point. For Claude
 Desktop, add to `claude_desktop_config.json`:
@@ -124,7 +103,7 @@ agent passing cma-mcp output to a user without attribution would
 strip the reproducibility that makes the loop's evidence worth
 citing. Surfacing "how to cite faithfully" inside the payload is
 the structure that carries that integrity forward. This convention
-is established by [frame-check](https://github.com/Clarethium/frame-check);
+is the same one Frame Check uses;
 cma-mcp inherits it. Adversarial tests in
 `tests/test_payload_determinism.py` pin the structure.
 
@@ -132,8 +111,8 @@ cma-mcp inherits it. Adversarial tests in
 
 **Subprocess over reimplementation.** cma-mcp invokes bash cma as
 a subprocess for every captured action. cma-mcp does not
-reimplement cma's seven primitives in Python. See
-[DECISIONS.md](https://github.com/Clarethium/cma/blob/main/DECISIONS.md) AD-001 for the rationale.
+reimplement cma's seven primitives in Python; that is a deliberate
+subprocess-over-reimplementation decision.
 
 **Methodology-agnostic substrate.** cma stores `--fm` (failure
 mode) as an opaque string. cma-mcp does not bundle any
@@ -178,25 +157,14 @@ pipeline wiring and that the cma binary is reachable.
 
 ## Documentation
 
-Project-level (repository root):
+Bundled with the wheel:
 
-- [README.md](https://github.com/Clarethium/cma#readme): cma's CLI overview
-- [DECISIONS.md](https://github.com/Clarethium/cma/blob/main/DECISIONS.md): architectural decisions log
-- [GOVERNANCE.md](https://github.com/Clarethium/cma/blob/main/GOVERNANCE.md): BDFL governance, named curator
-- [CONTRIBUTING.md](https://github.com/Clarethium/cma/blob/main/CONTRIBUTING.md): contribution mechanics, DCO sign-off
-- [SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md): threat model and reporting
-- [LICENSE](https://github.com/Clarethium/cma/blob/main/LICENSE) (Apache-2.0), [NOTICE](https://github.com/Clarethium/cma/blob/main/NOTICE), [CITATION.cff](https://github.com/Clarethium/cma/blob/main/CITATION.cff)
-
-cma-mcp specific (this directory):
-
-- [CHANGELOG.md](CHANGELOG.md): cma-mcp release history
-- [docs/MCP_SERVER.md](docs/MCP_SERVER.md): protocol reference
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): module layout, data
-  flow, contracts; reading map for new contributors
-- [docs/FAQ.md](docs/FAQ.md): conceptual questions, install gotchas,
-  cross-client config patterns
-- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md): symptoms and
-  fixes; the diagnostic loop is the four-command sequence at the top
+- `CHANGELOG.md`: cma-mcp release history
+- `docs/MCP_SERVER.md`: protocol reference
+- `docs/ARCHITECTURE.md`: module layout, data flow, contracts
+- `docs/FAQ.md`: conceptual questions, install gotchas, cross-client config
+- `docs/TROUBLESHOOTING.md`: symptoms and fixes
+- `LICENSE` (Apache-2.0), `NOTICE`, `CITATION.cff`
 
 ## Running tests
 
@@ -212,10 +180,4 @@ require the bash cma binary skip when it is not on `PATH`.
 
 ## Issues
 
-Bug reports and feature requests at
-[github.com/Clarethium/cma/issues](https://github.com/Clarethium/cma/issues).
-Use the `cma-mcp` label or include `[cma-mcp]` in the title to
-disambiguate from bash cma issues.
-
-Security issues use GitHub's private vulnerability reporting; see
-[SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md).
+Bug reports, feature requests, and security reports: `hello@clarethium.com`.
