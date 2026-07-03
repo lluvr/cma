@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cma-mcp"
-version = "0.1.3"
+version = "0.1.4"
 description = "Model Context Protocol server for the cma compound practice loop. Subprocess wrapper around the canonical bash cma binary; methodology-agnostic substrate; three-section payload (analysis + agent_guidance + provenance) on every response."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -52,15 +52,9 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Clarethium/cma/tree/main/cma-mcp"
-Repository = "https://github.com/Clarethium/cma"
-Issues = "https://github.com/Clarethium/cma/issues"
-Changelog = "https://github.com/Clarethium/cma/blob/main/cma-mcp/CHANGELOG.md"
-Security = "https://github.com/Clarethium/cma/blob/main/SECURITY.md"
-Decisions = "https://github.com/Clarethium/cma/blob/main/DECISIONS.md"
-"MCP Server Reference" = "https://github.com/Clarethium/cma/blob/main/cma-mcp/docs/MCP_SERVER.md"
-"Wrapped CLI (cma)" = "https://github.com/Clarethium/cma"
-"Methodology Canon (Lodestone)" = "https://github.com/Clarethium/lodestone"
+# The source repository is not publicly reachable; the blog is the
+# project's public home. Do not list URLs that 404 for adopters.
+Homepage = "https://blog.clarethium.com"
 
 [project.scripts]
 cma-mcp = "mcp_server:cli"

@@ -15,7 +15,7 @@ the reference implementation.
 
 ## Status
 
-cma-mcp 0.1.2 is the current release. `pip install cma-mcp` pulls it
+cma-mcp 0.1.4 is the current release. `pip install cma-mcp` pulls it
 from PyPI. The changelog is bundled with the wheel (`CHANGELOG.md`).
 
 ## What this is
