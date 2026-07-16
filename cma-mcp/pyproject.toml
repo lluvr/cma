@@ -19,7 +19,6 @@ keywords = [
     "failure-capture",
     "decision-tracking",
     "prevention",
-    "lodestone",
     "cma",
     "claude-desktop",
     "cursor",
@@ -51,17 +50,17 @@ test = [
 ]
 
 [project.urls]
-# The source repository is not publicly reachable; the blog is the
-# project's public home. Do not list URLs that 404 for adopters.
-Homepage = "https://blog.clarethium.com"
+Homepage = "https://github.com/lluvr/cma/tree/main/cma-mcp"
+Repository = "https://github.com/lluvr/cma"
+Changelog = "https://github.com/lluvr/cma/blob/main/cma-mcp/CHANGELOG.md"
+Issues = "https://github.com/lluvr/cma/issues"
 
 [project.scripts]
 cma-mcp = "mcp_server:cli"
 
 [tool.setuptools]
-# Flat-modules layout matching frame-check's wheel-bundle
-# convention. Each *.py at the repo root ships as a top-level import
-# on the installed wheel.
+# Flat-modules layout: each *.py at the repo root ships as a
+# top-level import on the installed wheel.
 py-modules = [
     "mcp_server",
     "mcp_protocol",

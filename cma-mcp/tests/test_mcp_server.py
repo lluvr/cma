@@ -107,25 +107,25 @@ def test_tools_list_advertises_output_schema(fresh_dispatcher):
             assert section in schema["properties"]
 
 
-def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher):
+def test_tool_descriptions_stay_methodology_agnostic(fresh_dispatcher):
     """
-    Per DECISIONS AD-006: cma-mcp does not bundle Lodestone vocabulary.
-    The fm field on cma_miss (and cma_prevented) is where FM tagging
-    surfaces; that field's description must reference Lodestone as
-    the canonical methodology rather than enumerating the catalog.
+    Per DECISIONS AD-006: cma-mcp does not bundle a methodology's
+    vocabulary. The fm field on cma_miss (and cma_prevented) must frame
+    the tag as belonging to the caller's methodology and must not
+    enumerate a catalog.
     """
     result = call_handler(fresh_dispatcher, "tools/list")
     cma_miss = next(t for t in result["tools"] if t["name"] == "cma_miss")
     fm_field_desc = cma_miss["inputSchema"]["properties"]["fm"]["description"]
-    assert "lodestone" in fm_field_desc.lower(), (
-        "fm field must point to Lodestone as the canonical methodology"
+    # Frames the tag as the caller's methodology vocabulary, not a
+    # bundled one.
+    assert "methodology" in fm_field_desc.lower(), (
+        "fm field must frame the tag as the caller's methodology vocabulary"
     )
-    # The description must NOT define what each FM means (bundling the
-    # catalog inverts canon-vs-companion separation per DECISIONS AD-006).
-    # Brief reference to FM-1..10 as an example tag namespace is OK;
-    # an enumeration of definitions is not. We probe by checking for
-    # the disambiguation prose ("Speed Over Understanding", etc.) that
-    # would only appear if the catalog were bundled.
+    # The description must NOT define what any failure mode means
+    # (bundling a catalog inverts the substrate-vs-catalog separation
+    # per DECISIONS AD-006). Probe for disambiguation prose that would
+    # only appear if a catalog were bundled.
     forbidden_definitions = [
         "Speed Over Understanding",
         "Component Over Journey",
@@ -134,8 +134,8 @@ def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher)
     ]
     for definition in forbidden_definitions:
         assert definition not in fm_field_desc, (
-            f"fm description bundles Lodestone vocabulary ({definition!r}); "
-            "remove the definition and reference Lodestone instead"
+            f"fm description bundles a failure-mode catalog ({definition!r}); "
+            "keep it methodology-agnostic per AD-006"
         )
 
 
