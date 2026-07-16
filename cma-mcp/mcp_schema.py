@@ -19,10 +19,8 @@ as an opaque string; the canonical examples (`auth`, `db`, `docs`,
 but you may pass any short label that fits your work.
 
 `fm` (failure-mode) is opaque per DECISIONS AD-006. cma-mcp does not
-bundle a failure-mode catalog. Tool descriptions name Lodestone as
-one example methodology that owns an FM-1..10 vocabulary;
-if you use a different methodology, pass that methodology's tag
-through as opaque data.
+bundle a failure-mode catalog. Whatever methodology you practice owns
+the vocabulary; pass its tag through as opaque data.
 """
 
 from __future__ import annotations
@@ -40,10 +38,10 @@ _SURFACE_DESCRIPTION = (
 )
 
 _FM_DESCRIPTION = (
-    "Failure-mode tag, opaque to cma. When you use a "
-    "methodology with a canonical catalog (such as Lodestone's "
-    "FM-1..10), pass that tag here as a string. cma-mcp does not "
-    "bundle the catalog "
+    "Failure-mode tag, opaque to cma. When you practice a "
+    "methodology with a canonical failure-mode catalog, pass that "
+    "catalog's tag here as a string. cma-mcp does not "
+    "bundle a catalog "
     "itself. If unset, cma falls back to your "
     "CMA_FM_CLASSIFIER plugin (if configured) or stores the miss "
     "with no fm."

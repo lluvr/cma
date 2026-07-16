@@ -15,8 +15,8 @@ the reference implementation.
 
 ## Status
 
-cma-mcp 0.1.4 is the current release. `pip install cma-mcp` pulls it
-from PyPI. The changelog is bundled with the wheel (`CHANGELOG.md`).
+`pip install cma-mcp` installs the latest release from PyPI. The
+release history is in `CHANGELOG.md`.
 
 ## What this is
 
@@ -87,6 +87,13 @@ command; the stdio handshake runs).
 | `cma://core` | Active core learnings (retired filtered) |
 | `cma://stats` | Default stats summary |
 
+## Protocol
+
+cma-mcp speaks the current Model Context Protocol and negotiates the
+revision with each client: it echoes the revision the client requests
+when it supports it (`2025-11-25`, `2025-06-18`, `2025-03-26`,
+`2024-11-05`) and otherwise offers its newest. Transport is stdio.
+
 ## Three-section payload
 
 Every tool response and resource read returns a JSON payload with
@@ -106,10 +113,8 @@ The `agent_guidance` and `provenance` sections exist because an
 agent passing cma-mcp output to a user without attribution would
 strip the reproducibility that makes the loop's evidence worth
 citing. Surfacing "how to cite faithfully" inside the payload is
-the structure that carries that integrity forward. This convention
-is the same one frame-check uses;
-cma-mcp inherits it. Adversarial tests in
-`tests/test_payload_determinism.py` pin the structure.
+the structure that carries that integrity forward. Adversarial tests
+in `tests/test_payload_determinism.py` pin the structure.
 
 ## Approach
 
@@ -120,10 +125,10 @@ subprocess-over-reimplementation decision.
 
 **Methodology-agnostic substrate.** cma stores `--fm` (failure
 mode) as an opaque string. cma-mcp does not bundle any
-methodology's failure-mode catalog. You tag captures with
-your methodology's vocabulary (Lodestone's FM-1..10 or otherwise)
-by passing the tag through; for autoclassification, set
-`CMA_FM_CLASSIFIER` per cma's plugin convention.
+methodology's failure-mode catalog. You tag captures with your
+methodology's own vocabulary by passing the tag through; for
+autoclassification, set `CMA_FM_CLASSIFIER` per cma's plugin
+convention.
 
 **No external runtime dependencies.** cma-mcp implements MCP
 directly in-repo using JSON-RPC 2.0 over stdio. No third-party MCP
