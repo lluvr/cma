@@ -8,7 +8,7 @@ or `.cursorrules` is. Read it before making changes.
 
 ## What this repo is
 
-`Clarethium/cma` is the public canonical repository for **cma**
+`lluvr/cma` is the public canonical repository for **cma**
 (executable compound practice loop) plus its MCP wrapper at
 `cma-mcp/`. The bash CLI at the repo root is the load-bearing
 implementation; the Python MCP wrapper at `cma-mcp/` is a thin
@@ -16,7 +16,7 @@ distribution surface. They ship together because every cma flag is a
 cma-mcp tool argument and every JSONL field in `surface_events.jsonl`
 is a cma-mcp parser concern; same-repo prevents drift structurally.
 
-The decision is codified in `DECISIONS.md` AD-008. If you are
+The decision is codified in `docs/DECISIONS.md` AD-008. If you are
 proposing structural changes, read AD-008 first.
 
 ## What goes in this repo
@@ -24,10 +24,10 @@ proposing structural changes, read AD-008 first.
 This repository ships only what an adopter needs to install, run,
 extend, and audit CMA. The scope is fixed:
 
-- The bash CLI and its `test.sh` suite.
+- The bash CLI and its `scripts/test.sh` suite.
 - The `cma-mcp/` Python wrapper, its tests, and the wheel metadata.
-- `README.md`, `CONTRIBUTING.md`, `GOVERNANCE.md`, `SECURITY.md`,
-  `CHANGELOG.md`, `LICENSE`, `CITATION.cff`, `DECISIONS.md`.
+- `README.md`, `CONTRIBUTING.md`, `docs/GOVERNANCE.md`, `SECURITY.md`,
+  `CHANGELOG.md`, `LICENSE`, `CITATION.cff`, `docs/DECISIONS.md`.
 - `AGENTS.md` (this file) at the root.
 
 Anything outside that scope does not enter the repository. The
@@ -93,7 +93,7 @@ with a placeholder marker; the marker itself is a leak.
 
 - DCO sign-off required (`git commit -s ...`). The `dco-check`
   workflow blocks merges of unsigned commits.
-- Bash CLI tests run via `./test.sh` at the repo root. MCP wrapper
+- Bash CLI tests run via `./scripts/test.sh` at the repo root. MCP wrapper
   tests live under `cma-mcp/tests/` and run via
   `pytest cma-mcp/tests/`. Both must pass before merging.
 - Style: no em-dashes, en-dashes, smart quotes, or curly apostrophes
@@ -108,7 +108,7 @@ with a placeholder marker; the marker itself is a leak.
 ## Pointers for further reading
 
 - `README.md`: what CMA is and how to use it.
-- `DECISIONS.md`: durable architectural decisions (AD-001 through
+- `docs/DECISIONS.md`: durable architectural decisions (AD-001 through
   AD-008).
 - `CONTRIBUTING.md`: PR flow, sign-off, style.
 - `SECURITY.md`: vulnerability disclosure.
@@ -119,8 +119,8 @@ with a placeholder marker; the marker itself is a leak.
 Beyond the file shapes above, certain phrasings always leak. These never appear in committed content (with the exception of this AGENTS.md, the canon audit script `scripts/canon_audit.sh`, and its two self-test fixtures `scripts/canon_audit_known_leaks.txt` and `scripts/canon_audit_pystring_concat_known_leaks.py`, which are allowed to name the patterns in order to forbid or self-verify them):
 
 - `maintainer-side`, `maintainer-internal` (any compound).
-- `the operator's [strategy|methodology|notes|vault|workspace|tree|dev tree|bet|stake|positioning]` — also when an adjective intervenes (`the operator's research vault`).
-- Bare `operator [paper|study|playbook|doctrine|memo|brief]` — these artifact-shape words name a written artifact authored by "the operator" and are unambiguously leak-shaped.
+- `the operator's [strategy|methodology|notes|vault|workspace|tree|dev tree|bet|stake|positioning]`, also when an adjective intervenes (`the operator's research vault`).
+- Bare `operator [paper|study|playbook|doctrine|memo|brief]`: these artifact-shape words name a written artifact authored by "the operator" and are unambiguously leak-shaped.
 - Practitioner-sense `operator` compounds: `operator [methodology|framework|practice|discipline|skill|stance]`, `multi-operator`, `operator-AI`, and `the operator's [loop|stance|skill|judgment|contribution|disposition|perspective|choice|workflow|discipline]`. "operator" was retired from public content in favor of "builder" (the person), second person for direct address, or dropped where it read as filler; these compounds are leaks. Bare `operator` in unrelated literal senses (cloud operators, the Python `operator` module, mathematical operators) is fine. The fresh-reader test catches any practitioner-sense recurrence the patterns miss.
 - Any definite reference to `vault` as a body of operator material: `the vault`, `in the vault`, `from the vault`. Also forbidden as terms of art: `vault-faithful`, `vault-validated`, `vault behaviour`, `vault precision threshold`, `vault notes`. Allowed only in domain compounds where `vault` is unrelated (`password vault`, `secrets vault`, `hashicorp vault`, `key vault`).
 - Sanitization-shape parentheticals: `(see private)`, `(internal reference)`, `(maintainer-side reference)`, `(see maintainer-side ...)`.

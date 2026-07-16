@@ -1,7 +1,7 @@
 # Governance
 
 **Scope:** Covers the cma project as a whole. The project ships as
-a single repository ([Clarethium/cma](https://github.com/Clarethium/cma))
+a single repository ([lluvr/cma](https://github.com/lluvr/cma))
 with two components: the bash cma reference implementation
 (repository root) and the cma-mcp Python distribution wrapper
 (`cma-mcp/` subdirectory). One curator, one governance model, one
@@ -102,9 +102,8 @@ forces a position:
 - **Suggestion/RFC process** modeled on Touchstone's
   `SUGGESTIONS/PROCESS.md`. cma-mcp is small enough that PR review
   is sufficient at the current scale; an RFC layer may add unwanted weight.
-- **Trademark and brand policy.** cma-mcp is published under
-  Clarethium; brand decisions defer to the Clarethium-level
-  curator.
+- **Trademark and brand policy.** cma is a personal project; brand
+  and naming decisions rest with the author.
 
 ---
 

@@ -1,6 +1,6 @@
 """Build-time hook: bake the repo git SHA into _build_info.py.
 
-The pyproject.toml file is the authoritative metadata source — this
+The pyproject.toml file is the authoritative metadata source. This
 shim runs only during sdist/wheel builds (and editable installs) so
 the resulting artifact carries the git SHA it was built from. After
 `pip install` from a wheel there is no `.git` directory next to the

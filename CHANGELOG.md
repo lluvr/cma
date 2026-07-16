@@ -8,6 +8,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+
+- Repository home moved to a personal account (`lluvr/cma`). Self-references, badges, and issue/security links updated; author and publisher framing is now personal (organization publisher attribution dropped).
+- Zenodo DOI references removed from `CITATION.cff` pending re-issuance under the new account; `SECURITY.md`'s publisher-identity claim softened accordingly.
+- Repository layout: the deep-dive docs (`DESIGN`, `ARCHITECTURE`, `DATA`, `DECISIONS`, `GOVERNANCE`) moved under `docs/`, and `test.sh` / `bench.sh` moved under `scripts/`. All internal references updated.
+
 ---
 
 ## [1.1.0] - 2026-05-25
@@ -20,7 +26,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [1.0.0] - 2026-05-15
 
-cma 1.0 reference implementation. The surface defined in [DESIGN.md](DESIGN.md) is locked and complete.
+cma 1.0 reference implementation. The surface defined in [DESIGN.md](docs/DESIGN.md) is locked and complete.
 
 ### Surface
 
@@ -36,7 +42,7 @@ cma 1.0 reference implementation. The surface defined in [DESIGN.md](DESIGN.md) 
 
 ### Action-time injection
 
-- Five-stage architecture (interception, context extraction, query, injection, logging) specified in [ARCHITECTURE.md](ARCHITECTURE.md). Reference implementations:
+- Five-stage architecture (interception, context extraction, query, injection, logging) specified in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Reference implementations:
   - Claude Code: `hooks/claude-code-pre-tool-use.sh` (per-action surfacing) and `hooks/claude-code-session-start.sh` (session priming with recurrence + active rejections, optionally behavior pivots).
   - Shell: `hooks/cma-pre` for zsh (native `preexec`) and bash (via `bash-preexec`), with manual-wrap support.
 - Failure-isolated: hook errors never block the wrapped action; 5-second timeout on cma queries.
@@ -64,10 +70,10 @@ cma 1.0 reference implementation. The surface defined in [DESIGN.md](DESIGN.md) 
 
 ### Documentation
 
-- [DESIGN.md](DESIGN.md): seven-primitive surface, argument semantics, output expectations.
-- [ARCHITECTURE.md](ARCHITECTURE.md): five-stage action-time injection contract, data shapes, validation framework, quality criteria for integrations.
-- [DATA.md](DATA.md): per-record-type schemas with examples, schema versioning policy, atomicity guarantees, tolerant-read behavior, storage requirements, backup recommendations, migration policy.
-- [DECISIONS.md](DECISIONS.md): architectural decision records.
+- [DESIGN.md](docs/DESIGN.md): seven-primitive surface, argument semantics, output expectations.
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md): five-stage action-time injection contract, data shapes, validation framework, quality criteria for integrations.
+- [DATA.md](docs/DATA.md): per-record-type schemas with examples, schema versioning policy, atomicity guarantees, tolerant-read behavior, storage requirements, backup recommendations, migration policy.
+- [DECISIONS.md](docs/DECISIONS.md): architectural decision records.
 
 ### Roadmap
 

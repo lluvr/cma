@@ -228,4 +228,4 @@ If you choose to stay on schema 1.0, you can do so indefinitely; cma 2.0 readers
 
 - [DESIGN.md](DESIGN.md): the seven cma 1.0 primitives that produce these records.
 - [ARCHITECTURE.md](ARCHITECTURE.md): the action-time injection layer and three-layer validation framework that uses this data.
-- [CHANGELOG.md](CHANGELOG.md): record of schema and feature changes over time.
+- [CHANGELOG.md](../CHANGELOG.md): record of schema and feature changes over time.

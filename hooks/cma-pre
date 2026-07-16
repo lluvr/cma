@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # cma-pre: action-time injection wrapper for shell environments.
 #
-# Implements the five-stage architecture from ARCHITECTURE.md:
+# Implements the five-stage architecture from docs/ARCHITECTURE.md:
 #   1. Interception:    invoked by shell preexec hook OR manually
 #   2. Context extract: parses command line for trigger + surface heuristics
 #   3. Query:           calls `cma surface` with derived filters
@@ -16,7 +16,7 @@
 # Failure isolation: if cma is missing, errors, or times out, the wrapped
 # command still runs. The wrapper never blocks a command on its own failure.
 #
-# See ARCHITECTURE.md for the design contract this script implements.
+# See docs/ARCHITECTURE.md for the design contract this script implements.
 
 set -uo pipefail
 
@@ -45,7 +45,7 @@ Shell integration (bash, requires bash-preexec):
   preexec_functions+=("cma_pre_hook")
   cma_pre_hook() { cma-pre --check "$1"; }
 
-See ARCHITECTURE.md for the design contract.
+See docs/ARCHITECTURE.md for the design contract.
 EOF
     exit 1
 fi
@@ -139,7 +139,7 @@ if [[ -n "$output" && "$output" != "No captures match." ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Stage 5: logging — handled by `cma surface` invocation above.
+# Stage 5: logging, handled by `cma surface` invocation above.
 # ---------------------------------------------------------------------------
 
 # Execute the wrapped command (if not in check-only mode)

@@ -26,7 +26,7 @@
 # "recurrence,rejections"). Available sections: recurrence, rejections,
 # behavior. Set to "all" to include every available section.
 #
-# See ARCHITECTURE.md Section 2.1 (Interception) for the design context.
+# See docs/ARCHITECTURE.md Section 2.1 (Interception) for the design context.
 
 set -uo pipefail
 
@@ -37,7 +37,7 @@ if [[ ! -t 0 ]]; then
     cat > /dev/null
 fi
 
-# Stage 3: query — failure-isolated. If cma missing, silent exit.
+# Stage 3: query, failure-isolated. If cma missing, silent exit.
 if ! command -v cma >/dev/null 2>&1; then
     exit 0
 fi
@@ -79,7 +79,7 @@ get_section() {
     echo "$out"
 }
 
-# Stage 4: injection — assemble output, write to stdout for Claude Code
+# Stage 4: injection. Assemble output, write to stdout for Claude Code
 # to inject as session context. Silent when nothing to show.
 
 declare -a parts=()
@@ -103,7 +103,7 @@ for p in "${parts[@]}"; do
     echo "$p"
 done
 
-# Stage 5: logging — handled by cma stats invocations themselves where
+# Stage 5: logging, handled by cma stats invocations themselves where
 # applicable (stats commands are aggregate views that do not log surface
 # events; this is intentional, since session-start priming is broad rather
 # than action-specific).

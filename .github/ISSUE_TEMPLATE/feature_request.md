@@ -23,7 +23,7 @@ labels: enhancement
 
 <!--
 For bash cma: command surface (flags, output format, exit codes).
-Mirror DESIGN.md conventions (kebab-case flags, JSONL outputs where
+Mirror docs/DESIGN.md conventions (kebab-case flags, JSONL outputs where
 appropriate).
 
 For cma-mcp: tool / resource name, parameters, returned payload
@@ -32,10 +32,11 @@ snake_case fields, optional `surface` label, `maxLength` on every
 string field).
 -->
 
-## Companion impact
+## Related-project impact
 
 <!--
 Does this require a parallel change in the other component, in
-DESIGN.md / ARCHITECTURE.md / DATA.md / docs/MCP_SERVER.md, or in
-any companion repo (Lodestone, Touchstone)? If yes, name what.
+docs/DESIGN.md / docs/ARCHITECTURE.md / docs/DATA.md /
+cma-mcp/docs/MCP_SERVER.md, or in any paired methodology? If yes,
+name what.
 -->

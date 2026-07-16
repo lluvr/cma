@@ -63,7 +63,7 @@ jobs:
       - name: Run pytest with coverage
         # Coverage measurement scopes the eight runtime modules per
         # [tool.coverage.run] in pyproject.toml. The reported number
-        # reflects in-process dispatch only — `tests/test_mcp_wire.py`
+        # reflects in-process dispatch only: `tests/test_mcp_wire.py`
         # spawns cma-mcp as a real subprocess (closes ANTICIPATED_
         # CRITIQUES C-8), and pytest-cov does not follow subprocess
         # paths without a sitecustomize hook. Lines exercised only
