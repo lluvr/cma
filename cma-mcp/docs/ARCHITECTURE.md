@@ -127,7 +127,7 @@ silently swallows misconfiguration.
          "agent_guidance": {"what_this_tool_does": "...",
                             "what_this_tool_does_not_do": "...",
                             "how_to_cite_faithfully": "..."},
-         "provenance":     {"server_version": "0.1.4",
+         "provenance":     {"server_version": "0.1.5",
                             "license": "Apache-2.0",
                             "cost_usd": 0.0,
                             "cma_argv": ["/usr/local/bin/cma",
@@ -267,7 +267,7 @@ the records.
 
 ```
 {"server_name": "cma-mcp",
- "server_version": "0.1.4",
+ "server_version": "0.1.5",
  "protocol_version": "2025-11-25",
  "git_sha": "<runtime probe or build-time bake>",
  "cma_binary_version": "<cma --version output>",
