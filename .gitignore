@@ -37,6 +37,10 @@ coverage.xml
 *.swo
 *~
 
+# linters / agent-local config (per-developer, never committed)
+.ruff_cache/
+.claude/settings.local.json
+
 # os
 .DS_Store
 Thumbs.db

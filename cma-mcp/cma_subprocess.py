@@ -125,7 +125,7 @@ def resolve_cma_binary() -> str:
             argv=["cma"],
             returncode=None,
             stdout="",
-            stderr="cma binary not found on PATH; install from https://github.com/Clarethium/cma",
+            stderr="cma binary not found on PATH; install from https://github.com/lluvr/cma",
             reason="missing_binary",
         )
     return found

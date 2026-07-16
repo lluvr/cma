@@ -5,7 +5,7 @@ protocol surface: the initialize handshake, tools/list, tools/call,
 resources/list, resources/read, ping, and notifications. It covers
 the request and response shapes a client sees.
 
-For the rationale behind these choices, see [`DECISIONS.md`](../../DECISIONS.md)
+For the rationale behind these choices, see [`DECISIONS.md`](../../docs/DECISIONS.md)
 at the repository root.
 
 ## Transport
@@ -24,7 +24,7 @@ Request:
       "id": 1,
       "method": "initialize",
       "params": {
-        "protocolVersion": "2024-11-05",
+        "protocolVersion": "2025-11-25",
         "capabilities": {},
         "clientInfo": {"name": "claude-desktop", "version": "1.x"}
       }
@@ -36,33 +36,47 @@ Response:
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "protocolVersion": "2024-11-05",
+        "protocolVersion": "2025-11-25",
         "capabilities": {
           "tools":     {"listChanged": false},
           "resources": {"listChanged": false, "subscribe": false}
         },
-        "serverInfo": {"name": "cma-mcp", "version": "0.1.2"},
+        "serverInfo": {"name": "cma-mcp", "version": "0.1.4"},
         "instructions": "cma-mcp distributes the cma compound practice loop ..."
       }
     }
 
 The `instructions` field carries cross-tool orientation prose for
 agents and for MCP clients whose UI surfaces the field. Names the
-use case, the default invocation pattern, and the methodology-canon
-boundary (Lodestone owns vocabulary; cma stores `--fm` opaque).
+use case, the default invocation pattern, and the methodology
+boundary (the methodology owns vocabulary; cma stores `--fm` opaque).
+
+### Version negotiation
+
+The server speaks these protocol revisions, newest first:
+`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`. Per the MCP
+lifecycle spec, if the client requests a revision the server
+supports, the server responds with that same revision; otherwise it
+responds with its newest (`2025-11-25`), and the client decides
+whether to proceed. A client that omits `protocolVersion` gets the
+newest.
 
 ## Tools
 
 `tools/list` returns seven tools. Each tool definition has
-`name`, `title`, `description`, and `inputSchema`. The full schema
-shapes are in `mcp_schema.py`.
+`name`, `title`, `description`, `inputSchema`, and `outputSchema`.
+Every tool returns the same three-section payload, so `outputSchema`
+is the shared shape below; the full schema shapes are in
+`mcp_schema.py`.
 
 ### Common shapes
 
 All tool results have `content` (a one-element array of `{type:
-"text", text: <stringified JSON>}`) and `isError` (boolean).
+"text", text: <stringified JSON>}`), `structuredContent` (the same
+payload as a JSON object, for 2025-06-18+ clients that validate it
+against the tool's `outputSchema`), and `isError` (boolean).
 
-The text payload is always a three-section JSON document:
+The payload is always a three-section JSON document:
 
     {
       "analysis":       { ... },
@@ -187,8 +201,8 @@ Server version follows semver:
 
     {
       "server_name": "cma-mcp",
-      "server_version": "0.1.2",
-      "protocol_version": "2024-11-05",
+      "server_version": "0.1.4",
+      "protocol_version": "2025-11-25",
       "git_sha": "abc12345" or "abc12345+dirty" or null,
       "cma_binary_version": "<output of cma --version>" or null,
       "python": "3.12.3",

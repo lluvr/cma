@@ -1,7 +1,7 @@
 """
 Wire-protocol subprocess tests.
 
-The other test files dispatch in-process — they exercise handler
+The other test files dispatch in-process: they exercise handler
 logic but never push bytes through real stdin/stdout pipes. This
 file spawns cma-mcp as a real subprocess, exchanges JSON-RPC over
 the standard MCP transport, and pins the framing-level invariants
@@ -40,7 +40,7 @@ class WireServer:
     """A real cma-mcp subprocess driven over stdin/stdout pipes.
 
     Reads one JSON-RPC line per response. Notifications produce no
-    response. The class deliberately stays minimal — it is the
+    response. The class deliberately stays minimal: it is the
     test's leverage point, not a general-purpose MCP client.
     """
 
@@ -318,6 +318,13 @@ def test_tools_call_cma_stats_round_trips_three_section_payload(
         # passed to cma. On an empty corpus the call still succeeds.
         assert payload["provenance"]["cma_returncode"] == 0
         assert payload["provenance"]["cma_argv"][-1] == "stats"
+        # 2025-06-18+ structured output: structuredContent mirrors the
+        # text payload exactly and carries the three-section shape a
+        # validating client checks against the tool's outputSchema.
+        assert result["structuredContent"] == payload
+        assert set(result["structuredContent"].keys()) >= {
+            "analysis", "agent_guidance", "provenance"}
+        assert result["isError"] is False
 
 
 @pytest.mark.subprocess

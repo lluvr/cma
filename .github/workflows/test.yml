@@ -28,7 +28,7 @@ jobs:
         run: python3 --version
 
       - name: Run test suite
-        run: ./test.sh
+        run: ./scripts/test.sh
 
   lint:
     runs-on: ubuntu-latest
@@ -41,8 +41,8 @@ jobs:
       - name: Lint cma and hooks
         run: |
           shellcheck cma
-          shellcheck test.sh
-          shellcheck bench.sh
+          shellcheck scripts/test.sh
+          shellcheck scripts/bench.sh
           shellcheck hooks/cma-pre
           shellcheck hooks/claude-code-pre-tool-use.sh
           shellcheck hooks/claude-code-session-start.sh

@@ -95,15 +95,19 @@ three top-level sections:
     {
       "analysis":       { ... data and stdout },
       "agent_guidance": { what to tell the user, how to cite },
-      "provenance":     { server_version, license, cost: 0.0, ... }
+      "provenance":     { server_version, protocol_version, license, cost_usd: 0.0, ... }
     }
+
+Tool calls also return this payload as `structuredContent` (validated
+against each tool's `outputSchema`) for MCP clients on protocol
+`2025-06-18` or newer, alongside the text form older clients read.
 
 The `agent_guidance` and `provenance` sections exist because an
 agent passing cma-mcp output to a user without attribution would
 strip the reproducibility that makes the loop's evidence worth
 citing. Surfacing "how to cite faithfully" inside the payload is
 the structure that carries that integrity forward. This convention
-is the same one Frame Check uses;
+is the same one frame-check uses;
 cma-mcp inherits it. Adversarial tests in
 `tests/test_payload_determinism.py` pin the structure.
 
@@ -157,14 +161,17 @@ pipeline wiring and that the cma binary is reachable.
 
 ## Documentation
 
-Bundled with the wheel:
+In the repository:
 
 - `CHANGELOG.md`: cma-mcp release history
 - `docs/MCP_SERVER.md`: protocol reference
 - `docs/ARCHITECTURE.md`: module layout, data flow, contracts
 - `docs/FAQ.md`: conceptual questions, install gotchas, cross-client config
 - `docs/TROUBLESHOOTING.md`: symptoms and fixes
-- `LICENSE` (Apache-2.0), `NOTICE`, `CITATION.cff`
+
+The installed wheel carries `LICENSE` and `NOTICE` in its `dist-info`
+metadata (Apache-2.0 attribution); the docs above live in the source
+repository.
 
 ## Running tests
 

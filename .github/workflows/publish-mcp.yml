@@ -17,10 +17,11 @@
 #   3. Push tag `cma-mcp-X.Y.Z`.
 #   4. Approve the deployment in the GitHub Actions UI when the
 #      reviewer-required gate fires on the `pypi` environment.
-#   5. Create a GitHub Release at the tag so the GitHub-Zenodo
-#      integration mints a versioned DOI.
-#   6. Update `cma-mcp/CITATION.cff` with the issued DOI under
-#      `identifiers:` and bump `doi:` to the versioned DOI.
+#   5. If the GitHub-Zenodo integration is enabled for this
+#      repository, create a GitHub Release at the tag so it mints a
+#      versioned DOI.
+#   6. When a DOI is issued, record it in `cma-mcp/CITATION.cff`
+#      under `identifiers:` (and set a top-level `doi:` to it).
 #
 # A TestPyPI upload step is available as a commented job below
 # (`publish-to-testpypi`); swap the comment blocks and add
@@ -196,3 +197,8 @@ jobs:
           name: cma-mcp-dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # PEP 740 attestations back the provenance-verification path
+          # documented in SECURITY.md. Set explicitly rather than relying
+          # on the action default so the guarantee cannot silently regress.
+          attestations: true

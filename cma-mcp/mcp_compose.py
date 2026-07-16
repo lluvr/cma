@@ -36,7 +36,7 @@ from cma_subprocess import cma_version
 # cma binary surfaces here as None rather than crashing the server.
 _SERVER_NAME: str = "cma-mcp"
 _SERVER_VERSION: str = "0.1.0"
-_PROTOCOL_VERSION: str = "2024-11-05"
+_PROTOCOL_VERSION: str = "2025-11-25"
 _GIT_SHA: str | None = None
 _CMA_BINARY_VERSION: str | None = None
 
@@ -62,6 +62,20 @@ def configure_provenance(
     _CMA_BINARY_VERSION = cma_version()
 
 
+def set_protocol_version(version: str) -> None:
+    """Update the protocol version reported in provenance to the revision
+    negotiated for the current session.
+
+    Startup configures this to the server's default (latest supported);
+    mcp_server._handle_initialize overrides it once the client's
+    initialize handshake settles on a revision, so per-call provenance
+    reports the version the session actually speaks rather than the
+    server's maximum.
+    """
+    global _PROTOCOL_VERSION
+    _PROTOCOL_VERSION = version
+
+
 def _now_iso() -> str:
     """UTC ISO-8601 with microsecond resolution."""
     from datetime import datetime, timezone
@@ -80,8 +94,8 @@ def base_provenance() -> dict[str, Any]:
         "license": "Apache-2.0",
         "cost_usd": 0.0,
         "citation": (
-            f"cma-mcp {_SERVER_VERSION} (Clarethium, 2026). "
-            f"https://github.com/Clarethium/cma/tree/main/cma-mcp"
+            f"cma-mcp {_SERVER_VERSION} (L. Lucic, 2026). "
+            f"https://github.com/lluvr/cma/tree/main/cma-mcp"
         ),
         "deterministic": True,
         "timestamp": _now_iso(),
@@ -108,17 +122,15 @@ _GUIDANCE_CAPTURE = {
         "Does not interpret the capture, does not classify "
         "automatically. The fm field stays opaque unless "
         "CMA_FM_CLASSIFIER is wired for an external classifier. "
-        "cma-mcp is a substrate; methodology vocabulary lives in the "
-        "methodology canon (see "
-        "https://github.com/Clarethium/lodestone for the canonical "
-        "methodology Clarethium publishes)."
+        "cma-mcp is a substrate; methodology vocabulary lives in "
+        "whatever methodology you practice, not in cma."
     ),
     "how_to_cite_faithfully": (
         "Cite the capture explicitly when telling you about "
         "it: name the cma tool that ran ('cma_miss' / 'cma_decision' "
         "/ etc.), the id returned in analysis.record.id (or visible "
         "in analysis.cma_stdout), and the stored surface/fm. Do not "
-        "paraphrase as 'I noted that...' — paraphrase strips the "
+        "paraphrase as 'I noted that...': paraphrase strips the "
         "durability you chose this tool to obtain."
     ),
 }
@@ -334,7 +346,7 @@ def compose_error_response(
             "how_to_cite_faithfully": (
                 "Surface the error reason verbatim ('cma binary "
                 "missing on PATH', 'cma subprocess timeout', etc.). "
-                "Do not paraphrase as 'something went wrong' — that "
+                "Do not paraphrase as 'something went wrong'; that "
                 "robs you of the actionable detail."
             ),
         },

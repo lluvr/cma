@@ -68,7 +68,32 @@ from cma_subprocess import CmaError, cma_version, run_cma
 # publish workflow's verify-tag step hard-fails on mismatch.
 SERVER_NAME = "cma-mcp"
 SERVER_VERSION = "0.1.4"
-PROTOCOL_VERSION = "2024-11-05"
+
+# Protocol versions this server speaks, newest first. The wire surface
+# it uses (initialize, tools/list, tools/call, resources/list,
+# resources/read, ping) is unchanged across these revisions, so the
+# server negotiates to whichever revision the client requests and
+# otherwise offers its newest. See negotiate_protocol_version().
+SUPPORTED_PROTOCOL_VERSIONS = (
+    "2025-11-25",
+    "2025-06-18",
+    "2025-03-26",
+    "2024-11-05",
+)
+# Preferred/default revision (the newest supported). Exposed via the
+# --version fingerprint and returned when a client requests a revision
+# this server does not support.
+PROTOCOL_VERSION = SUPPORTED_PROTOCOL_VERSIONS[0]
+
+
+def negotiate_protocol_version(client_protocol: str | None) -> str:
+    """Resolve the protocol version for the session per the MCP lifecycle
+    spec: if the server supports the revision the client requested, respond
+    with that same revision; otherwise respond with the latest revision the
+    server supports (the client then decides whether to proceed)."""
+    if client_protocol in SUPPORTED_PROTOCOL_VERSIONS:
+        return client_protocol
+    return PROTOCOL_VERSION
 
 # Cross-tool orientation prose for MCP clients whose UI surfaces the
 # initialize response's `instructions` field (e.g., Claude Desktop).
@@ -84,8 +109,9 @@ SERVER_INSTRUCTIONS = (
     "cma_surface before substantive work to inherit relevant prior "
     "context (this also logs a surface event used by leak detection). "
     "Use cma_stats and the cma:// resources to inspect the corpus. "
-    "cma-mcp is methodology-agnostic: vocabulary lives in Lodestone "
-    "(https://github.com/Clarethium/lodestone). Three-section payload "
+    "cma-mcp is methodology-agnostic: the failure-mode vocabulary "
+    "lives in whatever methodology you practice, not in cma. "
+    "Three-section payload "
     "(analysis + agent_guidance + provenance) on every response; "
     "preserve attribution when relaying tool output to you."
 )
@@ -306,14 +332,23 @@ _TOOL_HANDLERS = {
 
 
 def _handle_initialize(params: dict) -> dict:
-    """Initialize handshake: return server identity and capabilities."""
+    """Initialize handshake: negotiate protocol version, return server
+    identity and capabilities."""
+    client_protocol = params.get("protocolVersion")
+    negotiated = negotiate_protocol_version(client_protocol)
+    # Reflect the negotiated revision in every subsequent payload's
+    # provenance, not just the server's default. The lifecycle guarantees
+    # initialize precedes any tool call, so this settles before the first
+    # provenance block is built.
+    mcp_compose.set_protocol_version(negotiated)
     mcp_log.info(
         "initialize",
-        client_protocol=params.get("protocolVersion"),
+        client_protocol=client_protocol,
+        negotiated_protocol=negotiated,
         client_name=(params.get("clientInfo") or {}).get("name"),
     )
     return {
-        "protocolVersion": PROTOCOL_VERSION,
+        "protocolVersion": negotiated,
         "capabilities": {
             "tools": {"listChanged": False},
             "resources": {"listChanged": False, "subscribe": False},
@@ -332,6 +367,7 @@ def _handle_tools_list(_: dict) -> dict:
                 "title": t.get("title", t["name"]),
                 "description": t["description"],
                 "inputSchema": t["inputSchema"],
+                "outputSchema": t["outputSchema"],
             }
             for t in mcp_schema.TOOLS
         ]
@@ -370,6 +406,11 @@ def _handle_tools_call(params: dict) -> dict:
                 "text": json.dumps(payload, ensure_ascii=False, indent=2),
             }
         ],
+        # Structured mirror of the same three-section payload for
+        # 2025-06-18+ clients that consume and validate structuredContent
+        # against the tool's outputSchema. The text block above stays for
+        # backward compatibility with clients that do not.
+        "structuredContent": payload,
         "isError": is_error,
     }
 

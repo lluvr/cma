@@ -17,7 +17,9 @@ from conftest import call_handler
 
 
 def test_initialize_returns_protocol_and_serverinfo(fresh_dispatcher):
-    result = call_handler(fresh_dispatcher, "initialize", {"protocolVersion": "2024-11-05"})
+    result = call_handler(
+        fresh_dispatcher, "initialize", {"protocolVersion": mcp_server.PROTOCOL_VERSION}
+    )
     assert result["protocolVersion"] == mcp_server.PROTOCOL_VERSION
     assert result["serverInfo"]["name"] == "cma-mcp"
     assert result["serverInfo"]["version"] == mcp_server.SERVER_VERSION
@@ -29,6 +31,41 @@ def test_initialize_returns_protocol_and_serverinfo(fresh_dispatcher):
     assert isinstance(result["instructions"], str)
     assert "cma-mcp" in result["instructions"]
     assert "cma_miss" in result["instructions"]
+
+
+def test_initialize_negotiates_protocol_version(fresh_dispatcher):
+    """Per the MCP lifecycle spec: the server echoes a supported revision
+    the client requests, and falls back to its own latest otherwise."""
+    # Newest supported is the preferred default.
+    assert mcp_server.PROTOCOL_VERSION == mcp_server.SUPPORTED_PROTOCOL_VERSIONS[0]
+    # Legacy revision stays supported for older clients.
+    assert "2024-11-05" in mcp_server.SUPPORTED_PROTOCOL_VERSIONS
+    # Every supported revision is echoed back unchanged.
+    for version in mcp_server.SUPPORTED_PROTOCOL_VERSIONS:
+        result = call_handler(fresh_dispatcher, "initialize", {"protocolVersion": version})
+        assert result["protocolVersion"] == version
+    # An unsupported request falls back to the server's latest.
+    result = call_handler(fresh_dispatcher, "initialize", {"protocolVersion": "1.0.0"})
+    assert result["protocolVersion"] == mcp_server.PROTOCOL_VERSION
+    # A client that omits the field gets the server's latest.
+    result = call_handler(fresh_dispatcher, "initialize", {})
+    assert result["protocolVersion"] == mcp_server.PROTOCOL_VERSION
+
+
+def test_provenance_reflects_negotiated_protocol_version(fresh_dispatcher):
+    """After the initialize handshake, provenance reports the protocol
+    revision negotiated for the session, not just the server default."""
+    import mcp_compose
+
+    # A supported legacy revision is reflected in provenance...
+    call_handler(fresh_dispatcher, "initialize", {"protocolVersion": "2024-11-05"})
+    assert mcp_compose.base_provenance()["protocol_version"] == "2024-11-05"
+    # ...and re-initializing with a newer one updates it.
+    call_handler(fresh_dispatcher, "initialize", {"protocolVersion": "2025-11-25"})
+    assert mcp_compose.base_provenance()["protocol_version"] == "2025-11-25"
+    # An unsupported request falls back to the server's latest here too.
+    call_handler(fresh_dispatcher, "initialize", {"protocolVersion": "1.0.0"})
+    assert mcp_compose.base_provenance()["protocol_version"] == mcp_server.PROTOCOL_VERSION
 
 
 def test_server_version_is_strict_semver():
@@ -55,6 +92,19 @@ def test_tools_list_carries_seven_tools(fresh_dispatcher):
     for tool in result["tools"]:
         assert isinstance(tool["description"], str) and len(tool["description"]) > 50
         assert tool["inputSchema"]["type"] == "object"
+
+
+def test_tools_list_advertises_output_schema(fresh_dispatcher):
+    """Every tool declares outputSchema (the shared three-section shape)
+    so 2025-06-18+ clients can validate structuredContent against it."""
+    result = call_handler(fresh_dispatcher, "tools/list")
+    for tool in result["tools"]:
+        schema = tool.get("outputSchema")
+        assert isinstance(schema, dict), f"{tool['name']} missing outputSchema"
+        assert schema["type"] == "object"
+        assert set(schema["required"]) == {"analysis", "agent_guidance", "provenance"}
+        for section in ("analysis", "agent_guidance", "provenance"):
+            assert section in schema["properties"]
 
 
 def test_tool_descriptions_reference_lodestone_for_methodology(fresh_dispatcher):
@@ -218,7 +268,7 @@ def test_initialize_notification_does_not_crash(fresh_dispatcher):
 
 
 def test_git_sha_falls_back_to_baked_build_info(monkeypatch, tmp_path):
-    """When the runtime git probe fails (PyPI install layout — no `.git`
+    """When the runtime git probe fails (PyPI install layout, no `.git`
     next to the script), `_git_sha()` must fall back to the build-time
     value baked into `_build_info.BUILD_GIT_SHA` by `setup.py`.
 
