@@ -19,6 +19,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-07-16
+
 ### Changed
 
 - Protocol version negotiation. The `initialize` handshake now responds with the protocol revision the client requested when the server supports it (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`), and otherwise responds with the newest revision the server supports, per the MCP lifecycle spec. Previously the server always returned `2024-11-05` regardless of the client's request, which mislabeled the session for clients speaking a newer revision. The `--version` fingerprint reports the newest supported revision (`2025-11-25`); per-call provenance reports the revision negotiated for the session.

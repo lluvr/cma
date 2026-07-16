@@ -67,7 +67,7 @@ from cma_subprocess import CmaError, cma_version, run_cma
 # `cma-mcp-X.Y.Z` tag must align character-for-character; the
 # publish workflow's verify-tag step hard-fails on mismatch.
 SERVER_NAME = "cma-mcp"
-SERVER_VERSION = "0.1.4"
+SERVER_VERSION = "0.1.5"
 
 # Protocol versions this server speaks, newest first. The wire surface
 # it uses (initialize, tools/list, tools/call, resources/list,

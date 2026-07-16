@@ -197,7 +197,7 @@ discipline (DECISIONS AD-002).
 
 Every response carries `provenance.citation`:
 
-> `cma-mcp 0.1.4 (L. Lucic, 2026). https://github.com/lluvr/cma/tree/main/cma-mcp`
+> `cma-mcp 0.1.5 (L. Lucic, 2026). https://github.com/lluvr/cma/tree/main/cma-mcp`
 
 Also in `CITATION.cff` at the repository root and in the project's
 PyPI metadata. Once a Zenodo DOI is allocated, the citation will
