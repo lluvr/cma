@@ -28,32 +28,9 @@ Licensing
 Code in this repository is licensed under Apache 2.0; see LICENSE
 at repository root.
 
-External works referenced
--------------------------
+Methodology
+-----------
 
-cma is methodology-agnostic and bundles no methodology content.
-If you tag captures with a methodology's failure-mode vocabulary
-(such as Lodestone's FM-1..10), you are responsible for citing that
-methodology in your own work.
-
-Verification substrate referenced in design documents is Touchstone
-(https://github.com/Clarethium/touchstone), Apache 2.0 (library)
-and CC-BY 4.0 (Standard).
-
-Related projects
-----------------
-
-- Lodestone: canonical methodology (CC-BY 4.0)
-- Touchstone: model-independent measurement substrate
-- frame-check: applied vehicle, sibling MCP using Touchstone
-  (https://github.com/Clarethium/frame-check)
-
-Sibling-MCP pattern conformance
--------------------------------
-
-cma-mcp's three-section payload discipline, governance scaffolding,
-and adversarial test architecture follow the conventions established
-by frame-check. Where this project diverges (e.g., bundling the
-MCP wrapper alongside the wrapped binary in one repository rather
-than as a separate sibling repo), the divergence is named in
-DECISIONS.md.
+cma is methodology-agnostic and bundles no methodology content. If
+you tag captures with a methodology's failure-mode vocabulary, you
+are responsible for citing that methodology in your own work.

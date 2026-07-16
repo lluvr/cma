@@ -192,8 +192,7 @@ Adversarial determinism tests in `tests/test_payload_determinism.py`
 pin the shape on every tool and resource. Any change that affects
 the payload requires updating those tests.
 
-The convention is inherited from frame-check and applied here
-unchanged; the determinism tests pin it commit-by-commit.
+The determinism tests pin the convention commit-by-commit.
 
 ---
 
@@ -317,9 +316,8 @@ in CI.
 
 - **No MCP SDK dependency.** Manual JSON-RPC keeps the runtime
   surface to the Python standard library.
-- **No methodology vocabulary bundled.** `--fm` is opaque.
-  You tag with your methodology's catalog (Lodestone's
-  FM-1..10 or otherwise).
+- **No methodology vocabulary bundled.** `--fm` is opaque. You tag
+  with whatever methodology's catalog you practice.
 - **No transports beyond stdio.** SSE / WebSocket / HTTP are out of
   scope; gateways exist for multi-client deployment. DECISIONS
   AD-005.

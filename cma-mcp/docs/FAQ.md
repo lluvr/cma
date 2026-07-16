@@ -39,11 +39,11 @@ inheritance.
 
 ### Is cma-mcp methodology-specific?
 
-No. cma stores `--fm` as an opaque string. If you use Lodestone,
-tag captures with its FM-1..10; if you use a different methodology,
-tag with that catalog. cma-mcp does not validate, expand, or
-interpret the tag. Tool descriptions name Lodestone as one example
-methodology but bundle no vocabulary (DECISIONS AD-006).
+No. cma stores `--fm` as an opaque string. Tag captures with your
+methodology's failure-mode catalog, whatever it is; cma-mcp does not
+validate, expand, or interpret the tag. Tool descriptions frame the
+tag as the caller's methodology vocabulary but bundle none of it
+(DECISIONS AD-006).
 
 ---
 
@@ -177,8 +177,8 @@ It validates the MCP-side input schema (every argument's type per
 the `inputSchema` in `mcp_schema.py`) and surfaces validation
 errors as `isError: true` with reason. It does not enforce
 methodology rules (which `--fm` values are legal, what shapes a
-"good" miss has). That belongs in the methodology layer
-(Lodestone), not the substrate (DECISIONS AD-006).
+"good" miss has). That belongs in the methodology layer, not the
+substrate (DECISIONS AD-006).
 
 ### What happens if cma writes to a corrupted JSONL line?
 
@@ -205,9 +205,9 @@ include it.
 
 ### Can I publish a paper using cma-mcp?
 
-Yes; the project is Apache-2.0 licensed and the methodology canon
-(Lodestone) is CC-BY-4.0. Cite cma-mcp via the field above and
-Lodestone separately if you reference its vocabulary.
+Yes; the project is Apache-2.0 licensed. Cite cma-mcp via the field
+above, and cite whatever methodology you practice separately if you
+reference its vocabulary.
 
 ---
 

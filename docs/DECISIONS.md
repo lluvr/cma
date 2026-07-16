@@ -85,20 +85,21 @@ Resources are reserved for context the agent reads to orient itself
 
 ---
 
-## AD-006: cma-mcp does not bundle Lodestone's failure-shape catalog
+## AD-006: cma-mcp does not bundle a methodology's failure-shape catalog
 
 **Date:** 2026-05-06
 
 **Decision.** No `cma://failure-shapes` resource. Tool descriptions
-for `cma_miss` and `cma_prevented` reference Lodestone's FM-1..10 as
-an example methodology but do not enumerate it.
+for `cma_miss` and `cma_prevented` describe the `fm` tag as belonging
+to whatever methodology the caller practices, but do not enumerate
+any catalog.
 
 **Rationale.** Methodology vocabulary lives in the methodology, not
 in cma-mcp; bundling a frozen copy couples release cadence and
 inverts the substrate-vs-catalog separation. If you want a
-failure-mode catalog, tag with your methodology's (Lodestone's
-FM-1..10, for example); if you want autoclassification, wire
-`CMA_FM_CLASSIFIER` per cma's plugin convention.
+failure-mode catalog, tag with your methodology's; if you want
+autoclassification, wire `CMA_FM_CLASSIFIER` per cma's plugin
+convention.
 
 ---
 

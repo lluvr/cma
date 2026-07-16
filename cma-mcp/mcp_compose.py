@@ -14,8 +14,7 @@ The `agent_guidance` and `provenance` blocks exist because an agent
 passing cma-mcp output to a user without attribution would strip
 the reproducibility that makes the loop's evidence worth citing.
 Surfacing "how to cite faithfully" inside the payload is the
-structure that carries that integrity forward (this convention is
-established by frame-check; cma-mcp inherits it).
+structure that carries that integrity forward.
 
 Composers in this module produce the shape; tests in
 test_payload_determinism.py pin every surface to assert all three

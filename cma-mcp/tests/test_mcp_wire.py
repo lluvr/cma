@@ -7,9 +7,8 @@ file spawns cma-mcp as a real subprocess, exchanges JSON-RPC over
 the standard MCP transport, and pins the framing-level invariants
 that an in-process dispatcher cannot see.
 
-Mirrors frame-check's `test_mcp_adversarial.py` pattern:
-construct a real client→server→client roundtrip, fire malformed
-and rapid-fire inputs at it, and confirm the server stays
+Construct a real client to server to client roundtrip, fire
+malformed and rapid-fire inputs at it, and confirm the server stays
 responsive with well-formed JSON-RPC error envelopes throughout.
 
 Tests skip when the bash cma binary is not on PATH because tools/call
