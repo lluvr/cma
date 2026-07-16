@@ -34,16 +34,15 @@ to your `~/.cma/` per its DATA.md schema. On WSL, that is
 the WSL home (`/home/<user>/.cma/`), not the Windows side.
 
 You can override via `CMA_DIR=/some/other/path` and bash
-cma honors it — cma-mcp passes the env through subprocess
+cma honors it; cma-mcp passes the env through subprocess
 inheritance.
 
 ### Is cma-mcp methodology-specific?
 
-No. cma stores `--fm` as an opaque string. If you use
-[Lodestone](https://github.com/Clarethium/lodestone), tag captures
-with FM-1..10; if you use a different methodology, tag with
-that catalog. cma-mcp does not validate, expand, or interpret the
-tag. Tool descriptions reference Lodestone as the canonical
+No. cma stores `--fm` as an opaque string. If you use Lodestone,
+tag captures with its FM-1..10; if you use a different methodology,
+tag with that catalog. cma-mcp does not validate, expand, or
+interpret the tag. Tool descriptions name Lodestone as one example
 methodology but bundle no vocabulary (DECISIONS AD-006).
 
 ---
@@ -56,7 +55,7 @@ Yes. cma-mcp wraps the canonical bash cma binary as a subprocess.
 On startup, every tool call invokes `cma <verb> ...`. Without the
 binary on `PATH`, every call returns `isError: true` with
 `reason: missing_binary`. Install bash cma first per the
-[parent README](https://github.com/Clarethium/cma#readme), then
+[parent README](https://github.com/lluvr/cma#readme), then
 `pip install cma-mcp`.
 
 ### Where do I put the MCP client config?
@@ -68,7 +67,7 @@ binary on `PATH`, every call returns `isError: true` with
 | Cline | VS Code settings UI → Cline → MCP servers | `cma` |
 | Continue.dev | `~/.continue/config.json` | `mcpServers.cma` |
 
-The block content is the same across clients — point at the
+The block content is the same across clients. Point at the
 installed `cma-mcp` entry point:
 
 ```
@@ -109,11 +108,11 @@ Run `cma-mcp --version` directly in a terminal. It emits a one-line
 JSON fingerprint with `server_version`, `protocol_version`,
 `git_sha`, `cma_binary_version`, `python` version, and `script`
 path. If `cma_binary_version` is `null`, bash cma is missing or
-silent — fix that first.
+silent. Fix that first.
 
 For a deeper check, run `cma-mcp --test`. It emits a full
 three-section payload for `cma_stats` (default view) against your
-real `~/.cma/` corpus — the same shape an MCP client would see for
+real `~/.cma/` corpus, the same shape an MCP client would see for
 that tool call, without needing to spin up a client.
 
 ### Why does my agent paraphrase cma's output instead of quoting it?
@@ -122,7 +121,7 @@ The agent guidance section of every payload includes
 `how_to_cite_faithfully`: a one-line instruction telling the agent
 exactly how to quote without smoothing the numbers. If the agent
 still paraphrases, surface the issue with the agent's prompt
-configuration rather than cma-mcp's payload — the discipline lives
+configuration rather than cma-mcp's payload. The discipline lives
 in the agent's reading, not in the wire format.
 
 ### Can I use cma-mcp and the bash hooks at the same time?
@@ -131,14 +130,14 @@ Yes. They are independent integration paths over the same
 underlying corpus (`~/.cma/*.jsonl`). The PreToolUse hook in Claude
 Code surfaces priming context before tool calls; cma-mcp tools
 surface or capture on demand from any MCP-compatible client. Both
-write through bash cma's atomic-write discipline — captures from
+write through bash cma's atomic-write discipline; captures from
 either path interleave correctly.
 
 ### How fast is each MCP call?
 
 Lightweight calls (ping, tools/list, resources/list) round-trip in
 under 5ms. Subprocess-bound calls inherit bash cma's latency:
-~50ms for `cma_stats` (default), ~5–15ms for `cma_surface` and
+~50ms for `cma_stats` (default), ~5 to 15ms for `cma_surface` and
 `cma_miss`. Run `python3 bench.py` from the cma-mcp directory for
 numbers against your machine. The MCP wrapper itself adds
 essentially zero overhead.
@@ -147,7 +146,7 @@ essentially zero overhead.
 
 The three-section payload contract (`analysis` + `agent_guidance` +
 `provenance`) is stable across cma-mcp 0.x. Tool argument schemas
-are stable within a major version (`SERVER_VERSION` — see
+are stable within a major version (`SERVER_VERSION`, see
 `mcp_server.py`). bash cma's JSONL data schema is stable across
 the `1.0` line per its DATA.md. Schema changes that are not
 backwards-compatible bump the relevant major version explicitly.
@@ -198,7 +197,7 @@ discipline (DECISIONS AD-002).
 
 Every response carries `provenance.citation`:
 
-> `cma-mcp 0.1.2 (Clarethium, 2026). https://github.com/Clarethium/cma/tree/main/cma-mcp`
+> `cma-mcp 0.1.4 (L. Lucic, 2026). https://github.com/lluvr/cma/tree/main/cma-mcp`
 
 Also in `CITATION.cff` at the repository root and in the project's
 PyPI metadata. Once a Zenodo DOI is allocated, the citation will
@@ -214,9 +213,9 @@ Lodestone separately if you reference its vocabulary.
 
 ## Where things live
 
-- **Reference:** [`MCP_SERVER.md`](MCP_SERVER.md) —
+- **Reference:** [`MCP_SERVER.md`](MCP_SERVER.md):
   every tool argument, every resource URI, the exact response
   shapes.
-- **Architecture map:** [`ARCHITECTURE.md`](ARCHITECTURE.md) —
+- **Architecture map:** [`ARCHITECTURE.md`](ARCHITECTURE.md):
   module layout, data flow, contracts.
 - **Symptoms and fixes:** [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).

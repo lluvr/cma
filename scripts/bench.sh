@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # bench.sh - Performance benchmarks for cma's action-time injection layer.
 #
-# ARCHITECTURE.md Section 6 specifies <50ms typical end-to-end overhead for
+# docs/ARCHITECTURE.md Section 6 specifies <50ms typical end-to-end overhead for
 # integration calls. This script measures `cma-pre --check` (the hook path)
 # and `cma surface` (the underlying query) so the claim is verifiable rather
 # than aspirational.
 #
 # Usage:
-#   ./bench.sh           Run and print a human-readable table.
-#   ./bench.sh --json    Emit machine-readable JSON to stdout (one object).
+#   ./scripts/bench.sh   Run and print a human-readable table.
+#   ./scripts/bench.sh --json  Emit machine-readable JSON to stdout (one object).
 #
 # Methodology: each operation is timed N=100 times after 3 warmup iterations.
 # Reports min, median (p50), p95, p99. Numbers vary across machines, kernels,
@@ -17,8 +17,8 @@
 
 set -uo pipefail
 
-CMA="$(cd "$(dirname "$0")" && pwd)/cma"
-PRE="$(cd "$(dirname "$0")" && pwd)/hooks/cma-pre"
+CMA="$(cd "$(dirname "$0")/.." && pwd)/cma"
+PRE="$(cd "$(dirname "$0")/.." && pwd)/hooks/cma-pre"
 
 N=${BENCH_N:-100}
 EMIT_JSON=false
@@ -136,7 +136,7 @@ print(json.dumps({
 PYEOF
 else
     echo ""
-    echo "Latency benchmarks (N=$N per operation; ARCHITECTURE.md target: <50ms typical)"
+    echo "Latency benchmarks (N=$N per operation; docs/ARCHITECTURE.md target: <50ms typical)"
     echo "Host: $HOST_KERNEL ($HOST_CPU, fs=$HOST_FS)"
     echo ""
     while IFS=$'\t' read -r name mn p50 p95 p99; do

@@ -19,7 +19,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-(no entries yet)
+### Changed
+
+- Protocol version negotiation. The `initialize` handshake now responds with the protocol revision the client requested when the server supports it (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`), and otherwise responds with the newest revision the server supports, per the MCP lifecycle spec. Previously the server always returned `2024-11-05` regardless of the client's request, which mislabeled the session for clients speaking a newer revision. The `--version` fingerprint reports the newest supported revision (`2025-11-25`); per-call provenance reports the revision negotiated for the session.
+- Structured tool output. Every tool declares an `outputSchema` (the shared three-section shape), and tool-call results include `structuredContent` alongside the existing text block, so `2025-06-18`+ clients can consume and validate the payload without re-parsing the text. Backward-compatible: clients that predate structured output ignore both fields.
+- Server `instructions` and tool descriptions read as self-contained. cma-mcp is described as a methodology-agnostic substrate without a hard dependency on an external methodology link; references that did not resolve for adopters were removed.
+- Repository home moved to `lluvr/cma`; author and publisher framing is now personal. The provenance `citation` shipped in every payload reads "(L. Lucic, 2026)". Zenodo DOI references were removed from `CITATION.cff` pending re-issuance under the new account.
+- Documentation section of the README corrected: the wheel ships the Python modules plus `LICENSE` and `NOTICE`; the docs and changelog live in the source repository (an earlier "bundled with the wheel" claim did not match what the wheel actually contains).
 
 ---
 

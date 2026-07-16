@@ -16,18 +16,18 @@ Newest first.
 
 ---
 
-## AD-008: cma-mcp lives inside Clarethium/cma as a subdirectory, not as a separate sibling repository
+## AD-008: cma-mcp lives inside lluvr/cma as a subdirectory, not as a separate sibling repository
 
 **Date:** 2026-05-06
 
-**Decision.** cma-mcp ships under `cma-mcp/` in the Clarethium/cma
+**Decision.** cma-mcp ships under `cma-mcp/` in the lluvr/cma
 repository alongside the canonical bash CLI rather than as a
-separate `Clarethium/cma-mcp` repository. One repository, one
+separate `lluvr/cma-mcp` repository. One repository, one
 governance scaffold (root-level `DECISIONS.md`, `GOVERNANCE.md`,
 `CONTRIBUTING.md`, `SECURITY.md`, `CITATION.cff`, `NOTICE`), two
 release tracks (tags prefixed `cma-1.x` and `cma-mcp-0.x`), two
 CHANGELOGs (`CHANGELOG.md` for cma; `cma-mcp/CHANGELOG.md` for
-cma-mcp), two CI workflows (`tests.yml` for bash cma;
+cma-mcp), two CI workflows (`test.yml` for bash cma;
 `tests-mcp.yml` for the Python wrapper, path-filtered to
 `cma-mcp/**`).
 
@@ -93,11 +93,12 @@ Resources are reserved for context the agent reads to orient itself
 for `cma_miss` and `cma_prevented` reference Lodestone's FM-1..10 as
 an example methodology but do not enumerate it.
 
-**Rationale.** Methodology vocabulary lives in
-Lodestone; bundling a frozen copy in cma-mcp couples release cadence
-and inverts canon-vs-companion separation. If you want the FM
-catalog, read Lodestone directly; if you want autoclassification,
-wire `CMA_FM_CLASSIFIER` per cma's plugin convention.
+**Rationale.** Methodology vocabulary lives in the methodology, not
+in cma-mcp; bundling a frozen copy couples release cadence and
+inverts the substrate-vs-catalog separation. If you want a
+failure-mode catalog, tag with your methodology's (Lodestone's
+FM-1..10, for example); if you want autoclassification, wire
+`CMA_FM_CLASSIFIER` per cma's plugin convention.
 
 ---
 

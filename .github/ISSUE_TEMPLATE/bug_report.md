@@ -13,7 +13,7 @@ labels: bug
 
 ## Expected behavior
 
-<!-- What you expected to happen, with reference to README, DESIGN.md, ARCHITECTURE.md, cma-mcp/docs/MCP_SERVER.md, or a specific primitive/tool. -->
+<!-- What you expected to happen, with reference to README, docs/DESIGN.md, docs/ARCHITECTURE.md, cma-mcp/docs/MCP_SERVER.md, or a specific primitive/tool. -->
 
 ## Actual behavior
 

@@ -27,18 +27,10 @@ keywords:
   - decision-tracking
   - prevention
   - cma
-  - clarethium
 license: Apache-2.0
 version: "0.1.4"
 date-released: "2026-07-03"
-doi: "10.5281/zenodo.20066625"
 identifiers:
-  - type: doi
-    value: "10.5281/zenodo.20066625"
-    description: "Concept DOI; resolves to the latest release"
-  - type: doi
-    value: "10.5281/zenodo.20211591"
-    description: "Versioned DOI for cma-mcp 0.1.2"
   - type: url
     value: "https://pypi.org/project/cma-mcp/"
     description: "PyPI distribution"

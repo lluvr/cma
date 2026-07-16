@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # cma - Compound practice loop
-# https://github.com/Clarethium/cma
+# https://github.com/lluvr/cma
 #
-# Specification: see DESIGN.md
-# Methodology: https://github.com/Clarethium/lodestone
+# Specification: see docs/DESIGN.md
 
 set -euo pipefail
 
@@ -170,7 +169,7 @@ cmd_miss() {
     # invoke the classifier with description on stdin and use its first
     # line of output as the fm tag. Failure-isolated: classifier errors,
     # missing commands, or timeouts do not block the capture.
-    # See ARCHITECTURE.md Section 9 (Methodology integration).
+    # See docs/ARCHITECTURE.md Section 9 (Methodology integration).
     if [[ -z "$fm" ]] && [[ -n "${CMA_FM_CLASSIFIER:-}" ]]; then
         fm=$(printf '%s' "$description" | timeout 5 sh -c "$CMA_FM_CLASSIFIER" 2>/dev/null | head -1 || true)
         # Trim leading/trailing whitespace
@@ -1059,13 +1058,13 @@ warn_if_storage_risky() {
     # cloud-sync directories that watch+rewrite files (Dropbox,
     # iCloud Drive, OneDrive, Google Drive). Warn rather than block
     # so you can override after reading the rationale in
-    # DATA.md.
+    # docs/DATA.md.
     local dir="$1"
     case "$dir" in
         *Dropbox*|*"iCloud Drive"*|*OneDrive*|*"Google Drive"*|*GoogleDrive*|*pCloudDrive*|*Sync/*)
             echo "cma: warning: $dir looks like a cloud-sync path." >&2
             echo "cma: append atomicity is not guaranteed on synced directories;" >&2
-            echo "cma: see DATA.md (Storage requirements) for the rationale." >&2
+            echo "cma: see docs/DATA.md (Storage requirements) for the rationale." >&2
             return 0
             ;;
     esac
@@ -1077,7 +1076,7 @@ warn_if_storage_risky() {
         nfs*|cifs|smbfs|fuse.sshfs|fuseblk)
             echo "cma: warning: $dir is on a $fs filesystem." >&2
             echo "cma: append atomicity is not guaranteed on network filesystems;" >&2
-            echo "cma: see DATA.md (Storage requirements) for the rationale." >&2
+            echo "cma: see docs/DATA.md (Storage requirements) for the rationale." >&2
             ;;
     esac
 }
@@ -1270,7 +1269,7 @@ cmd_init() {
 This directory is the durable corpus of compound practice. The schema,
 layout, atomicity guarantees, and migration policy are documented at:
 
-  https://github.com/Clarethium/cma/blob/main/DATA.md
+  https://github.com/lluvr/cma/blob/main/docs/DATA.md
 
 Files in this directory:
 
@@ -1327,10 +1326,9 @@ Other:
   cma --version
   cma --help
 
-Specification: DESIGN.md in this repository.
-Architecture:  ARCHITECTURE.md in this repository.
-Schema:        DATA.md in this repository.
-Methodology:   https://github.com/Clarethium/lodestone
+Specification: docs/DESIGN.md in this repository.
+Architecture:  docs/ARCHITECTURE.md in this repository.
+Schema:        docs/DATA.md in this repository.
 
 Data directory: \$CMA_DIR (default: ~/.cma)
 EOF

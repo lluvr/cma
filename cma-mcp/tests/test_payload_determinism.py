@@ -42,7 +42,7 @@ def _assert_provenance_canonical(provenance: dict) -> None:
     assert provenance["license"] == "Apache-2.0"
     assert provenance["cost_usd"] == 0.0
     assert provenance["deterministic"] is True
-    assert "Clarethium" in provenance["citation"]
+    assert "Lucic" in provenance["citation"]
 
 
 def _setup_provenance() -> None:

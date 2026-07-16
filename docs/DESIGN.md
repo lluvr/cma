@@ -4,17 +4,17 @@ This document locks the surface API for cma 1.0. Implementation follows from thi
 
 ## Purpose
 
-cma is the executable companion to [Lodestone](https://github.com/Clarethium/lodestone). It runs the compound practice loop on your local machine: capture failures, surface relevant prior context at the moment of action, track decisions and rejected alternatives, detect recurrence, and capture preventions.
+cma runs the compound practice loop on your local machine: capture failures, surface relevant prior context at the moment of action, track decisions and rejected alternatives, detect recurrence, and capture preventions.
 
-This document specifies the seven primitives that compose the cma surface, the relationships between them, and how the surface maps to the vocabulary defined in Lodestone.
+This document specifies the seven primitives that compose the cma surface, the relationships between them, and how the surface maps to a methodology's failure-mode vocabulary.
 
 ## Conceptual basis
 
-Vocabulary lives in two places: prose (the Lodestone glossary) and commands (cma primitives). The two surfaces share the same load-bearing terms.
+Vocabulary lives in two places: a methodology's prose glossary and cma's commands (the primitives). The two surfaces share the same load-bearing terms.
 
-Capture concepts are first-class. The Lodestone glossary names four distinct capture types — Miss, Decision, Rejection, Prevention — and cma preserves that distinction by giving each a verb. The conceptual difference between recording a failure and recording an eliminated option is load-bearing; collapsing them under a single `cma capture --type=...` would hide the distinction.
+Capture concepts are first-class. cma's surface names four distinct capture types (Miss, Decision, Rejection, Prevention) and preserves that distinction by giving each a verb. The conceptual difference between recording a failure and recording an eliminated option is load-bearing; collapsing them under a single `cma capture --type=...` would hide the distinction.
 
-Operational concerns are not first-class. Listing rejections, viewing leaks, retiring a learning, previewing a distillation — these are modes of larger operations, expressed as flags rather than separate verbs. Three operational verbs cover them all (surface, distill, stats).
+Operational concerns are not first-class. Listing rejections, viewing leaks, retiring a learning, previewing a distillation: these are modes of larger operations, expressed as flags rather than separate verbs. Three operational verbs cover them all (surface, distill, stats).
 
 The result is seven primitives total: four capture verbs and three operational verbs.
 
@@ -35,7 +35,7 @@ cma miss <description>
 
 - `<description>` (required, positional). One-line statement of what failed. Phrased actively: "Treated X as Y without verifying" rather than "X was treated as Y."
 - `--surface` (optional). The domain area: `auth`, `db`, `docs`, `ui`, `infra`, `general`, `git`. Auto-detected from file paths when `--files` is provided.
-- `--fm` (optional). A failure-mode tag. cma stores the value opaquely; interpretation is the methodology's responsibility. When using a methodology with a canonical catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with that methodology's canonical names. Auto-classification can be plugged in via the `CMA_FM_CLASSIFIER` env var (see ARCHITECTURE.md).
+- `--fm` (optional). A failure-mode tag. cma stores the value opaquely; interpretation is the methodology's responsibility. When using a methodology with a canonical catalog (such as Lodestone), tag with that methodology's canonical names. Auto-classification can be plugged in via the `CMA_FM_CLASSIFIER` env var (see ARCHITECTURE.md).
 - `--files` (optional). Files involved in the failure. Comma-separated list.
 
 **Output:** Confirmation with the captured description, surface, fm, and a unique miss ID. If a similar miss exists in the last 90 days, output flags the recurrence and indicates which warning weight has been incremented.
@@ -140,9 +140,9 @@ cma distill --review
 
 **Modes:**
 
-- **Default mode** — promote a learning from accumulated captures to a permanent core learning that surfaces every session. `<learning>` is the distilled principle.
-- **`--retire` mode** — retire a core learning that no longer applies or has been superseded. The learning is moved out of active surfacing but retained in the reasoning record.
-- **`--review` mode** — preview the patterns that have accumulated since the last distillation. Outputs a summary of recent captures grouped by surface and failure shape, and lists candidate distillations. Read-only.
+- **Default mode**: promote a learning from accumulated captures to a permanent core learning that surfaces every session. `<learning>` is the distilled principle.
+- **`--retire` mode**: retire a core learning that no longer applies or has been superseded. The learning is moved out of active surfacing but retained in the reasoning record.
+- **`--review` mode**: preview the patterns that have accumulated since the last distillation. Outputs a summary of recent captures grouped by surface and failure shape, and lists candidate distillations. Read-only.
 
 **Arguments (default mode):**
 
@@ -167,12 +167,12 @@ cma stats
 
 **Modes:**
 
-- **Default mode** — summary dashboard. Total captures by type, recent activity, most-active surfaces, top failure shapes, prevention rate, recurrence trends.
-- **`--rejections` view** — list of active rejections with surfaces, ages, and revisit triggers.
-- **`--leaks` view** — failures that occurred despite an active warning. Each leak increments the warning's weight.
-- **`--preventions` view** — captured preventions with linked misses. Evidence of the loop closing.
-- **`--recurrence` view** — failure shapes ordered by recurrence rate. Identifies preventions that are not working.
-- **`--behavior` view** — behavior-layer signals from misses carrying intended/corrected texture, grouped by surface and failure mode.
+- **Default mode**: summary dashboard. Total captures by type, recent activity, most-active surfaces, top failure shapes, prevention rate, recurrence trends.
+- **`--rejections` view**: list of active rejections with surfaces, ages, and revisit triggers.
+- **`--leaks` view**: failures that occurred despite an active warning. Each leak increments the warning's weight.
+- **`--preventions` view**: captured preventions with linked misses. Evidence of the loop closing.
+- **`--recurrence` view**: failure shapes ordered by recurrence rate. Identifies preventions that are not working.
+- **`--behavior` view**: behavior-layer signals from misses carrying intended/corrected texture, grouped by surface and failure mode.
 
 **Output:** Tabular text with optional filters. Designed for human reading, not piping.
 
@@ -182,11 +182,11 @@ cma stats
 
 Reference-implementation polish will land as additive features without changing this surface:
 
-- **Texture preservation on misses** (conversation excerpt, intended action, corrected action) — added as additional optional fields on `cma miss`. The basic signature does not change.
-- **Counterfactual capture** — same as above.
-- **Action-time injection** (PreToolUse hook integration) — not a cma command; an integration with the host environment.
-- **Active failure-shape curation** (3-4 active at any time, others archived) — implementation detail of how surfacing prioritizes warnings; surface unchanged.
-- **Recurrence detection auto-flagging** — already implicit in `cma miss` output (recurrence is flagged when a similar prior miss exists); becomes more aggressive in a later version.
+- **Texture preservation on misses** (conversation excerpt, intended action, corrected action): added as additional optional fields on `cma miss`. The basic signature does not change.
+- **Counterfactual capture**: same as above.
+- **Action-time injection** (PreToolUse hook integration): not a cma command; an integration with the host environment.
+- **Active failure-shape curation** (3-4 active at any time, others archived): implementation detail of how surfacing prioritizes warnings; surface unchanged.
+- **Recurrence detection auto-flagging**: already implicit in `cma miss` output (recurrence is flagged when a similar prior miss exists); becomes more aggressive in a later version.
 
 ## Output and storage
 

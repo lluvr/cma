@@ -7,8 +7,8 @@ This policy covers both components in this repository: bash cma
 
 | Component | Version | Supported |
 |---|---|---|
-| cma       | 1.0.x   | Yes |
-| cma       | < 1.0   | No  |
+| cma       | 1.1.x   | Yes |
+| cma       | < 1.1   | No  |
 | cma-mcp   | 0.1.x   | Yes |
 | cma-mcp   | < 0.1   | No  |
 
@@ -22,7 +22,7 @@ artifact and update on each minor release.
 If you find a security issue in either component, do not open a
 public GitHub issue. Instead, use GitHub's private vulnerability
 reporting: open the repository **Security** tab and click **Report a
-vulnerability** (<https://github.com/Clarethium/cma/security/advisories/new>).
+vulnerability** (<https://github.com/lluvr/cma/security/advisories/new>).
 Include:
 
 - Affected component (cma or cma-mcp) and version
@@ -57,7 +57,7 @@ Their combined threat surface is limited:
    from your `PATH`. You are responsible for
    confirming the `cma` binary on your `PATH` is the canonical one
    (run `cma --version` and verify the SHA against the
-   [Clarethium/cma](https://github.com/Clarethium/cma) release).
+   [lluvr/cma](https://github.com/lluvr/cma) release).
 4. **No network calls.** cma-mcp performs zero network I/O. No
    telemetry, no remote configuration, no external dependencies at
    runtime beyond the Python standard library.
@@ -86,8 +86,8 @@ provenance bundle from PyPI's integrity endpoint:
 https://pypi.org/integrity/cma-mcp/<version>/<filename>/provenance
 ```
 
-The returned JSON identifies the publisher as `Clarethium/cma`,
-workflow `publish-mcp.yml`, environment `pypi`. Verification
+The returned JSON identifies the publishing GitHub Actions
+workflow (`publish-mcp.yml`) and environment (`pypi`). Verification
 tooling such as [`pypi-attestation-models`](https://pypi.org/project/pypi-attestation-models/)
 can validate the bundle and confirm the wheel was produced by
 this repository's release workflow rather than swapped at the
