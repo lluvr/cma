@@ -1,23 +1,23 @@
 # cma
 
-[![tests](https://github.com/Clarethium/cma/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/test.yml)
-[![tests-mcp](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/tests-mcp.yml)
-[![codeql](https://github.com/Clarethium/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Clarethium/cma/actions/workflows/codeql.yml)
+[![tests](https://github.com/lluvr/cma/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/lluvr/cma/actions/workflows/test.yml)
+[![tests-mcp](https://github.com/lluvr/cma/actions/workflows/tests-mcp.yml/badge.svg?branch=main)](https://github.com/lluvr/cma/actions/workflows/tests-mcp.yml)
+[![codeql](https://github.com/lluvr/cma/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/lluvr/cma/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Capture what each piece of work teaches: failures, decisions, the paths you ruled out. Get the relevant ones back the moment you need them. cma is the command-line companion to [Lodestone](https://github.com/Clarethium/lodestone).
+Capture what each piece of work teaches: failures, decisions, the paths you ruled out. Get the relevant ones back the moment you need them. cma runs entirely on your machine.
 
 ## What this is
 
-cma runs the compound practice loop on your machine: it captures failures as they happen, surfaces the relevant ones at the moment you are about to act again, tracks decisions, and flags when a failure is recurring. It is the executable instantiation of the practice defined in Lodestone.
+cma runs the compound practice loop on your machine: it captures failures as they happen, surfaces the relevant ones at the moment you are about to act again, tracks decisions, and flags when a failure is recurring.
 
-The methodology lives in Lodestone. cma is what running that methodology looks like in a terminal.
+cma is methodology-agnostic. It owns the data substrate (how captures are stored, surfaced, and joined into computable evidence) and stays out of the vocabulary you use to classify them. Pair it with whatever failure-mode catalog your practice already uses; Lodestone is one such methodology.
 
 ## Status
 
 cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. Test suite (143 cases) covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
 
-The full surface is specified in [DESIGN.md](DESIGN.md). Additive features (action-time injection, texture preservation, counterfactual capture, recurrence detection) layer on without changing the locked surface.
+The full surface is specified in [DESIGN.md](docs/DESIGN.md). Additive features (action-time injection, texture preservation, counterfactual capture, recurrence detection) layer on without changing the locked surface.
 
 ## Quick start
 
@@ -26,7 +26,7 @@ The full surface is specified in [DESIGN.md](DESIGN.md). Additive features (acti
 Clone the repository and add the script to your `PATH`:
 
 ```bash
-git clone https://github.com/Clarethium/cma.git
+git clone https://github.com/lluvr/cma.git
 ln -s "$(pwd)/cma/cma" ~/.local/bin/cma   # or copy to anywhere on PATH
 cma init                                   # create the data directory with a README
 ```
@@ -50,9 +50,9 @@ cma miss "missed validation in middleware" \
 
 The texture fields (`--excerpt`, `--intended`, `--corrected`) preserve the conditions of the failure so future surfacing can match by situation, not just keywords.
 
-The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
+The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as Lodestone), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 
-Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](DATA.md).
+Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](docs/DATA.md).
 
 Run `cma --help` for the full command surface.
 
@@ -90,7 +90,7 @@ The closure rate counts only preventions evidenced by a surface event between th
 
 ## Action-time injection
 
-cma surfaces relevant prior captures automatically when you (or an AI assistant) are about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](ARCHITECTURE.md). Two reference integrations ship in this repository.
+cma surfaces relevant prior captures automatically when you (or an AI assistant) are about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Two reference integrations ship in this repository.
 
 ### Claude Code
 
@@ -168,7 +168,7 @@ Triggers fire on commands likely to warrant surfacing: editors (`vim`, `nvim`, `
 
 Failure isolation: if cma is missing, errors, or times out (default 5 seconds), the wrapped command still runs cleanly. The wrapper never blocks an action on its own failure.
 
-Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced — the validation evidence that the loop closes.
+Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced, the validation evidence that the loop closes.
 
 ## MCP distribution (cma-mcp)
 
@@ -187,28 +187,29 @@ pip install cma-mcp
 
 See [`cma-mcp/README.md`](cma-mcp/README.md) for the MCP-specific
 quickstart and tool surface. The architectural decisions governing
-the wrapper are recorded in [DECISIONS.md](DECISIONS.md).
+the wrapper are recorded in [DECISIONS.md](docs/DECISIONS.md).
 
 ## Testing
 
 ```bash
-./test.sh
+./scripts/test.sh
 ```
 
 Tests cover all capture verbs (normal and edge cases including special characters, missing arguments, unknown flags) and the operational verbs (`surface`, `distill`, `stats`).
 
-## The Clarethium body
+## Related work
 
-cma sits alongside two open reference artifacts published by Clarethium:
+cma sits alongside a set of open reference artifacts:
 
 - **[Touchstone](https://github.com/Clarethium/touchstone)** validates work against quality standards.
-- **[Lodestone](https://github.com/Clarethium/lodestone)** orients practice.
+- **[frame-check](https://github.com/Clarethium/frame-check)** analyzes structural framing as an MCP server.
+- **Lodestone** orients practice with a canonical methodology.
 
-cma is the executable companion to Lodestone. The doctrine is in Lodestone; the running code is here. Experiments and findings from this practice are published at [What Holds Up](https://blog.clarethium.com).
+cma runs on its own and is agnostic to the methodology you practice; when that methodology is Lodestone, cma is what running it looks like in a terminal. Experiments and findings from this practice are published at [What Holds Up](https://blog.clarethium.com).
 
 ## Methodology integration
 
-cma is methodology-agnostic. The `--fm` field on captures is an opaque string; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as [Lodestone](https://github.com/Clarethium/lodestone)), tag with the methodology's canonical names. The methodology owns the vocabulary and its meaning; cma owns the data substrate.
+cma is methodology-agnostic. The `--fm` field on captures is an opaque string; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as Lodestone), tag with the methodology's canonical names. The methodology owns the vocabulary and its meaning; cma owns the data substrate.
 
 For automatic classification at capture time, set `CMA_FM_CLASSIFIER` to a command that reads the description on stdin and emits the failure-mode tag on stdout:
 
@@ -219,21 +220,21 @@ cma miss "skipped verification before deploying"
 # Classifier auto-tags the --fm value based on the description.
 ```
 
-The classifier is external to cma; you provide the command. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma invokes it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](ARCHITECTURE.md) for the full integration pattern.
+The classifier is external to cma; you provide the command. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma invokes it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](docs/ARCHITECTURE.md) for the full integration pattern.
 
 ## Architecture
 
-cma's action-time injection layer follows a five-stage architecture (interception, context extraction, query, injection, logging). The pattern, reference implementations, data contracts, and validation framework are specified in [ARCHITECTURE.md](ARCHITECTURE.md). Read it before writing a new integration; conform to its contracts so downstream analysis tooling stays consistent.
+cma's action-time injection layer follows a five-stage architecture (interception, context extraction, query, injection, logging). The pattern, reference implementations, data contracts, and validation framework are specified in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Read it before writing a new integration; conform to its contracts so downstream analysis tooling stays consistent.
 
 ### Performance
 
-ARCHITECTURE.md Section 6 specifies <50ms typical latency for action-time injection. The `./bench.sh` harness measures each operation 100 times after 3 warmup runs against a synthetic 100-capture data set, and reports min / p50 / p95 / p99. The text run prints a table; `./bench.sh --json` emits a machine-readable record (operation name, percentile latencies, host kernel/CPU/filesystem, timestamp) suitable for tracking over time.
+docs/ARCHITECTURE.md Section 6 specifies <50ms typical latency for action-time injection. The `./scripts/bench.sh` harness measures each operation 100 times after 3 warmup runs against a synthetic 100-capture data set, and reports min / p50 / p95 / p99. The text run prints a table; `./scripts/bench.sh --json` emits a machine-readable record (operation name, percentile latencies, host kernel/CPU/filesystem, timestamp) suitable for tracking over time.
 
 On commodity Linux and macOS the hot operations (`cma-pre --check`, `cma surface`, `cma stats` default summary) come in at p95 under 50ms. p99 is noisier and occasionally crosses the target on busy hosts; the architecture target is "typical" latency, not worst-case. Sub-50ms work is inherently sample-sensitive; re-run on the target host before citing numbers, and prefer the JSON output over a single text run.
 
 ## Roadmap
 
-The 1.0 surface is locked (see [DESIGN.md](DESIGN.md)) and all seven primitives are functional. Action-time injection ships for Claude Code (PreToolUse and SessionStart hooks) and for shell environments (zsh native preexec, bash via bash-preexec). Both follow the five-stage architecture in [ARCHITECTURE.md](ARCHITECTURE.md).
+The 1.0 surface is locked (see [DESIGN.md](docs/DESIGN.md)) and all seven primitives are functional. Action-time injection ships for Claude Code (PreToolUse and SessionStart hooks) and for shell environments (zsh native preexec, bash via bash-preexec). Both follow the five-stage architecture in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Beyond 1.0: counterfactual capture analysis tooling, per-project data scoping, recency-weighted surface ranking. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
 
@@ -243,4 +244,4 @@ Apache 2.0. See [LICENSE](LICENSE).
 
 ## Author
 
-L. Lucic. Published under Clarethium.
+L. Lucic.

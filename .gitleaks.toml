@@ -12,6 +12,22 @@ title = "cma gitleaks configuration"
 # these, do not replace.
 useDefault = true
 
+# The canon-discipline detector and its self-test fixtures are the
+# files explicitly allowed to name the forbidden patterns (in order to
+# detect or self-verify them). They therefore trip the custom rules
+# below by construction: `canon_audit.sh` matches the *AUDIT* filename
+# shape, and `canon_audit_known_leaks.txt` deliberately carries
+# leak-shaped strings (including a /home/ path) to exercise the
+# detector. Exempt them from all rules, consistent with the public-canon
+# discipline's own path allowlist.
+[allowlist]
+description = "Canon-discipline detector and self-test fixtures may name forbidden patterns"
+paths = [
+  '''scripts/canon_audit\.sh''',
+  '''scripts/canon_audit_known_leaks\.txt''',
+  '''scripts/canon_audit_pystring_concat_known_leaks\.py''',
+]
+
 # Refuse commits matching common agent-handoff scratchpad filename
 # patterns. These files are scratch space and should never enter
 # version control regardless of content.

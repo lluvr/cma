@@ -12,7 +12,7 @@ cma writes append-only JSON Lines files to `$CMA_DIR/` (default
     surface_events.jsonl
 
 Schema is documented in cma's DATA.md. This module reads those files
-without writing — cma-mcp's tools always shell out to bash cma for
+without writing. cma-mcp's tools always shell out to bash cma for
 writes; reads happen here directly because they are simpler and
 faster than spawning a subprocess for every resource fetch.
 

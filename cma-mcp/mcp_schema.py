@@ -19,8 +19,8 @@ as an opaque string; the canonical examples (`auth`, `db`, `docs`,
 but you may pass any short label that fits your work.
 
 `fm` (failure-mode) is opaque per DECISIONS AD-006. cma-mcp does not
-bundle a failure-mode catalog. Tool descriptions reference Lodestone
-as the canonical methodology that owns the FM-1..10 vocabulary;
+bundle a failure-mode catalog. Tool descriptions name Lodestone as
+one example methodology that owns an FM-1..10 vocabulary;
 if you use a different methodology, pass that methodology's tag
 through as opaque data.
 """
@@ -42,8 +42,8 @@ _SURFACE_DESCRIPTION = (
 _FM_DESCRIPTION = (
     "Failure-mode tag, opaque to cma. When you use a "
     "methodology with a canonical catalog (such as Lodestone's "
-    "FM-1..10, see https://github.com/Clarethium/lodestone), pass "
-    "that tag here as a string. cma-mcp does not bundle the catalog "
+    "FM-1..10), pass that tag here as a string. cma-mcp does not "
+    "bundle the catalog "
     "itself. If unset, cma falls back to your "
     "CMA_FM_CLASSIFIER plugin (if configured) or stores the miss "
     "with no fm."
@@ -507,6 +507,52 @@ CMA_STATS = {
 }
 
 
+# Shared output schema. Every cma-mcp tool returns the same three-section
+# payload, so the shape is declared once and attached to each tool below.
+# 2025-06-18+ clients use it to validate `structuredContent`; older clients
+# ignore the field, so it is backward-compatible.
+THREE_SECTION_OUTPUT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "Every cma-mcp tool returns the same three-section payload: the "
+        "tool's data, guidance for relaying it, and provenance."
+    ),
+    "properties": {
+        "analysis": {
+            "type": "object",
+            "description": "Tool-specific result data and the raw cma stdout.",
+        },
+        "agent_guidance": {
+            "type": "object",
+            "description": (
+                "How to relay the result: what the tool does, what it does "
+                "not do, and how to cite it faithfully."
+            ),
+            "properties": {
+                "what_this_tool_does": {"type": "string"},
+                "what_this_tool_does_not_do": {"type": "string"},
+                "how_to_cite_faithfully": {"type": "string"},
+            },
+        },
+        "provenance": {
+            "type": "object",
+            "description": "Reproducibility metadata for the call.",
+            "properties": {
+                "server_name": {"type": "string"},
+                "server_version": {"type": "string"},
+                "protocol_version": {"type": "string"},
+                "license": {"type": "string"},
+                "cost_usd": {"type": "number"},
+                "citation": {"type": "string"},
+                "deterministic": {"type": "boolean"},
+                "timestamp": {"type": "string"},
+            },
+        },
+    },
+    "required": ["analysis", "agent_guidance", "provenance"],
+}
+
+
 # Ordered list (the order defines the sequence in tools/list response).
 TOOLS: list[dict[str, Any]] = [
     CMA_MISS,
@@ -517,6 +563,11 @@ TOOLS: list[dict[str, Any]] = [
     CMA_SURFACE,
     CMA_STATS,
 ]
+
+# Every cma tool returns the same three-section payload; attach the shared
+# output schema to each so tools/list advertises it uniformly.
+for _tool in TOOLS:
+    _tool["outputSchema"] = THREE_SECTION_OUTPUT_SCHEMA
 
 
 # ── resources ─────────────────────────────────────────────────────

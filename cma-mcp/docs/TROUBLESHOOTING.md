@@ -1,6 +1,6 @@
 # cma-mcp Troubleshooting
 
-Symptoms, diagnostics, fixes. Read top-down — the diagnostic loop
+Symptoms, diagnostics, fixes. Read top-down: the diagnostic loop
 at the start gives the right answer for ~80% of issues.
 
 For "why" questions and conceptual orientation, see
@@ -22,7 +22,7 @@ identifies the layer to fix.
 ```
 
 If `1` fails: install bash cma per the
-[parent README](https://github.com/Clarethium/cma#readme).
+[parent README](https://github.com/lluvr/cma#readme).
 
 If `2` fails (binary works but corpus errors): run `cma init` to
 materialize `~/.cma/`, or check that `CMA_DIR` is not pointing
@@ -90,7 +90,7 @@ log tells you what failed.
 **Symptom.** Every tool call returns:
 ```
 {"isError": true, "reason": "missing_binary",
- "install": "https://github.com/Clarethium/cma#readme"}
+ "install": "https://github.com/lluvr/cma#readme"}
 ```
 
 **Cause.** The cma binary is not on the PATH that cma-mcp sees.
@@ -171,7 +171,7 @@ unrecognized schema.
 
 **Fix.** Two paths.
 
-1. If the records came from a non-Clarethium cma fork (different
+1. If the records came from a different cma fork (a different
    `schema_version` value), confirm the schema is read-compatible
    with cma 1.0. Most additive changes are; check the fork's
    schema docs.
@@ -203,7 +203,7 @@ unrecognized schema.
    binary is missing or unreadable.** Install git and confirm
    `git rev-parse HEAD` works from the cma-mcp directory.
 
-`git_sha: null` is honest and not a fatal error — the install
+`git_sha: null` is honest and not a fatal error; the install
 fingerprint surfaces the gap rather than hiding it.
 
 ---
@@ -232,7 +232,7 @@ floor, not a ceiling.
 ## Where to file a bug
 
 Reproducible bugs go to
-[github.com/Clarethium/cma/issues](https://github.com/Clarethium/cma/issues)
+[github.com/lluvr/cma/issues](https://github.com/lluvr/cma/issues)
 with the `cma-mcp` label or `[cma-mcp]` in the title to
 disambiguate from bash cma issues.
 
@@ -260,5 +260,5 @@ MCP client: <Claude Desktop X.Y.Z / Cursor / Cline / etc.>
 ```
 
 Security issues use GitHub's private vulnerability reporting; see
-[SECURITY.md](https://github.com/Clarethium/cma/blob/main/SECURITY.md),
+[SECURITY.md](https://github.com/lluvr/cma/blob/main/SECURITY.md),
 not the public issue tracker.

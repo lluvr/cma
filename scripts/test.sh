@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Tests for cma 1.0
-# Run from repository root: ./test.sh
+# Run from repository root: ./scripts/test.sh
 
 set -uo pipefail
 
-CMA="$(cd "$(dirname "$0")" && pwd)/cma"
+CMA="$(cd "$(dirname "$0")/.." && pwd)/cma"
 CMA_DIR=$(mktemp -d)
 export CMA_DIR
 trap 'rm -rf "$CMA_DIR"' EXIT
@@ -751,7 +751,7 @@ expect_contains "behavior shows corrected"       "fix the root cause" "$CMA" sta
 # ---------------------------------------------------------------------------
 
 reset
-HOOK="$(cd "$(dirname "$0")" && pwd)/hooks/claude-code-pre-tool-use.sh"
+HOOK="$(cd "$(dirname "$0")/.." && pwd)/hooks/claude-code-pre-tool-use.sh"
 # Make cma command available on PATH for the hook's subprocess call
 HOOK_BIN_DIR=$(mktemp -d)
 ln -sf "$CMA" "$HOOK_BIN_DIR/cma"
@@ -804,7 +804,7 @@ fi
 # ---------------------------------------------------------------------------
 
 reset
-SS_HOOK="$(cd "$(dirname "$0")" && pwd)/hooks/claude-code-session-start.sh"
+SS_HOOK="$(cd "$(dirname "$0")/.." && pwd)/hooks/claude-code-session-start.sh"
 
 # Empty data: silent
 out=$(bash "$SS_HOOK" </dev/null 2>&1)
@@ -876,7 +876,7 @@ fi
 # ---------------------------------------------------------------------------
 
 reset
-PRE="$(cd "$(dirname "$0")" && pwd)/hooks/cma-pre"
+PRE="$(cd "$(dirname "$0")/.." && pwd)/hooks/cma-pre"
 
 # No-args exits 1
 expect_exit "cma-pre with no args exits 1"       1 bash "$PRE"

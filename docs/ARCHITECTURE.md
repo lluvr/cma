@@ -6,7 +6,7 @@ The document is the contract between cma and any integration that connects it to
 
 ## 1. Purpose and scope
 
-cma is the executable of compound practice, the discipline defined in [Lodestone](https://github.com/Clarethium/lodestone). The compound practice loop (Lodestone Section VIII) has five steps:
+cma is the executable of compound practice. The compound practice loop has five steps:
 
 1. **Capture** a failure, decision, rejection, or prevention.
 2. **Surface** relevant prior captures when context matches a future action.
@@ -18,7 +18,7 @@ The loop closes only if step 2 (surface) happens reliably at the moment of step 
 
 This document covers the action-time injection layer: the pattern by which surfacing is triggered automatically by an external interception point, the data it produces, and the criteria that distinguish state-of-the-art integrations from bolt-on ones.
 
-The document does not cover the seven primitives themselves (see [DESIGN.md](DESIGN.md)) or the methodology defined in Lodestone.
+The document does not cover the seven primitives themselves (see [DESIGN.md](DESIGN.md)) or the vocabulary of any methodology paired with cma.
 
 ## 2. The five-stage architecture
 
@@ -250,7 +250,7 @@ The architecture is designed to produce data supporting three independent layers
 - Score deltas correlated with cma usage intensity (captures per task, surfacings per task).
 - Failure-shape distribution shifts (fewer recurrences of named failure shapes).
 
-**Strength**: objective, model-independent measurement. **Weakness**: requires your actual work to be amenable to Touchstone evaluation, which depends on output type. Currently aspirational; the bridge between Lodestone, cma, and Touchstone is the project's intellectual spine and is the next major architectural project after this one.
+**Strength**: objective, model-independent measurement. **Weakness**: requires your actual work to be amenable to Touchstone evaluation, which depends on output type. Currently aspirational; the bridge between cma, a methodology's catalog, and Touchstone measurement is the next major architectural project after this one.
 
 The three layers are independent. A system that passes the Process layer alone is a journal. A system that passes Process + Behavior is a working compound practice loop. A system that passes all three is a methodology with empirical grounding.
 
@@ -324,13 +324,13 @@ Integrations writing to `surface_events.jsonl` without conforming to the schema 
 
 The architecture's contract is: integrations call `cma surface` and respect its output schema (Section 4). Adding new fields to surface events (additive) is backward-compatible. Removing fields requires a major version bump.
 
-The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes to the contract follow the project's versioning policy (see [CHANGELOG.md](CHANGELOG.md)).
+The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes to the contract follow the project's versioning policy (see [CHANGELOG.md](../CHANGELOG.md)).
 
 ## 9. Methodology integration
 
 cma is methodology-agnostic. The `--fm` field on captures and any methodology-specific tags are opaque strings from cma's perspective. Semantics are owned by the methodology in use.
 
-When you use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is the canonical human-AI collaboration methodology under Clarethium; others may emerge), you tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
+When you use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is one such methodology; others may emerge), you tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
 
 The integration is by convention (shared vocabulary), not by code. cma does not depend on any methodology. Methodologies do not depend on cma. Each evolves independently. cma documentation does not replicate methodology catalogs; methodology documents own their catalogs and their meaning.
 
@@ -352,5 +352,4 @@ The classifier is external to cma: this repository ships no classifier. Methodol
 ## 10. References
 
 - [DESIGN.md](DESIGN.md): the seven cma 1.0 primitives.
-- [Lodestone Section VIII](https://github.com/Clarethium/lodestone): the compound practice loop (the methodology this architecture serves).
 - [Touchstone](https://github.com/Clarethium/touchstone): the measurement infrastructure for the outcome layer of validation.

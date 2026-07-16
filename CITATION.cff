@@ -1,10 +1,9 @@
 cff-version: 1.2.0
 message: >-
   If you use cma in academic, applied, or compliance work, please
-  cite it using the metadata below. The methodology canon
-  (Lodestone) and the MCP distribution wrapper (cma-mcp, in this
-  repository under cma-mcp/) are separately citeable artifacts;
-  see the references block.
+  cite it using the metadata below. The MCP distribution wrapper
+  (cma-mcp, in this repository under cma-mcp/) is a separately
+  citeable artifact; see the references block.
 title: "cma: executable compound practice loop"
 type: software
 authors:
@@ -12,12 +11,10 @@ authors:
     given-names: Lovro
     orcid: "https://orcid.org/0009-0008-9976-6933"
     website: "https://blog.clarethium.com"
-repository-code: "https://github.com/Clarethium/cma"
-url: "https://github.com/Clarethium/cma"
+repository-code: "https://github.com/lluvr/cma"
+url: "https://github.com/lluvr/cma"
 abstract: >-
-  cma is the executable companion to Lodestone, Clarethium's
-  canonical methodology for AI-coupled work. cma runs the
-  compound practice loop on your local machine: it
+  cma runs the compound practice loop on your local machine: it
   captures failures, surfaces relevant prior context at the moment
   of action, tracks decisions and rejected alternatives, detects
   recurrence, and captures preventions. Action-time injection ships
@@ -31,18 +28,9 @@ keywords:
   - decision-tracking
   - prevention
   - lodestone
-  - clarethium
 license: Apache-2.0
 version: "1.1.0"
 date-released: "2026-05-25"
-doi: "10.5281/zenodo.20066625"
-identifiers:
-  - type: doi
-    value: "10.5281/zenodo.20066625"
-    description: "Concept DOI; resolves to the latest release in this repository (cma or cma-mcp)"
-  - type: doi
-    value: "10.5281/zenodo.20232904"
-    description: "Versioned DOI for cma 1.0.0"
 references:
   - type: software
     title: "cma-mcp: Model Context Protocol distribution for the cma compound practice loop"
@@ -50,7 +38,7 @@ references:
       - family-names: Lucic
         given-names: Lovro
         orcid: "https://orcid.org/0009-0008-9976-6933"
-    url: "https://github.com/Clarethium/cma/tree/main/cma-mcp"
+    url: "https://github.com/lluvr/cma/tree/main/cma-mcp"
     license: Apache-2.0
     notes: >-
       Lives in this repository under cma-mcp/. Brings the same
@@ -58,17 +46,3 @@ references:
       Desktop, Cursor, Cline, Continue.dev) by wrapping cma's CLI
       as a subprocess. See cma-mcp/CITATION.cff for its citable
       form.
-  - type: article
-    title: "Lodestone: canonical methodology for AI-coupled work"
-    authors:
-      - family-names: Lucic
-        given-names: Lovro
-        orcid: "https://orcid.org/0009-0008-9976-6933"
-    url: "https://github.com/Clarethium/lodestone"
-    license: CC-BY-4.0
-    notes: >-
-      The methodology canon Clarethium publishes alongside cma.
-      Defines stance, the loop, calibration, altitude, failure
-      shapes, quality levels, surface protocols, and compound
-      practice (Section VIII). cma is the executable instantiation
-      of Lodestone Section VIII.
