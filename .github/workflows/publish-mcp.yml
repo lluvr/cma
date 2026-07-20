@@ -57,7 +57,7 @@ jobs:
           # ever invokes setup.py without the env var path.
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
