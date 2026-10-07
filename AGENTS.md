@@ -124,8 +124,8 @@ Beyond the file shapes above, certain phrasings always leak. These never appear 
 - Practitioner-sense `operator` compounds: `operator [methodology|framework|practice|discipline|skill|stance]`, `multi-operator`, `operator-AI`, and `the operator's [loop|stance|skill|judgment|contribution|disposition|perspective|choice|workflow|discipline]`. "operator" was retired from public content in favor of "builder" (the person), second person for direct address, or dropped where it read as filler; these compounds are leaks. Bare `operator` in unrelated literal senses (cloud operators, the Python `operator` module, mathematical operators) is fine. The fresh-reader test catches any practitioner-sense recurrence the patterns miss.
 - Any definite reference to `vault` as a body of operator material: `the vault`, `in the vault`, `from the vault`. Also forbidden as terms of art: `vault-faithful`, `vault-validated`, `vault behaviour`, `vault precision threshold`, `vault notes`. Allowed only in domain compounds where `vault` is unrelated (`password vault`, `secrets vault`, `hashicorp vault`, `key vault`).
 - Sanitization-shape parentheticals: `(see private)`, `(internal reference)`, `(maintainer-side reference)`, `(see maintainer-side ...)`.
-- Strategic-positioning vocabulary: `trust|data|authorship|named-authorship|compounding|methodology moat`, `Clarethium`, `empire-grade`, `the project's empire`, `core claim`, `evidence discipline`.
-- Operator hostname / username: `examplehost.localdomain`, `user@`.
+- Strategic vocabulary: `trust|data|authorship|named-authorship|compounding|methodology moat`, `empire-grade`, `the project's empire`, `core claim`, `evidence discipline`.
+- A contributor's hostname, username, home directory path or agent memory directory, in any form.
 
 Subtract over substitute: when removing one of these, delete the sentence and rewrite the surrounding paragraph. Do not replace it with a placeholder marker; the marker itself is a leak.
 

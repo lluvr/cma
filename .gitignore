@@ -74,9 +74,7 @@ ENGINE_TIER_*.md
 METHODOLOGY_PAPER_*.md
 METHODOLOGY_V*_CANDIDATES_*.md
 TRACK_*_INFORMAL_STUDY_*.md
-REPO_SHAPE_MEMO.md
 verify_publication_state.sh
 
-# Operator workspace path patterns (never commit absolute paths)
+# Workspace path patterns (never commit absolute paths)
 *maintainer-internal*
-/clarethium-tools/
