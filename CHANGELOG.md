@@ -15,6 +15,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `cma stats --evidence` now uses the same leak rule as `cma stats --leaks`: surface and fm both present and equal. Previously an absent fm on both sides matched (`"" == ""`), so the two views disagreed on the same corpus.
 - `cma stats --evidence` prints the counts behind the closure rate and marks it self-attested; `--json` adds `loop_closure_evidenced`, `loop_closure_denominator`, and `loop_closure_basis`.
 - The fm classifier, `hooks/cma-pre`, and the `SessionStart` hook no longer require GNU `timeout`. On stock macOS it is absent, so the hooks printed nothing and the classifier never ran. They now fall back to `gtimeout`, then to a python3 time limit that kills the whole process group.
+- A flag given without its value (`cma miss "x" --surface`) now exits 1 with "`--surface requires a value`" instead of a bash `unbound variable` error.
+- `cma surface --limit` now requires a positive integer. `abc` raised a Python traceback and `-1` silently dropped the oldest result.
+- `cma install-hook` shell-quotes the hook paths it writes, so a checkout path containing a space works, and refuses a `settings.json` whose `hooks`, `hooks.SessionStart`, or `hooks.PreToolUse` has the wrong JSON type with a clear message instead of a traceback.
+- `cma miss`, `decision`, `reject`, and `prevented` reject an empty description, matching cma-mcp.
 
 ### Changed
 
