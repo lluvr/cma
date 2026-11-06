@@ -8,6 +8,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+
+- The Claude Code `PreToolUse` hook now prints its captures as `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": ...}}`. Claude Code adds plain stdout to the model's context only for events such as `SessionStart` and `UserPromptSubmit`; for `PreToolUse` it went to the debug log, so the per-action captures never reached the assistant. The hook also logs a surface event only when it actually emitted captures.
+
 ### Changed
 
 - Repository home moved to a personal account (`lluvr/cma`). Self-references, badges, and issue/security links updated; author and publisher framing is now personal (organization publisher attribution dropped).

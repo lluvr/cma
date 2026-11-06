@@ -85,7 +85,7 @@ The fourth stage delivers surfaced captures to your context. The injection chann
 
 | Environment | Channel |
 |-------------|---------|
-| Claude Code | `stdout` becomes additional context passed to the model |
+| Claude Code | `PreToolUse`: a JSON object on `stdout` with `hookSpecificOutput.additionalContext`; `SessionStart`: plain `stdout`. Both become additional context passed to the model |
 | Shell | `stderr` is visible to you before the next prompt |
 | IDE | Inline notice in the editor (status bar, popover, comment) |
 | CI | Comment on the commit, PR, or pipeline run |
@@ -114,7 +114,7 @@ The cma repository includes the following reference implementations of this arch
 
 `hooks/claude-code-pre-tool-use.sh`
 
-Interception via Claude Code's `PreToolUse` hook event. Reads stdin JSON (current format) or environment variables (legacy fallback). Surfaces captures to stdout, where Claude Code injects them as additional context. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
+Interception via Claude Code's `PreToolUse` hook event. Reads stdin JSON (current format) or environment variables (legacy fallback). Surfaces captures as a JSON object on stdout carrying `hookSpecificOutput.additionalContext`, which Claude Code injects as additional context (plain stdout from a `PreToolUse` hook only reaches the debug log). Logs a surface event only when captures were emitted. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
 
 Status: implemented, tested.
 

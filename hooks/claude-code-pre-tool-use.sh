@@ -3,8 +3,10 @@
 #
 # Surfaces relevant prior captures (misses, decisions, rejections, preventions)
 # at the moment Claude is about to use a tool that touches a file or runs a
-# command. Output goes to stdout, where Claude Code injects it as additional
-# context for the assistant.
+# command. Output goes to stdout as a JSON object carrying
+# hookSpecificOutput.additionalContext, which is the form Claude Code adds to
+# the assistant's context for PreToolUse hooks (plain stdout from a PreToolUse
+# hook only reaches the debug log).
 #
 # Install: copy or symlink to a location, then add to ~/.claude/settings.json:
 #
@@ -114,21 +116,32 @@ elif file_path:
 else:
     sys.exit(0)
 
-try:
-    result = subprocess.run(args, capture_output=True, text=True, timeout=5)
-except Exception:
+def run_surface(argv):
+    try:
+        result = subprocess.run(argv, capture_output=True, text=True, timeout=5)
+    except Exception:
+        return ""
+    if result.returncode != 0:
+        return ""
+    out = result.stdout.strip()
+    if out == "No captures match.":
+        return ""
+    return out
+
+# Query without logging first, so a surface event is only recorded when
+# this hook actually hands captures to the assistant. A miss-free query
+# is not a warning and should not count as one in leak detection.
+if not run_surface(args + ["--no-log"]):
+    sys.exit(0)
+output = run_surface(args)
+if not output:
     sys.exit(0)
 
-if result.returncode != 0:
-    sys.exit(0)
-
-output = result.stdout.strip()
-if not output or output == "No captures match.":
-    sys.exit(0)
-
-# Emit context for the assistant. Claude Code injects stdout as an
-# additionalContext payload to the model.
-print("Relevant prior captures from cma (action-time injection):")
-print()
-print(output)
+context = "Relevant prior captures from cma (action-time injection):\n\n" + output
+print(json.dumps({
+    "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "additionalContext": context,
+    }
+}))
 PYEOF

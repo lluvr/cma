@@ -96,7 +96,7 @@ cma surfaces relevant prior captures automatically when you (or an AI assistant)
 
 Two hooks for Claude Code: a `PreToolUse` hook for per-action surfacing and a `SessionStart` hook for session-priming context.
 
-**Per-action surfacing** (`hooks/claude-code-pre-tool-use.sh`): when Claude is about to use a tool that touches a file or runs a command, the hook detects surface heuristically from the tool input, queries `cma surface`, and writes matched captures to stdout. Claude Code injects them as additional context. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
+**Per-action surfacing** (`hooks/claude-code-pre-tool-use.sh`): when Claude is about to use a tool that touches a file or runs a command, the hook detects surface heuristically from the tool input, queries `cma surface`, and prints matched captures as a JSON object with `hookSpecificOutput.additionalContext`, the form Claude Code adds to the assistant's context for `PreToolUse` hooks. Silent for non-relevant tools (`Read`, etc.) and when no captures match; a surface event is logged only when captures were actually handed to the assistant.
 
 **Session-priming context** (`hooks/claude-code-session-start.sh`): at the start of each session, surfaces recurring failure patterns and active rejections so the assistant has orientation before the first tool call. Configurable via `CMA_SESSION_START_SECTIONS` (default `recurrence,rejections`; set to `all` for `recurrence,rejections,behavior`).
 
