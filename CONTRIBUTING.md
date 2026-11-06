@@ -68,8 +68,9 @@ prefixed accordingly (`cma-1.1`, `cma-mcp-0.2`).
    ```bash
    cma --help
    ```
-   If cma is missing, build it from this repository: `ln -s
-   "$(pwd)/cma" ~/.local/bin/cma` (per cma's README quickstart).
+   If cma is missing, build it from this repository: `mkdir -p
+   ~/.local/bin && ln -s "$(pwd)/cma" ~/.local/bin/cma` (per cma's
+   README quickstart).
 4. **Run the full test suite for the component you touched.**
    ```bash
    ./scripts/test.sh                   # bash cma tests
