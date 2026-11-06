@@ -10,7 +10,10 @@ VERSION="1.1.0"
 SCHEMA_VERSION="1.0"
 CMA_DIR="${CMA_DIR:-$HOME/.cma}"
 
-mkdir -p "$CMA_DIR"
+# The data directory holds conversation excerpts; create it private.
+if [[ ! -d "$CMA_DIR" ]]; then
+    (umask 077 && mkdir -p "$CMA_DIR")
+fi
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -174,7 +177,9 @@ for i in range(0, len(extras) - 1, 2):
     if value:
         rec[key] = value
 
-with open(path, "ab") as f:
+# New data files are created owner-only (0600): they hold excerpts.
+fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+with os.fdopen(fd, "ab") as f:
     f.write((json.dumps(rec) + "\n").encode("utf-8"))
 
 print(f"Captured {type_} {rec_id}")
@@ -298,6 +303,20 @@ cmd_surface() {
 import json, os, sys, time
 from glob import glob
 
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
+
 data_dir, surface_filter, file_filter, type_filter, limit_str, log_arg = sys.argv[1:]
 limit = int(limit_str) if limit_str else 10
 should_log = (log_arg == "log")
@@ -383,7 +402,8 @@ if should_log:
         ],
     }
     log_path = os.path.join(data_dir, "surface_events.jsonl")
-    with open(log_path, "a") as f:
+    fd = os.open(log_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+    with os.fdopen(fd, "a") as f:
         f.write(json.dumps(event) + "\n")
 
 if not filtered:
@@ -428,6 +448,20 @@ cmd_distill() {
         python3 - "$CMA_DIR" <<'PYEOF'
 import json, os, sys
 from collections import Counter
+
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
 
 data_dir = sys.argv[1]
 groups = Counter()
@@ -481,6 +515,20 @@ PYEOF
     if [[ -n "$retire_pattern" ]]; then
         python3 - "$CMA_DIR" "$retire_pattern" <<'PYEOF'
 import json, os, sys, time
+
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
 
 data_dir, pattern = sys.argv[1:3]
 core_path = os.path.join(data_dir, "core.jsonl")
@@ -586,6 +634,20 @@ cmd_stats() {
 import json, os, sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
 
 data_dir = sys.argv[1]
 window_days = int(sys.argv[2])
@@ -765,6 +827,20 @@ PYEOF
 import json, os, sys
 from collections import defaultdict
 
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
+
 data_dir = sys.argv[1]
 misses_path = os.path.join(data_dir, "misses.jsonl")
 
@@ -831,6 +907,20 @@ PYEOF
     if $leaks_mode; then
         python3 - "$CMA_DIR" <<'PYEOF'
 import json, os, sys
+
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
 
 data_dir = sys.argv[1]
 
@@ -977,6 +1067,20 @@ PYEOF
 import json, os, sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+
+# Captured text is untrusted: strip ANSI/OSC escapes and other control
+# characters (keeping newline and tab) before it reaches a terminal or
+# hook context.
+import re
+class _CleanOut:
+    _ctrl = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, text):
+        return self._stream.write(self._ctrl.sub("", text))
+    def flush(self):
+        self._stream.flush()
+sys.stdout = _CleanOut(sys.stdout)
 
 data_dir = sys.argv[1]
 window_days = int(sys.argv[2])
