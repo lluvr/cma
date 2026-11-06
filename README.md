@@ -27,22 +27,27 @@ Clone the repository and add the script to your `PATH`:
 
 ```bash
 git clone https://github.com/lluvr/cma.git
+mkdir -p ~/.local/bin
 ln -s "$(pwd)/cma/cma" ~/.local/bin/cma   # or copy to anywhere on PATH
 cma init                                   # create the data directory with a README
 ```
+
+If `cma --version` reports "command not found", add `~/.local/bin` to your `PATH`.
+
+In the examples below, `"<failure-shape>"` is a placeholder: replace it with your own tag, keeping the quotes.
 
 Capture a failure:
 
 ```bash
 cma miss "fix removed the error message instead of addressing the defect" \
-    --surface infra --fm <failure-shape>
+    --surface infra --fm "<failure-shape>"
 ```
 
 For richer capture (texture preservation), add the situational fields:
 
 ```bash
 cma miss "missed validation in middleware" \
-    --surface auth --fm <failure-shape> \
+    --surface auth --fm "<failure-shape>" \
     --intended "patch only the failing test" \
     --corrected "trace upstream defect, fix at root" \
     --excerpt-from /tmp/conversation-excerpt.txt
@@ -63,7 +68,7 @@ cma's central claim is that captured failures become surfaced warnings, surfaced
 ```bash
 # 1. Capture a failure so future similar work can see it.
 cma miss "claimed verified without testing the cross-tenant path" \
-    --surface auth --fm <failure-shape>
+    --surface auth --fm "<failure-shape>"
 
 # 2. Surface relevant prior captures before the next related action.
 #    The PreToolUse hook does this automatically; manual invocation
@@ -107,6 +112,17 @@ cma install-hook --claude-code
 ```
 
 This merges the SessionStart and PreToolUse blocks into `~/.claude/settings.json` (or `./.claude/settings.json` with `--scope project`). It is idempotent, preserves any other hooks you have configured, and writes a backup of the prior file at `settings.json.bak`. Preview without writing via `--dry-run`.
+
+Verify the per-action hook fires by feeding it the payload Claude Code would send (run from the directory you cloned into):
+
+```bash
+cma miss "example: skipped the token expiry check" --surface auth
+echo '{"tool_name":"Edit","tool_input":{"file_path":"src/auth/login.ts"}}' \
+    | bash cma/hooks/claude-code-pre-tool-use.sh
+# {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "Relevant prior captures ..."}}
+```
+
+No output means no capture matched or `cma` is not on the `PATH` the hook sees. Then restart Claude Code so it picks up the new settings.
 
 If you prefer to wire it manually, the JSON blocks the command produces look like:
 
