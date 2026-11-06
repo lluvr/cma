@@ -18,6 +18,8 @@ $CMA_DIR/
 
 All files are JSON Lines (JSONL): one JSON object per line, append-only, never edited in place. The format is durable, recoverable line by line, and parseable by any JSON-aware tool.
 
+Captures can hold conversation excerpts, so cma creates a new data directory with mode 0700 and new data files with mode 0600. Existing directories and files keep their modes; tighten them with `chmod 700 "$CMA_DIR" && chmod 600 "$CMA_DIR"/*.jsonl`.
+
 ## 2. Schema
 
 Every record begins with `schema_version`, `type`, `id`, and `timestamp`. Type-specific fields follow.

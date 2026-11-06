@@ -1106,6 +1106,37 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Data privacy and output hygiene
+# ---------------------------------------------------------------------------
+
+priv_root=$(mktemp -d)
+priv_dir="$priv_root/fresh/data"
+CMA_DIR="$priv_dir" "$CMA" miss $'esc \e[2J\e]0;pwned\a text\x07 end' --surface auth --excerpt "secret" >/dev/null
+CMA_DIR="$priv_dir" "$CMA" surface --surface auth >/dev/null
+perm_dir=$(python3 -c "import os,sys; print(oct(os.stat(sys.argv[1]).st_mode & 0o777))" "$priv_dir")
+perm_files=$(python3 -c "import os,sys; print(sorted({oct(os.stat(os.path.join(sys.argv[1], f)).st_mode & 0o777) for f in os.listdir(sys.argv[1]) if f.endswith('.jsonl')}))" "$priv_dir")
+if [[ "$perm_dir" == "0o700" && "$perm_files" == "['0o600']" ]]; then
+    printf "PASS  %s\n" "new data dir is 0700 and data files 0600"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (dir=%s files=%s)\n" "new data dir is 0700 and data files 0600" "$perm_dir" "$perm_files"
+    fail=$((fail + 1))
+fi
+surf_out=$(CMA_DIR="$priv_dir" "$CMA" surface --no-log)
+CMA_DIR="$priv_dir" "$CMA" miss "second" --surface auth --fm f --intended $'\e[31mred\e[0m' >/dev/null
+CMA_DIR="$priv_dir" "$CMA" miss "third" --surface auth --fm f >/dev/null
+all_out="$surf_out$(CMA_DIR="$priv_dir" "$CMA" stats --behavior)$(CMA_DIR="$priv_dir" CMA_SESSION_START_SECTIONS=all bash "$SS_HOOK" </dev/null)"
+hook_raw=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | CMA_DIR="$priv_dir" bash "$HOOK")
+if [[ "$surf_out" == *"text end"* && "$surf_out" != *pwned* && "$all_out" == *"red"* && "$all_out" != *$'\e'* && "$all_out" != *$'\a'* && "$hook_raw" != *'\u001b'* && "$hook_raw" != *'\u0007'* ]]; then
+    printf "PASS  %s\n" "control characters stripped from terminal and hook output"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q hook=%q)\n" "control characters stripped from terminal and hook output" "$all_out" "$hook_raw"
+    fail=$((fail + 1))
+fi
+rm -rf "$priv_root"
+
+# ---------------------------------------------------------------------------
 # Portability: GNU timeout absent (stock macOS)
 # ---------------------------------------------------------------------------
 

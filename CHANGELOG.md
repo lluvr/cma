@@ -19,6 +19,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `cma surface --limit` now requires a positive integer. `abc` raised a Python traceback and `-1` silently dropped the oldest result.
 - `cma install-hook` shell-quotes the hook paths it writes, so a checkout path containing a space works, and refuses a `settings.json` whose `hooks`, `hooks.SessionStart`, or `hooks.PreToolUse` has the wrong JSON type with a clear message instead of a traceback.
 - `cma miss`, `decision`, `reject`, and `prevented` reject an empty description, matching cma-mcp.
+- A new data directory is created with mode 0700 and new data files with mode 0600, since captures can hold conversation excerpts. Existing installs keep their modes (see `docs/DATA.md`).
+- Captured text is stripped of ANSI/OSC escape sequences and other control characters (newlines and tabs kept) before cma prints it to the terminal, so it also reaches the `SessionStart` and `PreToolUse` hook context clean.
 
 ### Changed
 
