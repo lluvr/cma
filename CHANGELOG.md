@@ -14,6 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `cma stats --rejections` and `--preventions` no longer log surface events. They are read-only views, and the `SessionStart` hook calls `--rejections` every session, which inflated the event log with entries that were never action-time warnings.
 - `cma stats --evidence` now uses the same leak rule as `cma stats --leaks`: surface and fm both present and equal. Previously an absent fm on both sides matched (`"" == ""`), so the two views disagreed on the same corpus.
 - `cma stats --evidence` prints the counts behind the closure rate and marks it self-attested; `--json` adds `loop_closure_evidenced`, `loop_closure_denominator`, and `loop_closure_basis`.
+- The fm classifier, `hooks/cma-pre`, and the `SessionStart` hook no longer require GNU `timeout`. On stock macOS it is absent, so the hooks printed nothing and the classifier never ran. They now fall back to `gtimeout`, then to a python3 time limit that kills the whole process group.
 
 ### Changed
 

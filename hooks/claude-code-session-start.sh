@@ -47,6 +47,34 @@ if [[ "$sections" == "all" ]]; then
     sections="recurrence,rejections,behavior"
 fi
 
+# Run a command under a time limit. GNU `timeout` is missing on stock
+# macOS, so fall back to Homebrew's `gtimeout`, then to python3 (already
+# a hard dependency). Exit status 124 on expiry, matching `timeout`.
+with_timeout() {
+    local secs="$1"; shift
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$secs" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$secs" "$@"
+    else
+        # Like GNU timeout, signal the whole process group on expiry so a
+        # grandchild holding the output pipe cannot outlive the limit.
+        python3 -c '
+import os, signal, subprocess, sys
+try:
+    p = subprocess.Popen(sys.argv[2:], start_new_session=True)
+except OSError:
+    sys.exit(127)
+try:
+    sys.exit(p.wait(timeout=float(sys.argv[1])))
+except subprocess.TimeoutExpired:
+    os.killpg(p.pid, signal.SIGKILL)
+    p.wait()
+    sys.exit(124)
+' "$secs" "$@"
+    fi
+}
+
 # Collect outputs from selected sections.
 # Each subsection's full output is preserved (header + data + footer)
 # because the framing text helps the assistant interpret the data.
@@ -55,7 +83,7 @@ get_section() {
     local out=""
     case "$name" in
         recurrence)
-            out=$(timeout 5 cma stats --recurrence 2>/dev/null || true)
+            out=$(with_timeout 5 cma stats --recurrence 2>/dev/null || true)
             # Suppress empty/no-data outputs: only return content if we
             # actually have recurring patterns.
             if [[ "$out" == *"no patterns are recurring"* ]] || [[ "$out" == *"No misses recorded"* ]] || [[ -z "$out" ]]; then
@@ -63,14 +91,14 @@ get_section() {
             fi
             ;;
         rejections)
-            out=$(timeout 5 cma stats --rejections 2>/dev/null || true)
+            out=$(with_timeout 5 cma stats --rejections 2>/dev/null || true)
             # Suppress when there are no active rejections
             if [[ "$out" == *"No captures match"* ]] || [[ -z "$out" ]]; then
                 out=""
             fi
             ;;
         behavior)
-            out=$(timeout 5 cma stats --behavior 2>/dev/null || true)
+            out=$(with_timeout 5 cma stats --behavior 2>/dev/null || true)
             if [[ "$out" == *"No misses recorded"* ]] || [[ "$out" == *"none have intended/corrected"* ]] || [[ -z "$out" ]]; then
                 out=""
             fi
