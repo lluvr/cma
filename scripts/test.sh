@@ -789,6 +789,40 @@ else
     fail=$((fail + 1))
 fi
 
+# Output is the documented PreToolUse JSON shape, and nothing else.
+hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" 2>/dev/null)
+hook_json_ok=$(python3 -c "
+import json, sys
+d = json.loads(sys.stdin.read())
+h = d['hookSpecificOutput']
+ok = (set(d) == {'hookSpecificOutput'} and h['hookEventName'] == 'PreToolUse'
+      and 'auth issue example' in h['additionalContext']
+      and 'permissionDecision' not in h)
+print('ok' if ok else 'fail')
+" <<<"$hook_out" 2>/dev/null)
+if [[ "$hook_json_ok" == "ok" ]]; then
+    printf "PASS  %s\n" "hook emits hookSpecificOutput.additionalContext JSON"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "hook emits hookSpecificOutput.additionalContext JSON" "$hook_out"
+    fail=$((fail + 1))
+fi
+
+# A silent hook run logs no surface event; an emitting run logs one.
+events_count() { if [[ -f "$CMA_DIR/surface_events.jsonl" ]]; then wc -l < "$CMA_DIR/surface_events.jsonl" | tr -d ' '; else echo 0; fi; }
+ev_before=$(events_count)
+echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/payments/y.ts"}}' | bash "$HOOK" >/dev/null 2>&1
+ev_silent=$(events_count)
+echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" >/dev/null 2>&1
+ev_emit=$(events_count)
+if [[ "$ev_silent" == "$ev_before" && "$ev_emit" -eq $((ev_before + 1)) ]]; then
+    printf "PASS  %s\n" "hook logs a surface event only when it emits"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (before=%s silent=%s emit=%s)\n" "hook logs a surface event only when it emits" "$ev_before" "$ev_silent" "$ev_emit"
+    fail=$((fail + 1))
+fi
+
 # Env var fallback
 hook_out=$(CLAUDE_TOOL_NAME=Bash CLAUDE_TOOL_INPUT='{"command":"npm test auth"}' bash "$HOOK" </dev/null 2>&1)
 if [[ "$hook_out" == *"auth issue example"* ]]; then
