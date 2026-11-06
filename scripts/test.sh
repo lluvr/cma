@@ -1037,6 +1037,41 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Portability: GNU timeout absent (stock macOS)
+# ---------------------------------------------------------------------------
+
+# Build a PATH with only the tools cma and its hooks use, minus timeout and
+# gtimeout, so the python3 fallback is what runs.
+NO_TIMEOUT_BIN=$(mktemp -d)
+trap 'rm -rf "$CMA_DIR" "$HOOK_BIN_DIR" "$NO_TIMEOUT_BIN"' EXIT
+for tool in bash sh python3 cat head tr sed awk wc mkdir dirname realpath date df env basename; do
+    tool_path=$(command -v "$tool" 2>/dev/null) && ln -sf "$tool_path" "$NO_TIMEOUT_BIN/$tool"
+done
+ln -sf "$CMA" "$NO_TIMEOUT_BIN/cma"
+if PATH="$NO_TIMEOUT_BIN" command -v timeout >/dev/null 2>&1; then
+    printf "FAIL  %s\n" "no-timeout PATH really lacks timeout"
+    fail=$((fail + 1))
+fi
+
+reset
+"$CMA" miss "portable miss" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "portable miss two" --surface auth --fm fm-1 >/dev/null
+"$CMA" reject "OPTION: portable rejection" >/dev/null
+output=$(PATH="$NO_TIMEOUT_BIN" bash "$PRE" --check "git commit auth-fix" 2>&1)
+expect_contains "cma-pre surfaces without GNU timeout" "portable miss" printf '%s' "$output"
+output=$(PATH="$NO_TIMEOUT_BIN" bash "$SS_HOOK" </dev/null 2>&1)
+if [[ "$output" == *"## recurrence"* && "$output" == *"portable rejection"* ]]; then
+    printf "PASS  %s\n" "session-start works without GNU timeout"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "session-start works without GNU timeout" "$output"
+    fail=$((fail + 1))
+fi
+reset
+PATH="$NO_TIMEOUT_BIN" CMA_FM_CLASSIFIER='echo portable-fm' "$CMA" miss "classified" >/dev/null
+expect_contains "classifier runs without GNU timeout" '"fm": "portable-fm"' cat "$CMA_DIR/misses.jsonl"
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 

@@ -16,6 +16,34 @@ mkdir -p "$CMA_DIR"
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Run a command under a time limit. GNU `timeout` is missing on stock
+# macOS, so fall back to Homebrew's `gtimeout`, then to python3 (already
+# a hard dependency). Exit status 124 on expiry, matching `timeout`.
+with_timeout() {
+    local secs="$1"; shift
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$secs" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$secs" "$@"
+    else
+        # Like GNU timeout, signal the whole process group on expiry so a
+        # grandchild holding the output pipe cannot outlive the limit.
+        python3 -c '
+import os, signal, subprocess, sys
+try:
+    p = subprocess.Popen(sys.argv[2:], start_new_session=True)
+except OSError:
+    sys.exit(127)
+try:
+    sys.exit(p.wait(timeout=float(sys.argv[1])))
+except subprocess.TimeoutExpired:
+    os.killpg(p.pid, signal.SIGKILL)
+    p.wait()
+    sys.exit(124)
+' "$secs" "$@"
+    fi
+}
+
 usage_for() {
     case "$1" in
         miss)
@@ -171,7 +199,7 @@ cmd_miss() {
     # missing commands, or timeouts do not block the capture.
     # See docs/ARCHITECTURE.md Section 9 (Methodology integration).
     if [[ -z "$fm" ]] && [[ -n "${CMA_FM_CLASSIFIER:-}" ]]; then
-        fm=$(printf '%s' "$description" | timeout 5 sh -c "$CMA_FM_CLASSIFIER" 2>/dev/null | head -1 || true)
+        fm=$(printf '%s' "$description" | with_timeout 5 sh -c "$CMA_FM_CLASSIFIER" 2>/dev/null | head -1 || true)
         # Trim leading/trailing whitespace
         fm="${fm#"${fm%%[![:space:]]*}"}"
         fm="${fm%"${fm##*[![:space:]]}"}"
