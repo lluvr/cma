@@ -15,7 +15,7 @@ cma is methodology-agnostic. It owns the data substrate (how captures are stored
 
 ## Status
 
-cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. Test suite (143 cases) covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
+cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. Test suite (173 cases) covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
 
 The full surface is specified in [DESIGN.md](docs/DESIGN.md). Additive features (action-time injection, texture preservation, counterfactual capture, recurrence detection) layer on without changing the locked surface.
 
