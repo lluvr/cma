@@ -302,6 +302,24 @@ reset
 expect_exit "prevented succeeds"                 0 "$CMA" prevented "almost X, did Y instead"
 expect_exit "prevented with miss-id"             0 "$CMA" prevented "x" --miss-id abc123
 
+# Flag with no value, and empty descriptions, fail cleanly (no bash traceback).
+expect_exit     "miss flag without value exits 1"   1 "$CMA" miss "t" --surface
+expect_contains "miss flag without value message"   "--surface requires a value" "$CMA" miss "t" --surface
+expect_contains "surface flag without value message" "--file requires a value" "$CMA" surface --file
+expect_contains "id flag without value message"     "--surface requires a value" "$CMA" id --surface
+reset
+expect_exit     "miss with empty description exits 1"      1 "$CMA" miss ""
+expect_exit     "decision with empty description exits 1"  1 "$CMA" decision ""
+expect_exit     "reject with empty description exits 1"    1 "$CMA" reject ""
+expect_exit     "prevented with empty description exits 1" 1 "$CMA" prevented ""
+if [[ ! -e "$CMA_DIR/misses.jsonl" ]]; then
+    printf "PASS  %s\n" "empty description writes nothing"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "empty description writes nothing"
+    fail=$((fail + 1))
+fi
+
 # ---------------------------------------------------------------------------
 # cma id helper
 # ---------------------------------------------------------------------------
@@ -411,6 +429,50 @@ fi
 popd >/dev/null || exit 1
 rm -rf "$ih_dir"
 
+# Hook paths containing a space are quoted in the written command.
+ih_dir=$(mktemp -d)
+mkdir -p "$ih_dir/with space" "$ih_dir/proj"
+cp "$CMA" "$ih_dir/with space/cma"
+cp -r "$(dirname "$CMA")/hooks" "$ih_dir/with space/hooks"
+pushd "$ih_dir/proj" >/dev/null || exit 1
+"$ih_dir/with space/cma" install-hook --claude-code --scope project >/dev/null
+quoted_ok=$(python3 -c "
+import json, shlex
+d = json.load(open('.claude/settings.json'))
+cmds = [h['command'] for ev in ('SessionStart', 'PreToolUse') for g in d['hooks'][ev] for h in g['hooks']]
+ok = all(len(shlex.split(c)) == 2 and ' ' in shlex.split(c)[1] for c in cmds) and len(cmds) == 2
+print('ok' if ok else 'fail: ' + repr(cmds))
+")
+if [[ "$quoted_ok" == "ok" ]]; then
+    printf "PASS  %s\n" "install-hook quotes hook paths with spaces"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (%s)\n" "install-hook quotes hook paths with spaces" "$quoted_ok"
+    fail=$((fail + 1))
+fi
+out=$("$ih_dir/with space/cma" install-hook --claude-code --scope project 2>&1)
+expect_contains "install-hook idempotent with quoted paths" "already present" printf '%s' "$out"
+popd >/dev/null || exit 1
+rm -rf "$ih_dir"
+
+# Wrong-typed hooks sections are refused cleanly, file left unchanged.
+ih_dir=$(mktemp -d)
+pushd "$ih_dir" >/dev/null || exit 1
+mkdir -p .claude
+for bad in '{"hooks": []}' '{"hooks": {"PreToolUse": {}}}' '[]'; do
+    printf '%s\n' "$bad" > .claude/settings.json
+    err=$("$CMA" install-hook --claude-code --scope project 2>&1); rc=$?
+    if [[ "$rc" == 1 && "$err" != *Traceback* && "$err" == *"no changes made"* && "$(cat .claude/settings.json)" == "$bad" ]]; then
+        printf "PASS  %s\n" "install-hook refuses wrong-typed settings: $bad"
+        pass=$((pass + 1))
+    else
+        printf "FAIL  %s (rc=%s err=%q)\n" "install-hook refuses wrong-typed settings: $bad" "$rc" "$err"
+        fail=$((fail + 1))
+    fi
+done
+popd >/dev/null || exit 1
+rm -rf "$ih_dir"
+
 # Malformed JSON is refused without overwriting.
 ih_dir=$(mktemp -d)
 pushd "$ih_dir" >/dev/null || exit 1
@@ -462,6 +524,13 @@ expect_contains "surface --type miss filters"    "first miss" "$CMA" surface --t
 expect_exit     "surface --limit 1 succeeds"     0 "$CMA" surface --limit 1
 expect_contains "surface --surface docs filters" "first miss" "$CMA" surface --surface docs
 expect_exit     "surface --bogus exits 1"        1 "$CMA" surface --bogus
+
+# --limit must be a positive integer; -1 used to drop the oldest result.
+expect_exit     "surface --limit abc exits 1"    1 "$CMA" surface --limit abc
+expect_contains "surface --limit abc message"    "positive integer" "$CMA" surface --limit abc
+expect_exit     "surface --limit -1 exits 1"     1 "$CMA" surface --limit -1
+expect_exit     "surface --limit 0 exits 1"      1 "$CMA" surface --limit 0
+expect_matches  "surface --limit 2 returns two"  'second miss.*first miss' "$CMA" surface --type miss --limit 2 --no-log
 
 # Surface --type filter excludes other types
 output=$("$CMA" surface --type miss 2>&1)

@@ -16,6 +16,16 @@ mkdir -p "$CMA_DIR"
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Fail cleanly when a flag that takes a value is the last argument.
+# Call as `need_value <verb> "$@"` from a flag's case arm: $2 is the flag
+# and $3 its value.
+need_value() {
+    if [[ $# -lt 3 ]]; then
+        echo "cma $1: $2 requires a value" >&2
+        exit 1
+    fi
+}
+
 # Run a command under a time limit. GNU `timeout` is missing on stock
 # macOS, so fall back to Homebrew's `gtimeout`, then to python3 (already
 # a hard dependency). Exit status 124 on expiry, matching `timeout`.
@@ -173,22 +183,24 @@ PYEOF
 
 cmd_miss() {
     if [[ $# -eq 0 ]]; then usage_for miss; exit 1; fi
+    if [[ -z "$1" ]]; then echo "cma miss: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" fm="" files=""
     local excerpt="" intended="" corrected=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --surface) surface="$2"; shift 2 ;;
-            --fm) fm="$2"; shift 2 ;;
-            --files) files="$2"; shift 2 ;;
-            --excerpt) excerpt="$2"; shift 2 ;;
+            --surface) need_value miss "$@"; surface="$2"; shift 2 ;;
+            --fm) need_value miss "$@"; fm="$2"; shift 2 ;;
+            --files) need_value miss "$@"; files="$2"; shift 2 ;;
+            --excerpt) need_value miss "$@"; excerpt="$2"; shift 2 ;;
             --excerpt-from)
+                need_value miss "$@"
                 if [[ ! -f "$2" ]]; then
                     echo "cma miss: --excerpt-from file not found: $2" >&2; exit 1
                 fi
                 excerpt=$(cat "$2"); shift 2 ;;
-            --intended) intended="$2"; shift 2 ;;
-            --corrected) corrected="$2"; shift 2 ;;
+            --intended) need_value miss "$@"; intended="$2"; shift 2 ;;
+            --corrected) need_value miss "$@"; corrected="$2"; shift 2 ;;
             *) echo "cma miss: unknown flag: $1" >&2; usage_for miss; exit 1 ;;
         esac
     done
@@ -212,12 +224,13 @@ cmd_miss() {
 
 cmd_decision() {
     if [[ $# -eq 0 ]]; then usage_for decision; exit 1; fi
+    if [[ -z "$1" ]]; then echo "cma decision: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" applies_when=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --surface) surface="$2"; shift 2 ;;
-            --applies-when) applies_when="$2"; shift 2 ;;
+            --surface) need_value decision "$@"; surface="$2"; shift 2 ;;
+            --applies-when) need_value decision "$@"; applies_when="$2"; shift 2 ;;
             *) echo "cma decision: unknown flag: $1" >&2; usage_for decision; exit 1 ;;
         esac
     done
@@ -227,12 +240,13 @@ cmd_decision() {
 
 cmd_reject() {
     if [[ $# -eq 0 ]]; then usage_for reject; exit 1; fi
+    if [[ -z "$1" ]]; then echo "cma reject: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" revisit_when=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --surface) surface="$2"; shift 2 ;;
-            --revisit-when) revisit_when="$2"; shift 2 ;;
+            --surface) need_value reject "$@"; surface="$2"; shift 2 ;;
+            --revisit-when) need_value reject "$@"; revisit_when="$2"; shift 2 ;;
             *) echo "cma reject: unknown flag: $1" >&2; usage_for reject; exit 1 ;;
         esac
     done
@@ -242,12 +256,13 @@ cmd_reject() {
 
 cmd_prevented() {
     if [[ $# -eq 0 ]]; then usage_for prevented; exit 1; fi
+    if [[ -z "$1" ]]; then echo "cma prevented: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local miss_id="" warning_id=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --miss-id) miss_id="$2"; shift 2 ;;
-            --warning-id) warning_id="$2"; shift 2 ;;
+            --miss-id) need_value prevented "$@"; miss_id="$2"; shift 2 ;;
+            --warning-id) need_value prevented "$@"; warning_id="$2"; shift 2 ;;
             *) echo "cma prevented: unknown flag: $1" >&2; usage_for prevented; exit 1 ;;
         esac
     done
@@ -263,14 +278,18 @@ cmd_surface() {
     local surface="" file="" type="" limit="10" log_event=true
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --surface) surface="$2"; shift 2 ;;
-            --file) file="$2"; shift 2 ;;
-            --type) type="$2"; shift 2 ;;
-            --limit) limit="$2"; shift 2 ;;
+            --surface) need_value surface "$@"; surface="$2"; shift 2 ;;
+            --file) need_value surface "$@"; file="$2"; shift 2 ;;
+            --type) need_value surface "$@"; type="$2"; shift 2 ;;
+            --limit) need_value surface "$@"; limit="$2"; shift 2 ;;
             --no-log) log_event=false; shift ;;
             *) echo "cma surface: unknown flag: $1" >&2; usage_for surface; exit 1 ;;
         esac
     done
+
+    if ! [[ "$limit" =~ ^[1-9][0-9]*$ ]]; then
+        echo "cma surface: --limit requires a positive integer" >&2; exit 1
+    fi
 
     local log_arg="log"
     $log_event || log_arg="nolog"
@@ -392,10 +411,10 @@ cmd_distill() {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --retire) retire_pattern="$2"; shift 2 ;;
+            --retire) need_value distill "$@"; retire_pattern="$2"; shift 2 ;;
             --review) review_mode=true; shift ;;
-            --scope) scope="$2"; shift 2 ;;
-            --surface) surface="$2"; shift 2 ;;
+            --scope) need_value distill "$@"; scope="$2"; shift 2 ;;
+            --surface) need_value distill "$@"; surface="$2"; shift 2 ;;
             -*) echo "cma distill: unknown flag: $1" >&2; usage_for distill; exit 1 ;;
             *)
                 if [[ -z "$learning" ]]; then learning="$1"; else
@@ -1132,9 +1151,9 @@ cmd_id() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --type)
-                type="$2"; shift 2 ;;
+                need_value id "$@"; type="$2"; shift 2 ;;
             --surface)
-                surface="$2"; shift 2 ;;
+                need_value id "$@"; surface="$2"; shift 2 ;;
             miss|decision|rejection|prevention|core)
                 # Allow `cma id miss` shorthand as well as --type miss.
                 type="$1"; shift ;;
@@ -1232,7 +1251,7 @@ cmd_install_hook() {
     $dry_run && mode="dry"
 
     python3 - "$settings_path" "$session_hook" "$pretool_hook" "$mode" <<'PYEOF'
-import json, os, shutil, sys
+import json, os, shlex, shutil, sys
 
 settings_path, session_hook, pretool_hook, mode = sys.argv[1:]
 
@@ -1248,26 +1267,40 @@ if os.path.exists(settings_path):
         print("  Fix the file (or remove it) and re-run; no changes made.", file=sys.stderr)
         sys.exit(1)
 
+def refuse(what, expected):
+    print(f"cma install-hook: {what} in {settings_path} must be {expected}; no changes made.",
+          file=sys.stderr)
+    sys.exit(1)
+
+if not isinstance(existing, dict):
+    refuse("the top level", "a JSON object")
 hooks = existing.setdefault("hooks", {})
+if not isinstance(hooks, dict):
+    refuse('"hooks"', "a JSON object")
 session_list = hooks.setdefault("SessionStart", [])
 pretool_list = hooks.setdefault("PreToolUse", [])
+for event, lst in (("SessionStart", session_list), ("PreToolUse", pretool_list)):
+    if not isinstance(lst, list):
+        refuse(f'"hooks.{event}"', "a JSON array")
 
 def has_cma_hook(hook_list, hook_path):
     for group in hook_list:
-        for h in group.get("hooks", []):
-            if hook_path in h.get("command", ""):
+        if not isinstance(group, dict):
+            continue
+        for h in group.get("hooks", []) or []:
+            if isinstance(h, dict) and hook_path in str(h.get("command", "")):
                 return True
     return False
 
 added = []
 if not has_cma_hook(session_list, session_hook):
     session_list.append({
-        "hooks": [{"type": "command", "command": f"bash {session_hook}"}]
+        "hooks": [{"type": "command", "command": "bash " + shlex.quote(session_hook)}]
     })
     added.append("SessionStart")
 if not has_cma_hook(pretool_list, pretool_hook):
     pretool_list.append({
-        "hooks": [{"type": "command", "command": f"bash {pretool_hook}"}]
+        "hooks": [{"type": "command", "command": "bash " + shlex.quote(pretool_hook)}]
     })
     added.append("PreToolUse")
 
