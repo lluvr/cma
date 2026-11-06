@@ -580,19 +580,23 @@ def in_window(rec):
 misses_w = [m for m in misses if in_window(m)]
 preventions_w = [p for p in preventions if in_window(p)]
 
+# Leak rule, shared with `cma stats --leaks` (its "strong" leak): surface
+# and fm both present and equal on the miss and on the surfaced capture.
+# An absent fm on either side is only a weak signal there, so it is not a
+# leak here either; an empty fm must never match an empty fm.
 leaks = []
 for miss in misses_w:
     miss_ts = norm_ts(miss.get("timestamp", ""))
     miss_surface = miss.get("surface", "")
     miss_fm = miss.get("fm", "")
-    if not miss_surface and not miss_fm:
+    if not miss_surface or not miss_fm:
         continue
     for event in events:
         if norm_ts(event.get("timestamp", "")) >= miss_ts:
             continue
         for matched in event.get("matched", []):
-            if (matched.get("surface") == miss_surface and
-                matched.get("fm") == miss_fm and miss_surface):
+            if (matched.get("surface", "") == miss_surface and
+                matched.get("fm", "") == miss_fm):
                 leaks.append(miss)
                 break
         else:
@@ -657,6 +661,9 @@ if output_format == "json":
         "preventions_evidenced": evidenced_count,
         "leaks": leak_count,
         "loop_closure_rate": closure_rate,
+        "loop_closure_evidenced": evidenced_count,
+        "loop_closure_denominator": closure_denom,
+        "loop_closure_basis": "self-attested",
         "recurring": [
             {"surface": s, "fm": f, "count": n}
             for (s, f), n in recurring
@@ -676,6 +683,8 @@ if closure_denom == 0:
 else:
     print("  Loop closure rate:           {:.0%}  ({}/{})".format(
         closure_rate, evidenced_count, closure_denom))
+    print("    self-attested: {} evidenced prevention(s) you recorded, {} leak(s)".format(
+        evidenced_count, leak_count))
 print()
 
 if recurring:
@@ -1028,7 +1037,10 @@ PYEOF
     fi
 
     if [[ -n "$view" ]]; then
-        cmd_surface --type "$view"
+        # Stats views are read-only: listing rejections or preventions is
+        # not a warning surfaced at action time, so it must not log a
+        # surface event (the SessionStart hook calls this every session).
+        cmd_surface --type "$view" --no-log
         return 0
     fi
 
