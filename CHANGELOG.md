@@ -11,6 +11,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Fixed
 
 - The Claude Code `PreToolUse` hook now prints its captures as `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": ...}}`. Claude Code adds plain stdout to the model's context only for events such as `SessionStart` and `UserPromptSubmit`; for `PreToolUse` it went to the debug log, so the per-action captures never reached the assistant. The hook also logs a surface event only when it actually emitted captures.
+- `cma stats --rejections` and `--preventions` no longer log surface events. They are read-only views, and the `SessionStart` hook calls `--rejections` every session, which inflated the event log with entries that were never action-time warnings.
+- `cma stats --evidence` now uses the same leak rule as `cma stats --leaks`: surface and fm both present and equal. Previously an absent fm on both sides matched (`"" == ""`), so the two views disagreed on the same corpus.
+- `cma stats --evidence` prints the counts behind the closure rate and marks it self-attested; `--json` adds `loop_closure_evidenced`, `loop_closure_denominator`, and `loop_closure_basis`.
 
 ### Changed
 

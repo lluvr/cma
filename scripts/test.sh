@@ -734,6 +734,61 @@ else
     fail=$((fail + 1))
 fi
 
+# Evidence and leaks share one fm rule: an absent fm on both sides is a weak
+# signal in --leaks, so it must not count as a leak in --evidence either.
+reset
+"$CMA" miss "no-fm anchor" --surface auth >/dev/null
+"$CMA" surface --surface auth >/dev/null
+wait_for_next_second
+"$CMA" miss "no-fm recur" --surface auth >/dev/null
+nofm_leaks=$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['leaks'])" <<<"$("$CMA" stats --evidence --json 2>/dev/null)")
+nofm_view=$("$CMA" stats --leaks 2>&1)
+if [[ "$nofm_leaks" == "0" && "$nofm_view" != *"leak(s):"* && "$nofm_view" == *"weak signal"* ]]; then
+    printf "PASS  %s\n" "evidence and leaks agree: empty fm is not a leak"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (evidence leaks=%s)\n" "evidence and leaks agree: empty fm is not a leak" "$nofm_leaks"
+    fail=$((fail + 1))
+fi
+
+# The closure rate is shown with its counts and marked self-attested.
+reset
+"$CMA" miss "anchor s" --surface auth --fm fm-1 >/dev/null
+anchor_id=$("$CMA" id miss)
+"$CMA" surface --surface auth >/dev/null
+wait_for_next_second
+"$CMA" prevented "caught s" --miss-id "$anchor_id" >/dev/null
+expect_contains "evidence marks closure rate self-attested" "self-attested: 1 evidenced prevention(s) you recorded, 0 leak(s)" "$CMA" stats --evidence
+sa_json=$(python3 -c "
+import json, sys
+d = json.loads(sys.stdin.read())
+print('ok' if (d['loop_closure_basis'] == 'self-attested' and d['loop_closure_evidenced'] == 1
+               and d['loop_closure_denominator'] == 1) else 'fail')
+" <<<"$("$CMA" stats --evidence --json 2>/dev/null)")
+if [[ "$sa_json" == "ok" ]]; then
+    printf "PASS  %s\n" "evidence --json carries closure counts and basis"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "evidence --json carries closure counts and basis"
+    fail=$((fail + 1))
+fi
+
+# Stats views never log surface events.
+reset
+"$CMA" reject "OPTION: r" >/dev/null
+"$CMA" prevented "p" >/dev/null
+"$CMA" stats --rejections >/dev/null
+"$CMA" stats --preventions >/dev/null
+"$CMA" stats --evidence >/dev/null
+"$CMA" stats --leaks >/dev/null
+if [[ ! -f "$CMA_DIR/surface_events.jsonl" ]]; then
+    printf "PASS  %s\n" "stats views do not log surface events"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n" "stats views do not log surface events"
+    fail=$((fail + 1))
+fi
+
 # stats --behavior
 reset
 expect_contains "behavior empty data"            "No misses" "$CMA" stats --behavior
