@@ -26,7 +26,7 @@ cma/
 ├── cma                          bash CLI (the seven primitives)
 ├── hooks/                       Claude Code + shell preexec integrations
 ├── scripts/                     test.sh, bench.sh, canon_audit.sh
-├── docs/                        DESIGN.md ARCHITECTURE.md DATA.md DECISIONS.md GOVERNANCE.md
+├── docs/                        DESIGN.md ARCHITECTURE.md DATA.md DECISIONS.md GOVERNANCE.md EVALUATION.md
 ├── CHANGELOG.md                 cma's release history
 ├── README.md                    cma overview
 ├── cma-mcp/                     Python MCP distribution wrapper

@@ -234,23 +234,23 @@ The architecture is designed to produce data supporting three independent layers
 
 **Metrics**, computable from texture-preserved captures:
 
-- Counterfactual rate: misses with both `intended` and `corrected` set, where the two differ. Direct evidence of mid-course correction.
-- Prevention-to-leak ratio: `cma prevented` captures versus leak detections. Higher ratio means warnings are working.
+- Counterfactual rate: misses with both `intended` and `corrected` set, where the two differ. A record of mid-course correction, as you described it.
+- Prevention-to-leak ratio: `cma prevented` captures versus leak detections. A higher ratio is consistent with warnings working, but both counts depend on what you chose to record.
 - Decision-shift rate: decisions captured that contradict prior decisions (your reflection).
 
-**Strength**: structural data; not self-report alone. **Weakness**: requires you to capture texture (the `--intended`, `--corrected` flags). Coverage depends on capture discipline.
+**Strength**: computed from structured fields, not free text. **Weakness**: every input is self-reported. You decide what counts as a miss, a prevention, or a correction, so these metrics measure your recording as much as your behavior. They also require you to capture texture (the `--intended`, `--corrected` flags), and coverage depends on capture discipline.
 
 ### 5.3 Outcome layer
 
 **Question**: Does your work get measurably better?
 
-**Metrics**, requiring [Touchstone](https://github.com/Clarethium/touchstone) integration:
+**Metrics**, requiring an external measure of work quality or of repeat failures:
 
-- Touchstone score trends on your actual outputs over time.
+- Quality-score trends on your actual outputs over time, from an evaluation suited to the output type.
 - Score deltas correlated with cma usage intensity (captures per task, surfacings per task).
 - Failure-shape distribution shifts (fewer recurrences of named failure shapes).
 
-**Strength**: objective, model-independent measurement. **Weakness**: requires your actual work to be amenable to Touchstone evaluation, which depends on output type. Currently aspirational; the bridge between cma, a methodology's catalog, and Touchstone measurement is the next major architectural project after this one.
+**Strength**: measures the result rather than your report of it. **Weakness**: requires your actual work to be amenable to external evaluation, which depends on output type. Currently aspirational: nothing in cma measures this layer, so whether surfaced warnings change behavior is not yet established. [EVALUATION.md](EVALUATION.md) proposes a first experiment: compare repeat failures with the action-time hook on and off.
 
 The three layers are independent. A system that passes the Process layer alone is a journal. A system that passes Process + Behavior is a working compound practice loop. A system that passes all three is a methodology with empirical grounding.
 
@@ -352,4 +352,4 @@ The classifier is external to cma: this repository ships no classifier. Methodol
 ## 10. References
 
 - [DESIGN.md](DESIGN.md): the seven cma 1.0 primitives.
-- [Touchstone](https://github.com/Clarethium/touchstone): the measurement infrastructure for the outcome layer of validation.
+- [EVALUATION.md](EVALUATION.md): a proposed experiment for the behavior and outcome layers.
