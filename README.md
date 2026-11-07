@@ -63,7 +63,7 @@ Run `cma --help` for the full command surface.
 
 ## The compound loop in four commands
 
-cma's central claim is that captured failures become surfaced warnings, surfaced warnings change behavior, and the resulting evidence is computable. The full chain in one walkthrough:
+cma is built on a chain: captured failures become surfaced warnings, surfaced warnings change what you do next, and the record of both can be computed over. cma does the capturing, the surfacing, and the computing. Whether the warnings change behavior is the part it does not yet measure: the numbers it reports are counts of what you recorded (see [What the numbers are](#what-the-numbers-are)). The full chain in one walkthrough:
 
 ```bash
 # 1. Capture a failure so future similar work can see it.
@@ -75,10 +75,10 @@ cma miss "claimed verified without testing the cross-tenant path" \
 #    works too. The surface event is logged for leak detection.
 cma surface --surface auth
 
-# 3. The warning fires, behavior changes, and the repeat is avoided.
-#    Link the prevention to the original miss so cma can attribute
-#    the closure. `cma id miss` returns the most recent miss id;
-#    use it to chain without scrolling back through terminal output.
+# 3. The warning fires. If it changed what you did, record that
+#    and link it to the original miss so cma can attribute it.
+#    `cma id miss` returns the most recent miss id; use it to chain
+#    without scrolling back through terminal output.
 cma prevented "almost claimed verified again; ran the cross-tenant test instead" \
     --miss-id "$(cma id miss --surface auth)"
 
@@ -89,9 +89,20 @@ cma stats --evidence
 #      of which evidenced:        1
 #    Leaks:                       0
 #    Loop closure rate:           100%  (1/1)
+#      self-attested: 1 evidenced prevention(s) you recorded, 0 leak(s)
 ```
 
-The closure rate counts only preventions evidenced by a surface event between the linked miss and the prevention. Self-attestation without that chain is captured but does not inflate the rate. `cma stats --evidence --json` emits the structured record for downstream consumers.
+`cma stats --evidence --json` emits the structured record for downstream consumers.
+
+### What the numbers are
+
+Every number above is a count of records you wrote, or a rate computed from those counts.
+
+- A **prevention** is your own report that a warning changed what you did. cma checks one thing about it: that the linked miss was actually surfaced between the miss and the prevention. A prevention with that surface event is counted as evidenced; one without it is still captured but stays out of the rate.
+- A **leak** is a miss you captured after a warning for the same surface and failure mode had been surfaced.
+- The **loop closure rate** is evidenced preventions divided by evidenced preventions plus leaks. It is self-reported, and the output labels it that way: it moves with what you choose to record, and it does not compare against what would have happened without the warning.
+
+What works and is checked by the test suite: capture, action-time surfacing, the surface-event log, and the joins that produce these counts. What is not yet measured: whether surfaced warnings reduce repeat failures. [EVALUATION.md](docs/EVALUATION.md) proposes how to measure that.
 
 ## Action-time injection
 
@@ -184,7 +195,7 @@ Triggers fire on commands likely to warrant surfacing: editors (`vim`, `nvim`, `
 
 Failure isolation: if cma is missing, errors, or times out (default 5 seconds), the wrapped command still runs cleanly. The wrapper never blocks an action on its own failure.
 
-Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced, the validation evidence that the loop closes.
+Both integrations log surface events to `~/.cma/surface_events.jsonl`. `cma stats --leaks` later joins these events against subsequent misses to flag failures that occurred despite a relevant warning being surfaced. A leak shows where a warning did not prevent a repeat; the leak and prevention counts are self-reported and do not by themselves show that warnings prevent repeats (see [What the numbers are](#what-the-numbers-are)).
 
 ## MCP distribution (cma-mcp)
 

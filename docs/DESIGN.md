@@ -84,7 +84,7 @@ cma reject <description>
 
 ### cma prevented
 
-Capture a catch. A moment where a surfaced warning prevented a recurrence. Without prevention captures, compound learning is a claim; with them, it is evidence.
+Capture a catch. A moment where a surfaced warning prevented a recurrence. A prevention is your own report that a warning changed what you did; the closure rate in `cma stats --evidence` is computed from these reports, so it is self-reported rather than an independent measurement.
 
 ```
 cma prevented <description>
@@ -170,7 +170,7 @@ cma stats
 - **Default mode**: summary dashboard. Total captures by type, recent activity, most-active surfaces, top failure shapes, prevention rate, recurrence trends.
 - **`--rejections` view**: list of active rejections with surfaces, ages, and revisit triggers.
 - **`--leaks` view**: failures that occurred despite an active warning. Each leak increments the warning's weight.
-- **`--preventions` view**: captured preventions with linked misses. Evidence of the loop closing.
+- **`--preventions` view**: captured preventions with linked misses: your own record of warnings that changed what you did.
 - **`--recurrence` view**: failure shapes ordered by recurrence rate. Identifies preventions that are not working.
 - **`--behavior` view**: behavior-layer signals from misses carrying intended/corrected texture, grouped by surface and failure mode.
 

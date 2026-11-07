@@ -24,6 +24,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Changed
 
+- The README and `docs/` now state that the prevention, leak, and closure-rate numbers are self-reported counts, and that whether surfaced warnings reduce repeat failures is not yet measured. `docs/EVALUATION.md` proposes how to measure it.
 - Repository home moved to a personal account (`lluvr/cma`). Self-references, badges, and issue/security links updated; author and publisher framing is now personal (organization publisher attribution dropped).
 - Zenodo DOI references removed from `CITATION.cff` pending re-issuance under the new account; `SECURITY.md`'s publisher-identity claim softened accordingly.
 - Repository layout: the deep-dive docs (`DESIGN`, `ARCHITECTURE`, `DATA`, `DECISIONS`, `GOVERNANCE`) moved under `docs/`, and `test.sh` / `bench.sh` moved under `scripts/`. All internal references updated.

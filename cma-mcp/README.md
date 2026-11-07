@@ -5,8 +5,8 @@
 
 The Model Context Protocol layer for cma, an executable compound
 practice loop: capture failures, surface them at the moment of action,
-track decisions and rejections, and check whether warnings actually
-prevented repeats.
+track decisions and rejections, and count the repeats you report as
+prevented and the ones that recurred anyway.
 
 cma-mcp wraps the canonical `cma` command-line tool and exposes its
 seven primitives to MCP-compatible AI clients. It does not reimplement
@@ -76,7 +76,7 @@ command; the stdio handshake runs).
 | `cma_prevented` | `cma prevented` | A surfaced warning actually changed behavior |
 | `cma_distill` | `cma distill` (modes: default / retire / review) | Promote, retire, or preview a distilled learning |
 | `cma_surface` | `cma surface` | Pull relevant prior captures before acting (logs surface event for leak detection) |
-| `cma_stats` | `cma stats` (views: default / leaks / recurrence / preventions / rejections / behavior) | Inspect loop-closing evidence |
+| `cma_stats` | `cma stats` (views: default / leaks / recurrence / preventions / rejections / behavior) | Inspect loop counts (self-reported) |
 
 **Four resources** for read-only context:
 
