@@ -330,7 +330,7 @@ The contract is documented in this file and in [DESIGN.md](DESIGN.md). Changes t
 
 cma is methodology-agnostic. The `--fm` field on captures and any methodology-specific tags are opaque strings from cma's perspective. Semantics are owned by the methodology in use.
 
-When you use cma alongside a methodology that defines a canonical failure-mode catalog (Lodestone is one such methodology; others may emerge), you tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
+When you use cma alongside a methodology that defines a canonical failure-mode catalog, you tag captures with the methodology's canonical names. Analysis tooling that reads cma data interprets the tags according to the methodology context.
 
 The integration is by convention (shared vocabulary), not by code. cma does not depend on any methodology. Methodologies do not depend on cma. Each evolves independently. cma documentation does not replicate methodology catalogs; methodology documents own their catalogs and their meaning.
 
@@ -345,7 +345,7 @@ Failure modes:
 - Classifier command not found, errors, or exits non-zero: `fm` stays empty; the capture proceeds.
 - Classifier exceeds 5 second timeout: `fm` stays empty; the capture proceeds.
 
-The plugin point exists so you can wire methodology-aware classification (a Lodestone-aware classifier, for instance) without coupling cma to any specific methodology. Using a different methodology, you wire a different classifier. If you do not use auto-classification, leave the env var unset and tag manually with `--fm`.
+The plugin point exists so you can wire methodology-aware classification without coupling cma to any specific methodology. Using a different methodology, you wire a different classifier. If you do not use auto-classification, leave the env var unset and tag manually with `--fm`.
 
 The classifier is external to cma: this repository ships no classifier. Methodologies that wish to provide one ship it as a separate companion tool (or document the wiring pattern in their own docs). This preserves the loose coupling.
 

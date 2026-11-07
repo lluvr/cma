@@ -59,8 +59,11 @@ or acting as an appointed representative at an online or offline event.
 ## Reporting
 
 Instances of behavior that violate this Code of Conduct may be reported
-to the curator at `hello@clarethium.com`. All complaints will be
-reviewed and investigated promptly and fairly.
+to the curator, the repository maintainer, through GitHub
+(<https://github.com/lluvr>). If the report should stay private, open
+an issue that asks for a private channel and leaves out the details;
+the curator will follow up away from the public thread. All
+complaints will be reviewed and investigated promptly and fairly.
 
 The curator is obligated to respect the privacy and security of the
 reporter of any incident.

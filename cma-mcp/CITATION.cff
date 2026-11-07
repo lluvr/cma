@@ -8,7 +8,6 @@ authors:
   - family-names: Lucic
     given-names: Lovro
     orcid: "https://orcid.org/0009-0008-9976-6933"
-    website: "https://blog.clarethium.com"
 url: "https://pypi.org/project/cma-mcp/"
 abstract: >-
   cma-mcp is the Model Context Protocol server that exposes the cma

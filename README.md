@@ -11,7 +11,7 @@ Capture what each piece of work teaches: failures, decisions, the paths you rule
 
 cma runs the compound practice loop on your machine: it captures failures as they happen, surfaces the relevant ones at the moment you are about to act again, tracks decisions, and flags when a failure is recurring.
 
-cma is methodology-agnostic. It owns the data substrate (how captures are stored, surfaced, and joined into computable evidence) and stays out of the vocabulary you use to classify them. Pair it with whatever failure-mode catalog your practice already uses; Lodestone is one such methodology.
+cma is methodology-agnostic. It owns the data substrate (how captures are stored, surfaced, and joined into computable evidence) and stays out of the vocabulary you use to classify them. Pair it with whatever failure-mode catalog your practice already uses.
 
 ## Status
 
@@ -55,7 +55,7 @@ cma miss "missed validation in middleware" \
 
 The texture fields (`--excerpt`, `--intended`, `--corrected`) preserve the conditions of the failure so future surfacing can match by situation, not just keywords.
 
-The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as Lodestone), tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
+The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog, tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 
 Captures are written to `~/.cma/` as JSON Lines files (one record per line, append-only). The data directory can be overridden with `CMA_DIR=/path/to/data cma ...`. The full schema, atomicity guarantees, and migration policy are documented in [DATA.md](docs/DATA.md).
 
@@ -224,19 +224,9 @@ the wrapper are recorded in [DECISIONS.md](docs/DECISIONS.md).
 
 Tests cover all capture verbs (normal and edge cases including special characters, missing arguments, unknown flags) and the operational verbs (`surface`, `distill`, `stats`).
 
-## Related work
-
-cma sits alongside a set of open reference artifacts:
-
-- **[Touchstone](https://github.com/Clarethium/touchstone)** validates work against quality standards.
-- **[frame-check](https://github.com/Clarethium/frame-check)** analyzes structural framing as an MCP server.
-- **Lodestone** orients practice with a canonical methodology.
-
-cma runs on its own and is agnostic to the methodology you practice; when that methodology is Lodestone, cma is what running it looks like in a terminal. Experiments and findings from this practice are published at [What Holds Up](https://blog.clarethium.com).
-
 ## Methodology integration
 
-cma is methodology-agnostic. The `--fm` field on captures is an opaque string; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog (such as Lodestone), tag with the methodology's canonical names. The methodology owns the vocabulary and its meaning; cma owns the data substrate.
+cma is methodology-agnostic. The `--fm` field on captures is an opaque string; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog, tag with the methodology's canonical names. The methodology owns the vocabulary and its meaning; cma owns the data substrate.
 
 For automatic classification at capture time, set `CMA_FM_CLASSIFIER` to a command that reads the description on stdin and emits the failure-mode tag on stdout:
 
@@ -247,7 +237,7 @@ cma miss "skipped verification before deploying"
 # Classifier auto-tags the --fm value based on the description.
 ```
 
-The classifier is external to cma; you provide the command. It can be Lodestone-aware (mapping descriptions to Lodestone's canonical failure shapes), methodology-specific, or generic. cma invokes it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](docs/ARCHITECTURE.md) for the full integration pattern.
+The classifier is external to cma; you provide the command. It can map descriptions to a specific methodology's catalog, or be generic. cma invokes it as an opaque command. Failure-isolated: if the classifier errors, is missing, or times out (5s), the capture proceeds without an `--fm` value. See [ARCHITECTURE.md Section 9](docs/ARCHITECTURE.md) for the full integration pattern.
 
 ## Architecture
 

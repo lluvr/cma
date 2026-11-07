@@ -41,14 +41,6 @@ before opening a substantial change. Especially:
 - [ ] No new runtime dependency added (bash cma: bash + python3 stdlib only; cma-mcp: Python stdlib only)
 - [ ] `bash scripts/canon_audit.sh` passes locally
 
-## Related-project impact
-
-<!--
-Does this change affect references to Touchstone, frame-check,
-Lodestone, or any related project? If yes, name what coordinates with
-each. If no, write "none".
--->
-
 ## DECISIONS
 
 <!--
