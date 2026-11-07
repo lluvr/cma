@@ -42,9 +42,9 @@ must update wrapper and wrapped together in one PR. Separate repos
 would create a coordination tax that the project's compounding
 logic actively works against.
 
-**Why frame-check's separate-repo pattern doesn't apply.** That
-project *uses* Touchstone as a substrate; Touchstone evolves
-independently. cma-mcp wraps cma. An earlier draft treated frame-check's
+**Why a separate-repo pattern doesn't apply.** Separate repositories
+fit a project that *uses* another as a substrate that evolves
+independently. cma-mcp wraps cma. An earlier draft treated the
 two-repo shape as a general convention; this entry records the
 correction.
 
@@ -175,8 +175,7 @@ data carries assumptions cma-mcp cannot validate.
 using JSON-RPC 2.0 over stdio. No third-party MCP SDK in
 `pyproject.toml` dependencies.
 
-**Rationale.** Echoes frame-check's
-self-containment convention. The protocol surface used here
+**Rationale.** Self-containment. The protocol surface used here
 (initialize, tools/list, tools/call, resources/list, resources/read,
 ping, notifications) fits in a few hundred lines and removes a class
 of version-skew failures.

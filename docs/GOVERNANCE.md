@@ -44,8 +44,6 @@ authority (BDFL-style) over:
 - Which tool/resource surface changes ship
 - Which pull requests merge (reviewer, per `CONTRIBUTING.md`)
 - Release timing and version numbers
-- Companion-link maintenance with cma, Lodestone, Touchstone,
-  frame-check
 
 The curator is the named author on every published release.
 
@@ -83,11 +81,6 @@ description that names the affected source(s) above:
    `cma-mcp/mcp_schema.py`, the dispatch in `cma-mcp/mcp_server.py`,
    the tests in `cma-mcp/tests/test_mcp_server.py`, and the docs in
    `cma-mcp/docs/MCP_SERVER.md`. All four must move together.
-4. **Companion-link change** (text in `README.md` that references
-   Lodestone, Touchstone, cma, frame-check). Coordinate with the
-   affected companion repo's curator before merge. Currently the
-   curator is the same person; that simplifies coordination but
-   does not exempt it.
 
 ---
 
@@ -99,8 +92,7 @@ forces a position:
 - **Multi-contributor governance.** Formal review process with
   named reviewers, dissent procedure, and conflict resolution.
   Deferred until a sustained external contributor exists.
-- **Suggestion/RFC process** modeled on Touchstone's
-  `SUGGESTIONS/PROCESS.md`. cma-mcp is small enough that PR review
+- **Suggestion/RFC process.** cma-mcp is small enough that PR review
   is sufficient at the current scale; an RFC layer may add unwanted weight.
 - **Trademark and brand policy.** cma is a personal project; brand
   and naming decisions rest with the author.

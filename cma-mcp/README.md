@@ -192,4 +192,9 @@ require the bash cma binary skip when it is not on `PATH`.
 
 ## Issues
 
-Bug reports, feature requests, and security reports: `hello@clarethium.com`.
+Bug reports and feature requests: <https://github.com/lluvr/cma/issues>.
+
+Security reports: do not open a public issue. Use GitHub private
+vulnerability reporting
+(<https://github.com/lluvr/cma/security/advisories/new>); see
+[SECURITY.md](https://github.com/lluvr/cma/blob/main/SECURITY.md).
