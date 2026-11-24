@@ -182,7 +182,11 @@ if not output:
 # Captured text is untrusted: strip ANSI/OSC escapes and control characters
 # (keeping newline and tab) before handing it to the assistant.
 output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", output)
-context = "Relevant prior captures from cma (action-time injection):\n\n" + output
+context = (
+    "Previous failures that matched this edit. "
+    "When an Instead line is present, do that. "
+    "The line above it is the failure it replaced.\n\n" + output
+)
 print(json.dumps({
     "hookSpecificOutput": {
         "hookEventName": "PreToolUse",

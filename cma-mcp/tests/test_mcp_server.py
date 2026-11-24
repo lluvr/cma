@@ -32,6 +32,11 @@ def test_initialize_returns_protocol_and_serverinfo(fresh_dispatcher):
     assert "cma-mcp" in result["instructions"]
     assert "cma_miss" in result["instructions"]
     assert "path just edited" in result["instructions"]
+    miss = next(t for t in call_handler(fresh_dispatcher, "tools/list")["tools"] if t["name"] == "cma_miss")
+    props = miss["inputSchema"]["properties"]
+    assert "basename" in props["files"]["description"]
+    assert "Instead" in props["corrected"]["description"]
+    assert "does not show this line" in props["intended"]["description"]
 
 
 def test_initialize_negotiates_protocol_version(fresh_dispatcher):

@@ -1066,6 +1066,22 @@ else
     fail=$((fail + 1))
 fi
 
+# The replacement action is shown. The rejected impulse is not.
+reset
+"$CMA" miss "token rule miss" --surface auth --fm fm-1 --files y.ts \
+    --intended "match the substring auth" --corrected "match the whole token" >/dev/null
+surf_out=$("$CMA" surface --file y.ts --no-log)
+hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" 2>/dev/null)
+if [[ "$surf_out" == *"Instead: match the whole token"* && "$surf_out" != *"substring"* \
+    && "$hook_out" == *"Instead: match the whole token"* && "$hook_out" != *"substring"* \
+    && "$hook_out" == *"When an Instead line is present"* ]]; then
+    printf "PASS  %s\n" "surface and hook show the replacement and hide the impulse"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (surf=%q hook=%q)\n" "surface and hook show the replacement and hide the impulse" "$surf_out" "$hook_out"
+    fail=$((fail + 1))
+fi
+
 # When the file has its own capture, the narrow-surface bucket stays out.
 reset
 "$CMA" miss "broad auth miss" --surface auth --fm fm-1 >/dev/null

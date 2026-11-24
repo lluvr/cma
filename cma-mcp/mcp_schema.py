@@ -99,11 +99,10 @@ CMA_MISS = {
         "captures ('I claimed verified without testing the cross-tenant "
         "write path') fire as warnings later via cma's surface-time "
         "matching.\n\n"
-        "Texture preservation: pass `intended` (what was about to "
-        "happen), `corrected` (what happened instead), and `excerpt` "
-        "(the conversation excerpt) when available. Texture-preserved "
-        "misses surface in cma's behavior-layer validation view "
-        "(`cma_stats` with view=behavior)."
+        "Pass `files` as the path just edited. The next edit shows "
+        "this miss only when that file's basename appears there. "
+        "Pass `corrected` as the action that replaced the failure. "
+        "The next edit shows that line and does not show `intended`."
     ),
     "inputSchema": {
         "type": "object",
@@ -128,28 +127,27 @@ CMA_MISS = {
                 "type": "string",
                 "maxLength": MAX_SHORT_FIELD,
                 "description": (
-                    "Comma-separated list of files involved in the "
-                    "failure. Used for surface auto-detection at "
-                    "surface-time matching."
+                    "Path of the file just edited, or several paths "
+                    "separated by commas. The next edit shows this "
+                    "miss when the file's basename appears here. "
+                    "Without it, that edit shows nothing."
                 ),
             },
             "intended": {
                 "type": "string",
                 "maxLength": MAX_TEXTURE,
                 "description": (
-                    "What was about to happen (the counterfactual). "
-                    "Texture field; preserves the conditions of the "
-                    "failure so cma_stats view=behavior can identify "
-                    "behavior pivots."
+                    "What was about to happen. Kept for the behavior "
+                    "view. The next edit does not show this line."
                 ),
             },
             "corrected": {
                 "type": "string",
                 "maxLength": MAX_TEXTURE,
                 "description": (
-                    "What happened instead, after correction. Texture "
-                    "field; pairs with `intended` to capture the "
-                    "behavior pivot."
+                    "The action that replaced the failure. The next "
+                    "matching edit shows this as an Instead line. "
+                    "Pass it when you know what to do instead."
                 ),
             },
             "excerpt": {

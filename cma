@@ -431,17 +431,26 @@ if not filtered:
     print("No captures match.")
     sys.exit(0)
 
+def one_line(text, limit):
+    text = " ".join((text or "").split())
+    if len(text) > limit:
+        text = text[:limit - 3] + "..."
+    return text
+
 for rec in filtered:
     type_label = rec.get("type", "?")
     rec_id = rec.get("id", "?")
     surface = rec.get("surface", "")
-    desc = rec.get("description", "")
-    desc = " ".join(desc.split())
-    if len(desc) > 96:
-        desc = desc[:93] + "..."
+    desc = one_line(rec.get("description", ""), 96)
+    # The rejected impulse stays out of this view. Putting it next to
+    # the edit is how the next action repeats the failure. The
+    # replacement action is the line the edit can follow.
+    corrected = one_line(rec.get("corrected", ""), 240)
     surface_part = " [" + surface + "]" if surface else ""
     print(type_label.ljust(10) + " " + rec_id + surface_part)
     print("           " + desc)
+    if corrected:
+        print("           Instead: " + corrected)
     print()
 PYEOF
 }

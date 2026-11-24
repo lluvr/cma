@@ -22,6 +22,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ### Changed
 
 - Server instructions tell the client to pass `files` on `cma_miss` when the user corrects the last action. The next edit finds that miss by file name. A miss without `files` is not shown on that edit.
+- `cma_miss` field text matches that replay. `files` is the path whose basename brings the miss back. `corrected` is the Instead line the next edit shows. `intended` stays on the behavior view and is not shown on that edit.
 
 ## [0.1.5] - 2026-07-16
 
