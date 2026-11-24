@@ -31,6 +31,7 @@ def test_initialize_returns_protocol_and_serverinfo(fresh_dispatcher):
     assert isinstance(result["instructions"], str)
     assert "cma-mcp" in result["instructions"]
     assert "cma_miss" in result["instructions"]
+    assert "path just edited" in result["instructions"]
 
 
 def test_initialize_negotiates_protocol_version(fresh_dispatcher):

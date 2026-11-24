@@ -114,7 +114,7 @@ The cma repository includes the following reference implementations of this arch
 
 `hooks/claude-code-pre-tool-use.sh`
 
-Interception via Claude Code's `PreToolUse` hook event. Reads stdin JSON (current format) or environment variables (legacy fallback). Surfaces captures as a JSON object on stdout carrying `hookSpecificOutput.additionalContext`, which Claude Code injects as additional context (plain stdout from a `PreToolUse` hook only reaches the debug log). Logs a surface event only when captures were emitted. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
+Interception via Claude Code's `PreToolUse` hook event. Reads stdin JSON (current format) or environment variables (legacy fallback). Queries by file name first, then falls back to auth, payments, or db only when that file has no capture. ui, docs, api, and test are not inferred from the path. Surfaces captures as a JSON object on stdout carrying `hookSpecificOutput.additionalContext`, which Claude Code injects as additional context (plain stdout from a `PreToolUse` hook only reaches the debug log). Logs a surface event only when captures were emitted. Silent for non-relevant tools (`Read`, etc.) and when no captures match.
 
 Status: implemented, tested.
 
@@ -272,8 +272,8 @@ A state-of-the-art integration of this architecture meets the following criteria
 
 ### Signal quality
 
-- Surface detection rules are configurable; defaults are tuned for canonical surfaces (auth, payments, db, ui, docs, test, api).
-- False-positive surface matches are rare; false-negatives are acceptable (you can capture without surface and still hit the file filter).
+- The Claude Code hook queries by file name first. It falls back to a surface only for auth, payments, and db, and only when that file has no capture. ui, docs, api, and test are not inferred from an extension or a path word, because that shows one bucket's latest misses on unrelated files. The shell hook uses the same three surfaces and does not read a file name out of the command.
+- False-positive surface matches are rare; false-negatives are acceptable (you can capture without a surface and still hit the file filter).
 - Empty matches produce silent output (no dialog box, no chatter).
 
 ### Composability

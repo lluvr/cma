@@ -80,19 +80,27 @@ for t in $triggers; do
     fi
 done
 
-# Surface detection from the full command line.
-# Same heuristics as the Claude Code PreToolUse hook for consistency.
+# Narrow surfaces only, same token rule as the Claude Code hook.
+# The shell wrapper does not pull a file name out of the command.
+# ui, docs, api, and test are not inferred: a component, a markdown
+# file, a route, or a test run is not one shared bucket of misses.
+# "session" is not auth. "auth" inside "author" is not auth.
 detect_surface() {
-    local lower
+    local lower tokens token
     lower=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+    tokens=$(printf '%s' "$lower" | LC_ALL=C tr -c 'a-z0-9' ' ')
+    for token in $tokens; do
+        case "$token" in
+            auth|auths|authentication|authenticate|authenticated|authorization|authorize|authorized|unauthorized|login|jwt|oauth|oauth2|password|passwords|credential|credentials)
+                echo "auth"; return ;;
+            payment|payments|stripe|billing|checkout)
+                echo "payments"; return ;;
+            schema|schemas|migration|migrations|database|databases)
+                echo "db"; return ;;
+        esac
+    done
     case "$lower" in
-        *auth*|*login*|*session*|*jwt*|*password*|*credential*) echo "auth"; return ;;
-        *payment*|*stripe*|*billing*|*checkout*) echo "payments"; return ;;
-        *schema*|*migration*|*database*|*/db/*) echo "db"; return ;;
-        *.test.*|*.spec.*|*/__tests__/*|*/tests/*|*/test/*) echo "test"; return ;;
-        *api/*|*/api*|*route*|*endpoint*|*controller*|*handler*) echo "api"; return ;;
-        *.tsx*|*.jsx*|*.vue*|*/ui/*|*component*) echo "ui"; return ;;
-        *.md*|*/docs/*|*readme*) echo "docs"; return ;;
+        */model*|*/db/*) echo "db"; return ;;
     esac
     echo ""
 }

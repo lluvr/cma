@@ -38,7 +38,7 @@ env_tool_name="${CLAUDE_TOOL_NAME:-}"
 env_tool_input="${CLAUDE_TOOL_INPUT:-}"
 
 python3 - "$stdin_payload" "$env_tool_name" "$env_tool_input" <<'PYEOF'
-import json, os, sys, subprocess
+import json, os, re, sys, subprocess
 
 stdin_json, env_tool_name, env_tool_input = sys.argv[1:]
 
@@ -101,38 +101,48 @@ if tool_name in ("Edit", "Write", "MultiEdit", "NotebookEdit"):
 elif tool_name == "Bash":
     command = tool_input.get("command", "")
 
-# Heuristic surface detection from file path or command
-def detect_surface(text):
+# Whole tokens only. "auth" inside "author", and "session" inside a
+# filename, are not auth. A short keyword as a substring labels the
+# wrong file and then hides that file's own miss.
+NARROW_TOKENS = {
+    "auth": {
+        "auth", "auths", "authentication", "authenticate", "authenticated",
+        "authorization", "authorize", "authorized", "unauthorized",
+        "login", "jwt", "oauth", "oauth2", "password", "passwords",
+        "credential", "credentials",
+    },
+    "payments": {"payment", "payments", "stripe", "billing", "checkout"},
+    "db": {
+        "schema", "schemas", "migration", "migrations",
+        "database", "databases",
+    },
+}
+
+def detect_narrow(text):
     t = text.lower()
-    # "session" is not a signal. It appears in filenames that are not auth,
-    # and a wrong label suppresses the file match below.
-    if any(k in t for k in ("auth", "login", "jwt", "oauth", "password", "credential")):
-        return "auth"
-    if any(k in t for k in ("payment", "stripe", "billing", "checkout")):
-        return "payments"
-    if any(k in t for k in ("schema", "migration", "/model", "database", "db/")):
+    tokens = set(re.findall(r"[a-z0-9]+", t))
+    for surface in ("auth", "payments", "db"):
+        if tokens & NARROW_TOKENS[surface]:
+            return surface
+    # "model" and "db" alone match too many paths. The slash is the signal.
+    if "/model" in t or "/db/" in t:
         return "db"
-    if any(k in t for k in ("/test", ".test.", ".spec.", "/__tests__/")):
-        return "test"
-    if any(k in t for k in ("/api", "route", "endpoint", "controller", "handler")):
-        return "api"
-    if any(k in t for k in ("/ui", "/component", ".tsx", ".jsx", ".vue")):
-        return "ui"
-    if any(k in t for k in ("readme", "/docs/", ".md")):
-        return "docs"
     return ""
 
-surface = detect_surface(file_path or command)
-
-# Prefer a detected surface, then the file name. A surface label that
-# matches nothing must not hide a miss recorded against this file.
-# Combining both with AND is too strict in practice.
+# The file's own captures come first. ui, docs, api, and test are not
+# inferred from an extension or a path word: that shows one bucket's
+# latest misses on unrelated files, and the assistant learns to skip
+# the hook. Auth, payments, and db are the fallback, and only when
+# this file has no capture. A bash command has no file, so it gets
+# the narrow surface or nothing.
+narrow = detect_narrow(file_path or command)
+base_name = os.path.basename(file_path) if file_path else ""
 base = ["cma", "surface", "--limit", "3"]
 queries = []
-if surface:
-    queries.append(base + ["--surface", surface])
-if file_path:
-    queries.append(base + ["--file", os.path.basename(file_path)])
+if base_name:
+    queries.append(base + ["--file", base_name])
+if narrow:
+    queries.append(base + ["--surface", narrow])
 if not queries:
     sys.exit(0)
 
@@ -171,7 +181,6 @@ if not output:
 
 # Captured text is untrusted: strip ANSI/OSC escapes and control characters
 # (keeping newline and tab) before handing it to the assistant.
-import re
 output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", output)
 context = "Relevant prior captures from cma (action-time injection):\n\n" + output
 print(json.dumps({

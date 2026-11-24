@@ -11,7 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 
 - `CMA_EVAL=1` records a per-session arm for the Claude Code hooks. The off arm writes `eval_shadow.jsonl` and does not show captures. `cma eval status` counts repeats and withholds the comparison until 30 repeats. The effect on repeat failures is still unmeasured. See `docs/EVALUATION.md`.
-- The PreToolUse hook no longer treats the word "session" as auth, and when a surface label matches nothing it still looks up the file name. A wrong label was hiding the miss recorded against that file.
+- The PreToolUse hook looks up the file name first. It falls back to a surface only for auth, payments, and db, and only when that file has no capture. It does not treat every component, markdown file, route, or test as one bucket, and it does not treat the word session as auth, or the filename author as auth. The shell hook uses the same three surfaces. A broad bucket was showing that bucket's latest misses on unrelated files.
 
 ### Fixed
 

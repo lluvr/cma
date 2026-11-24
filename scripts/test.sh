@@ -1009,16 +1009,73 @@ reset
 expect_contains "eval status counts the off-arm repeat" "Repeats: 0 on, 1 off" "$CMA" eval status
 expect_contains "eval status withholds the comparison" "Comparison is not a result yet: 1 repeats, floor 30." "$CMA" eval status
 
-# A path that merely contains "session" is not auth. The miss recorded
-# against the file name still surfaces when the keyword label matches nothing.
+# A path that merely contains "session" is not auth. The file name is
+# queried first, so the miss recorded against that file still surfaces.
 reset
 "$CMA" miss "hook file miss" --surface hooks --fm fm-1 --files claude-code-session-start.sh >/dev/null
 hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/hooks/claude-code-session-start.sh"}}' | bash "$HOOK" 2>/dev/null)
 if [[ "$hook_out" == *"hook file miss"* ]]; then
-    printf "PASS  %s\n" "hook falls through to the file when the label matches nothing"
+    printf "PASS  %s\n" "hook surfaces the miss recorded against the file"
     pass=$((pass + 1))
 else
-    printf "FAIL  %s (out=%q)\n" "hook falls through to the file when the label matches nothing" "$hook_out"
+    printf "FAIL  %s (out=%q)\n" "hook surfaces the miss recorded against the file" "$hook_out"
+    fail=$((fail + 1))
+fi
+
+# A component is not the ui bucket. An unrelated ui miss stays quiet.
+# The miss that names this file is the one that surfaces.
+reset
+"$CMA" miss "unrelated ui miss" --surface ui --fm fm-1 >/dev/null
+"$CMA" miss "button file miss" --surface ui --fm fm-1 --files Button.tsx >/dev/null
+hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/src/Button.tsx"}}' | bash "$HOOK" 2>/dev/null)
+hook_other=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/src/Other.tsx"}}' | bash "$HOOK" 2>/dev/null)
+if [[ "$hook_out" == *"button file miss"* && "$hook_out" != *"unrelated ui miss"* && -z "$hook_other" ]]; then
+    printf "PASS  %s\n" "hook shows the file miss and stays quiet on an unrelated component"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (file=%q other=%q)\n" "hook shows the file miss and stays quiet on an unrelated component" "$hook_out" "$hook_other"
+    fail=$((fail + 1))
+fi
+
+# A route, a markdown file, and a test command are not shared buckets.
+reset
+"$CMA" miss "handler bucket miss" --surface api --fm fm-1 >/dev/null
+"$CMA" miss "readme bucket miss" --surface docs --fm fm-1 >/dev/null
+"$CMA" miss "suite bucket miss" --surface test --fm fm-1 >/dev/null
+hook_route=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/routes/handler.ts"}}' | bash "$HOOK" 2>/dev/null)
+hook_doc=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/README.md"}}' | bash "$HOOK" 2>/dev/null)
+hook_test=$(echo '{"tool_name":"Bash","tool_input":{"command":"pytest tests/test_foo.py"}}' | bash "$HOOK" 2>/dev/null)
+if [[ -z "$hook_route" && -z "$hook_doc" && -z "$hook_test" ]]; then
+    printf "PASS  %s\n" "hook does not dump api, docs, or test buckets"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (route=%q doc=%q test=%q)\n" "hook does not dump api, docs, or test buckets" "$hook_route" "$hook_doc" "$hook_test"
+    fail=$((fail + 1))
+fi
+
+# "author" is not auth. A real auth path with no file capture still is.
+reset
+"$CMA" miss "auth issue example" --surface auth --fm fm-1 >/dev/null
+hook_author=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/src/author.ts"}}' | bash "$HOOK" 2>/dev/null)
+hook_auth=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" 2>/dev/null)
+if [[ -z "$hook_author" && "$hook_auth" == *"auth issue example"* ]]; then
+    printf "PASS  %s\n" "hook does not treat author as auth"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (author=%q auth=%q)\n" "hook does not treat author as auth" "$hook_author" "$hook_auth"
+    fail=$((fail + 1))
+fi
+
+# When the file has its own capture, the narrow-surface bucket stays out.
+reset
+"$CMA" miss "broad auth miss" --surface auth --fm fm-1 >/dev/null
+"$CMA" miss "login file miss" --surface auth --fm fm-1 --files y.ts >/dev/null
+hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" 2>/dev/null)
+if [[ "$hook_out" == *"login file miss"* && "$hook_out" != *"broad auth miss"* ]]; then
+    printf "PASS  %s\n" "hook prefers the file capture over the surface bucket"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "hook prefers the file capture over the surface bucket" "$hook_out"
     fail=$((fail + 1))
 fi
 
@@ -1163,6 +1220,18 @@ if [[ "$output" == *"test wrapper miss"* ]]; then
     pass=$((pass + 1))
 else
     printf "FAIL  %s (out=%q)\n" "cma-pre --check surfaces matched capture" "$output"
+    fail=$((fail + 1))
+fi
+
+# A component edit and the word session are not the auth or ui buckets.
+"$CMA" miss "unrelated ui miss" --surface ui >/dev/null
+output=$(bash "$PRE" --check "vim src/Button.tsx" 2>&1)
+session_out=$(bash "$PRE" --check "git commit -m session-notes" 2>&1)
+if [[ -z "$output" && -z "$session_out" ]]; then
+    printf "PASS  %s\n" "cma-pre does not treat a component or session as a bucket"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (ui=%q session=%q)\n" "cma-pre does not treat a component or session as a bucket" "$output" "$session_out"
     fail=$((fail + 1))
 fi
 
