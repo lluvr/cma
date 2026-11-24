@@ -15,10 +15,9 @@ cma_jsonl. The exception is `cma://stats`, which shells out to
 in your terminal; the subprocess wrapping discipline keeps the
 resource output and the CLI output identical by construction.
 
-cma 1.0 is single-project (per-project scoping is on cma's roadmap
-beyond 1.0). cma-mcp follows: no project filtering at v0.1; all
-records in your `~/.cma/` surface to your MCP
-clients. When cma adds project scoping, cma-mcp will follow.
+There is no project filter. Decisions are the newest 30 within
+180 days. Rejections are the newest 30 within 30 days. Core is
+the newest 30 active learnings, with retired ones removed.
 """
 
 from __future__ import annotations

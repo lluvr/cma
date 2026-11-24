@@ -10,8 +10,8 @@ prevented and the ones that recurred anyway.
 
 cma-mcp wraps the canonical `cma` command-line tool and exposes its
 seven primitives to MCP-compatible AI clients. It does not reimplement
-the loop; it shells out to the `cma` binary, so it never diverges from
-the reference implementation.
+the loop; it shells out to the `cma` binary on PATH, so the result matches
+that binary.
 
 ## Status
 
@@ -24,10 +24,9 @@ Most MCP servers expose new capability. cma-mcp exposes an
 existing capability (bash cma's seven primitives) to a wider set
 of environments: Claude Desktop, Cursor, Cline,
 Continue.dev, and any other MCP-compatible client. The contribution
-is reach. Drift is the named enemy: cma-mcp invokes the canonical
-bash cma binary as a subprocess for every captured action, so
-cma-mcp picks up cma's evolution automatically and never diverges
-from the 1.0 reference implementation.
+is reach. It invokes the `cma` binary on PATH for every call.
+The result matches that binary. An older `cma` earlier on PATH
+is the one that runs.
 
 ## Quickstart
 
@@ -73,9 +72,9 @@ command; the stdio handshake runs).
 | `cma_miss` | `cma miss` | A failure happened that may recur |
 | `cma_decision` | `cma decision` | A non-trivial architectural choice was made |
 | `cma_reject` | `cma reject` | An option was eliminated and should not be silently rebuilt |
-| `cma_prevented` | `cma prevented` | A surfaced warning actually changed behavior |
+| `cma_prevented` | `cma prevented` | Record a self-attested note that a warning changed the next action |
 | `cma_distill` | `cma distill` (modes: default / retire / review) | Promote, retire, or preview a distilled learning |
-| `cma_surface` | `cma surface` | Pull relevant prior captures before acting (logs surface event for leak detection) |
+| `cma_surface` | `cma surface` | Show captures for a file or a surface (logs a surface event) |
 | `cma_stats` | `cma stats` (views: default / leaks / recurrence / preventions / rejections / behavior) | Inspect loop counts (self-reported) |
 
 **Four resources** for read-only context:

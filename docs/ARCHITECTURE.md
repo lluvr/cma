@@ -251,7 +251,7 @@ The architecture is designed to produce data supporting three independent layers
 
 **Strength**: measures the result rather than your report of it. **Weakness**: requires your actual work to be amenable to external evaluation, which depends on output type. Currently aspirational: nothing in cma measures this layer, so whether surfaced warnings change behavior is not yet established. [EVALUATION.md](EVALUATION.md) proposes a first experiment: compare repeat failures with the action-time hook on and off.
 
-The three layers are independent. A system that passes the Process layer alone is a journal. A system that passes Process + Behavior is a working compound practice loop. A system that passes all three is a methodology with empirical grounding.
+The three layers are independent. Process counts are a journal. Behavior counts are notes you recorded, and section 5.2 says so. Outcome is not measured. [EVALUATION.md](EVALUATION.md) is that comparison, and it has not been run.
 
 ## 6. Quality criteria for an integration
 

@@ -4,7 +4,7 @@ This document locks the surface API for cma 1.0. Implementation follows from thi
 
 ## Purpose
 
-cma runs the compound practice loop on your local machine: capture failures, surface relevant prior context at the moment of action, track decisions and rejected alternatives, detect recurrence, and capture preventions.
+cma stores notes on your machine and can show a matching note on a later edit. You record failures, decisions, rejections, and preventions. Surfacing matches a file basename, then auth, payments, or db. Recurrence and the closure rate are counts of those notes.
 
 This document specifies the seven primitives that compose the cma surface, the relationships between them, and how the surface maps to a methodology's failure-mode vocabulary.
 
@@ -80,7 +80,7 @@ cma reject <description>
 
 **Output:** Confirmation with the captured rejection and a unique rejection ID.
 
-**Surfacing trigger:** Active rejections surface at session start and when current work matches the rejected option's surface.
+**Surfacing trigger:** Session start lists active rejections. A later edit shows a rejection when its file matches, or when its surface is auth, payments, or db and that file has no capture.
 
 ### cma prevented
 

@@ -72,9 +72,9 @@ cma is built on a chain: captured failures become surfaced warnings, surfaced wa
 cma miss "claimed verified without testing the cross-tenant path" \
     --surface auth --fm "<failure-shape>"
 
-# 2. Surface relevant prior captures before the next related action.
-#    The PreToolUse hook does this automatically; manual invocation
-#    works too. The surface event is logged for leak detection.
+# 2. Show the auth notes. The PreToolUse hook does this for a file
+#    whose basename matches, or for auth, payments, and db when that
+#    file has no capture. Manual invocation works too.
 cma surface --surface auth
 
 # 3. The warning fires. If it changed what you did, record that
@@ -108,7 +108,7 @@ What works and is checked by the test suite: capture, action-time surfacing, the
 
 ## Action-time injection
 
-cma surfaces relevant prior captures automatically when you (or an AI assistant) are about to act. The five-stage architecture (interception, context extraction, query, injection, logging) is documented in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Two reference integrations ship in this repository.
+The Claude Code hook shows a matching note when an edit or a shell command is about to run. It queries the file basename first, then auth, payments, or db if that file has no capture. Read and other tools stay silent. The five-stage layout is documented in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Two reference integrations ship in this repository.
 
 ### Claude Code
 

@@ -101,16 +101,15 @@ def negotiate_protocol_version(client_protocol: str | None) -> str:
 # resource set so an agent reading this gets orientation that the
 # per-tool descriptions cannot carry.
 SERVER_INSTRUCTIONS = (
-    "cma-mcp distributes the cma compound practice loop to "
-    "MCP-compatible clients. Use cma_miss to record a failure worth "
-    "surfacing later, cma_decision for an architectural choice, "
-    "cma_reject for an option ruled out, and cma_prevented for a "
-    "moment where a surfaced warning changed behavior. Use "
-    "cma_surface before substantive work to inherit relevant prior "
-    "context (this also logs a surface event used by leak detection). "
+    "cma-mcp stores notes and can show one on a later edit. "
     "When the user corrects the last action, call cma_miss and set "
     "files to the path just edited. Without files, the next edit of "
-    "that path does not show the miss. "
+    "that path does not show the miss. cma_decision records a choice, "
+    "cma_reject records an option ruled out, and cma_prevented records "
+    "a note that a warning changed the next action. That note is "
+    "self-attested. cma_surface matches a file basename, then auth, "
+    "payments, or db. With no filter it returns the newest records "
+    "and logs a surface event. "
     "Use cma_stats and the cma:// resources to inspect the corpus. "
     "cma-mcp is methodology-agnostic: the failure-mode vocabulary "
     "lives in whatever methodology you practice, not in cma. "

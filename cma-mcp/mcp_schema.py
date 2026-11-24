@@ -379,12 +379,12 @@ CMA_DISTILL = {
 
 CMA_SURFACE = {
     "name": "cma_surface",
-    "title": "Surface relevant prior captures for the current context",
+    "title": "Surface prior captures for a file or a surface",
     "description": (
-        "Bring relevant prior captures into view for the current "
-        "context: misses with matching surface or file path, decisions "
-        "with matching applies_when, active rejections, and core "
-        "learnings. Wraps `cma surface`.\n\n"
+        "Show prior captures for a file or a surface. A miss matches "
+        "when the file filter is contained in its files field, or when "
+        "the surface matches exactly. A decision also matches when a "
+        "word in applies_when appears in the filter. Wraps `cma surface`.\n\n"
         "This call has a side effect: cma writes a record to "
         "surface_events.jsonl with the filters used and the matched "
         "captures. The leak-detection view (cma_stats view=leaks) "
@@ -569,9 +569,8 @@ RESOURCES: list[dict[str, Any]] = [
         "name": "decisions",
         "title": "Active decisions in scope",
         "description": (
-            "Architectural and strategic decisions you have "
-            "captured. Every record in the data directory. There is "
-            "no project filter. Sorted by recency."
+            "Decisions you have captured. No project filter. The "
+            "newest 30 whose timestamp is within 180 days."
         ),
         "mimeType": "application/json",
     },
@@ -580,9 +579,8 @@ RESOURCES: list[dict[str, Any]] = [
         "name": "rejections",
         "title": "Active rejections",
         "description": (
-            "Options you have explicitly rejected and the "
-            "reason. Every record in the data directory. There is "
-            "no project filter. Sorted by recency."
+            "Options you have rejected and the reason. No project "
+            "filter. The newest 30 whose timestamp is within 30 days."
         ),
         "mimeType": "application/json",
     },
@@ -591,8 +589,8 @@ RESOURCES: list[dict[str, Any]] = [
         "name": "core",
         "title": "Active core learnings",
         "description": (
-            "Distilled learnings promoted to permanent surfacing via "
-            "cma_distill. Retired learnings are filtered out."
+            "Distilled learnings promoted via cma_distill. Retired "
+            "learnings are removed. The newest 30 active records."
         ),
         "mimeType": "application/json",
     },
