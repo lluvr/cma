@@ -1,20 +1,19 @@
 # cma Architecture
 
-This document specifies the architecture of cma's action-time injection layer: how surfaced warnings reach you at the moment of action, and how the data produced supports validation that the compound practice loop is closing.
+This document specifies how a stored note reaches the moment of an edit, and what the logs count. The logs do not measure that a later edit changed.
 
 The document is the contract between cma and any integration that connects it to your environment (AI client, shell, IDE, CI). Specific integrations are interchangeable; this architecture is what they implement.
 
 ## 1. Purpose and scope
 
-cma is the executable of compound practice. The compound practice loop has five steps:
+cma stores notes and can show one on a later edit. The steps the code runs:
 
-1. **Capture** a failure, decision, rejection, or prevention.
-2. **Surface** relevant prior captures when context matches a future action.
-3. **Catch** the repeat: the surfaced capture changes behavior.
-4. **Record prevention** linking the catch to the original capture.
-5. **Strengthen** the warning's weight from the prevention evidence.
+1. **Capture** a failure, decision, rejection, or prevention when you record it.
+2. **Surface** a prior capture when the file basename matches, or, if that file has no capture, when the surface is auth, payments, or db.
+3. **Record a prevention** with `cma prevented` when you say a warning changed the next action. That note is self-attested.
+4. There is no warning-weight field. A prevention does not change which later note is shown.
 
-The loop closes only if step 2 (surface) happens reliably at the moment of step 3 (catch). Manual `cma surface` invocation is sufficient in principle but unreliable in practice: you forget. Action-time injection makes surfacing automatic and reliable.
+The hook shows the note. It does not measure that the next edit changed. The on/off comparison in [EVALUATION.md](EVALUATION.md) has not been run. Manual `cma surface` works. The hook is what runs it at edit time.
 
 This document covers the action-time injection layer: the pattern by which surfacing is triggered automatically by an external interception point, the data it produces, and the criteria that distinguish state-of-the-art integrations from bolt-on ones.
 
@@ -59,9 +58,9 @@ Standard context fields:
 | `command` | Full command line, if applicable |
 | `working_directory` | Current working directory at time of action |
 | `project_root` | Detected project root (git toplevel, etc.), if available |
-| `surface` | Domain area inferred from `file_path` and `command` |
+| `surface` | Domain area. The Claude Code hook uses auth, payments, or db only as a fallback after the file basename misses. It does not infer ui, docs, api, or test. |
 
-Surface detection is heuristic: lexical matching of path components and command keywords against a configurable rule table. Heuristics will produce false positives and false negatives. State-of-the-art integrations expose the rule table for tuning.
+The Claude Code hook infers a surface only for auth, payments, and db, and only after the file basename matches nothing. The tokens are fixed in the hook. There is no configurable rule table.
 
 ### 2.3 Query
 
@@ -69,11 +68,11 @@ The third stage calls `cma surface` with filters derived from the context.
 
 Query strategy (default):
 
-1. If surface is detected, query with `--surface <s>` (broader, more useful).
-2. Else if file_path is detected, query with `--file <basename>`.
-3. Else skip the query entirely (no actionable filter; would dump all recent captures, which is noise).
+1. If a file basename is present, query with `--file <basename>` first.
+2. If that matches nothing and the surface is auth, payments, or db, query with `--surface`.
+3. Else skip. Do not infer ui, docs, api, or test from the path. An unfiltered query dumps the archive.
 
-Query result limit: a small number. The `cma surface` command default is 10, but the action-time hook passes `--limit 3` to surface only the most relevant matches, not to dump the archive.
+Query result limit: a small number. The `cma surface` command default is 10, but the action-time hook passes `--limit 3`. Matches are newest first. There is no relevance score.
 
 The query is read-only from your perspective. Logging happens as a side effect of `cma surface`, not as additional work for the integration.
 

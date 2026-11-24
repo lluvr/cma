@@ -70,8 +70,9 @@ cma miss <description>
     [--corrected <text>]     (what happened instead after correction)
 
 Capture a failure. The description is required; remaining flags are optional.
-Texture fields (excerpt, intended, corrected) preserve the conditions of the
-failure so future surfacing can match by situation, not just keywords.
+`--corrected` is shown on the next matching edit as an Instead line.
+`--intended` is not. Surfacing matches the file basename, then auth,
+payments, or db. It does not match by situation.
 EOF
             ;;
         decision)
@@ -98,14 +99,14 @@ EOF
             cat <<'EOF'
 cma prevented <description> [--miss-id <id>] [--warning-id <id>]
 
-Capture a moment where a surfaced warning prevented a recurrence.
+Record a note that you stopped because of a prior warning. The note is self-attested.
 EOF
             ;;
         surface)
             cat <<'EOF'
 cma surface [--surface <s>] [--file <f>] [--type <t>] [--limit <n>] [--session <id>] [--shadow]
 
-Bring relevant prior captures into view for the current context.
+Show prior captures for a file or a surface. With no filter, the newest records in the data directory.
 --shadow writes eval_shadow.jsonl and does not write a surface event.
 EOF
             ;;
@@ -125,8 +126,9 @@ cma stats --evidence [--window <days>] [--json]
 cma stats --recurrence [--window <days>]
 
 Evidence dashboard. Default mode shows summary; flags select views.
-The --evidence view composes preventions and leaks into a single
-prevention-rate signal over a trailing window (default 30 days).
+The --evidence view counts evidenced preventions over those
+preventions plus leaks, over a trailing window (default 30 days).
+The rate is a count of notes, not a measured change in a later edit.
 With --json, emits a machine-readable record instead of prose.
 The --recurrence view defaults to all-time; --window N scopes it
 to the trailing window.
@@ -843,11 +845,10 @@ if closure_denom == 0:
     print("  cma surface manually) so surface events exist, and link each")
     print("  prevention with cma prevented --miss-id <id>.")
 else:
-    print("  Loop closure rate measures: among moments where a prior miss")
-    print("  was actually surfaced before the next attempt, what fraction")
-    print("  closed (an evidenced prevention) versus leaked (the miss")
-    print("  recurred). Self-attested preventions without surface-event")
-    print("  evidence are captured separately and do not enter this rate.")
+    print("  Loop closure rate is a count of notes you recorded: evidenced")
+    print("  preventions over those preventions plus leaks. It is not a")
+    print("  measurement that a later edit changed. The on/off comparison")
+    print("  in docs/EVALUATION.md has not been run.")
 PYEOF
         return 0
     fi
@@ -927,9 +928,9 @@ for (surface, fm), records in sorted_groups:
         print("    corrected: {}".format(truncate(corrected)))
     print()
 
-print("Behavior-layer analysis: each group shows where you had to pivot")
-print("from an initial impulse to a different action. Recurring pivots indicate")
-print("patterns where surfaced warnings consistently change behavior.")
+print("Behavior-layer analysis: the intended and corrected lines you stored,")
+print("grouped by surface and fm. This is not a measurement that a warning")
+print("changed a later edit.")
 PYEOF
         return 0
     fi
@@ -1208,11 +1209,11 @@ for (surface, fm), count in recurring:
     else:
         print("  {}x  surface={}  fm={}   (caught: 0)".format(count, s, f))
 print()
-print("Recurrence indicates the prevention is not closing the loop fully.")
-print("A high catch-rate alongside recurrence means the warning works most of")
-print("the time but slips occasionally; sharpen the trigger. A zero catch-rate")
-print("means the warning is not firing at the right moment, or no prevention")
-print("has been captured yet.")
+print("Recurrence counts how often the same surface and fm were recorded again.")
+print("Catch-rate is preventions you linked to a miss in that pair, over those")
+print("preventions plus the misses. It is not a measurement that a warning")
+print("changed a later edit. A zero catch-rate means no prevention was linked")
+print("to that pair.")
 PYEOF
         return 0
     fi

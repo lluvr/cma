@@ -262,9 +262,9 @@ CMA_PREVENTED = {
     "name": "cma_prevented",
     "title": "Record a prevention catch",
     "description": (
-        "Capture a moment where a surfaced warning actually changed "
-        "behavior. The catch is the evidence compound learning works; "
-        "without preventions captured, the loop's effect is invisible. "
+        "Record a note that you stopped because of a prior warning. "
+        "The note is self-attested. It is not a measurement that the "
+        "warning changed a later edit. "
         "Wraps `cma prevented`.\n\n"
         "Invoke immediately after the catch, while the chain (warning "
         "→ recognition → different choice) is still legible. "
@@ -392,11 +392,10 @@ CMA_SURFACE = {
         "failures that occurred despite a relevant warning being "
         "surfaced. Disabling the log defeats leak detection, so cma-mcp "
         "does not expose the --no-log flag.\n\n"
-        "Invoke when about to act on a domain (file edit, command "
-        "execution, design decision) and the agent wants to inherit "
-        "prior context relevant to that action. Without arguments, "
-        "surfaces the most relevant captures for the current working "
-        "directory."
+        "Invoke before an edit when you want prior notes for that file "
+        "or surface. Without arguments, this returns the newest records "
+        "in the data directory. It does not look at the working "
+        "directory. Pass file or surface to narrow it."
     ),
     "inputSchema": {
         "type": "object",
@@ -444,27 +443,23 @@ CMA_STATS = {
         "Views:\n"
         "- `default`: summary (totals, recent activity, top surfaces, "
         "  top failure shapes, prevention rate, recurrence trends).\n"
-        "- `evidence`: prevention-rate signal over a trailing 30-day "
-        "  window (preventions / (preventions + leaks)), recurring "
-        "  patterns in window, prevention-miss linkage rate. The "
-        "  single number that says whether the loop is closing.\n"
-        "- `leaks`: failures that occurred despite an active warning "
-        "  having been surfaced. Each leak increments the warning's "
-        "  weight. The empirical signal that compound learning is "
-        "  working (or not).\n"
-        "- `recurrence`: failure shapes ordered by recurrence rate. "
-        "  Identifies preventions that are not working.\n"
-        "- `preventions`: captured preventions with linked misses. "
-        "  Evidence of the loop closing.\n"
+        "- `evidence`: a count of notes in a trailing 30-day window, "
+        "  evidenced preventions over those preventions plus leaks. "
+        "  It is not a measurement that a later edit changed.\n"
+        "- `leaks`: a later miss whose surface and fm both match a "
+        "  capture that was already shown. There is no warning-weight "
+        "  field.\n"
+        "- `recurrence`: failure shapes ordered by how often the same "
+        "  surface and fm were recorded again.\n"
+        "- `preventions`: notes recorded with `cma prevented`, with "
+        "  linked misses. Self-attested.\n"
         "- `rejections`: active rejections with surfaces, ages, and "
         "  revisit triggers.\n"
-        "- `behavior`: behavior pivots from texture-preserved misses "
-        "  (those captured with `intended` and `corrected`). Surfaces "
-        "  patterns where surfaced warnings consistently changed "
-        "  behavior.\n\n"
-        "Invoke when you want quantitative evidence the "
-        "loop is closing, or when the agent is evaluating which "
-        "captures matter most for the current work."
+        "- `behavior`: the intended and corrected lines you stored, "
+        "  grouped by surface and fm. This is not a measurement that "
+        "  a warning changed a later edit.\n\n"
+        "Invoke to read those counts. The on/off comparison in "
+        "docs/EVALUATION.md has not been run."
     ),
     "inputSchema": {
         "type": "object",
@@ -575,8 +570,8 @@ RESOURCES: list[dict[str, Any]] = [
         "title": "Active decisions in scope",
         "description": (
             "Architectural and strategic decisions you have "
-            "captured, filtered to those in scope for the current "
-            "project (plus global-scope decisions). Sorted by recency."
+            "captured. Every record in the data directory. There is "
+            "no project filter. Sorted by recency."
         ),
         "mimeType": "application/json",
     },
@@ -586,8 +581,8 @@ RESOURCES: list[dict[str, Any]] = [
         "title": "Active rejections",
         "description": (
             "Options you have explicitly rejected and the "
-            "reason. Filtered to the current project. Sorted by "
-            "recency."
+            "reason. Every record in the data directory. There is "
+            "no project filter. Sorted by recency."
         ),
         "mimeType": "application/json",
     },

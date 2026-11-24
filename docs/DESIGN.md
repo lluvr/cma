@@ -34,13 +34,13 @@ cma miss <description>
 **Arguments:**
 
 - `<description>` (required, positional). One-line statement of what failed. Phrased actively: "Treated X as Y without verifying" rather than "X was treated as Y."
-- `--surface` (optional). The domain area: `auth`, `db`, `docs`, `ui`, `infra`, `general`, `git`. Auto-detected from file paths when `--files` is provided.
+- `--surface` (optional). The domain area you pass: `auth`, `db`, `docs`, `ui`, `infra`, `general`, `git`. It is not inferred from `--files`.
 - `--fm` (optional). A failure-mode tag. cma stores the value opaquely; interpretation is the methodology's responsibility. When using a methodology with a canonical catalog, tag with that methodology's canonical names. Auto-classification can be plugged in via the `CMA_FM_CLASSIFIER` env var (see ARCHITECTURE.md).
 - `--files` (optional). Files involved in the failure. Comma-separated list.
 
-**Output:** Confirmation with the captured description, surface, fm, and a unique miss ID. If a similar miss exists in the last 90 days, output flags the recurrence and indicates which warning weight has been incremented.
+**Output:** `Captured miss <id>`. It does not scan prior misses or increment a weight.
 
-**Surfacing trigger:** Recorded misses surface when the current action matches the miss context (surface, file, or keyword overlap).
+**Surfacing trigger:** The Claude Code hook matches the file basename first. If that file has no capture, it falls back to auth, payments, or db. Keyword overlap is not implemented. A miss with no `--files` is silent on the next edit of that file unless the surface is one of those three.
 
 ### cma decision
 
@@ -95,14 +95,14 @@ cma prevented <description>
 **Arguments:**
 
 - `<description>` (required, positional). What was almost done versus what was done instead.
-- `--miss-id` (optional). The miss ID this prevention links to. If known, this provides traceable evidence that the original miss is no longer recurring.
+- `--miss-id` (optional). The miss ID this prevention links to. `--evidence` and `--recurrence` use the link. It does not mark the miss as closed.
 - `--warning-id` (optional). The warning ID that surfaced and was heeded.
 
-**Output:** Confirmation with the captured prevention. If linked to a miss, the miss's prevention count is incremented and the warning's effectiveness is recorded.
+**Output:** `Captured prevention <id>`. Linking a miss does not increment a weight and does not record an effectiveness score.
 
 ### cma surface
 
-Bring relevant prior captures into view for the current context.
+Show prior captures for a file or a surface. With no filter, the newest records in the data directory.
 
 ```
 cma surface
@@ -114,14 +114,14 @@ cma surface
 
 **Arguments:**
 
-All optional. Without arguments, surfaces the most relevant captures for the current working directory and recent activity.
+All optional. Without arguments, the newest records in the data directory. It does not look at the working directory.
 
 - `--surface` (optional). Filter by domain area.
 - `--file` (optional). Filter by specific file. Surfaces captures involving this file.
 - `--type` (optional). Filter by capture type.
 - `--limit` (optional). Maximum results. Default 10.
 
-**Output:** List of relevant captures ordered by relevance (recency, surface match, file match, keyword overlap). Each entry shows ID, type, description, and a relevance signal.
+**Output:** Newest matches first, up to `--limit` (default 10). Each entry shows type, id, surface, and description. A corrected action is an `Instead` line. There is no relevance score and no keyword overlap.
 
 **Replaces:** the prior `cma context` command, generalized.
 
@@ -169,7 +169,7 @@ cma stats
 
 - **Default mode**: summary dashboard. Total captures by type, recent activity, most-active surfaces, top failure shapes, prevention rate, recurrence trends.
 - **`--rejections` view**: list of active rejections with surfaces, ages, and revisit triggers.
-- **`--leaks` view**: failures that occurred despite an active warning. Each leak increments the warning's weight.
+- **`--leaks` view**: a later miss whose surface and fm were already shown by a surface event. There is no warning-weight field.
 - **`--preventions` view**: captured preventions with linked misses: your own record of warnings that changed what you did.
 - **`--recurrence` view**: failure shapes ordered by recurrence rate. Identifies preventions that are not working.
 - **`--behavior` view**: behavior-layer signals from misses carrying intended/corrected texture, grouped by surface and failure mode.

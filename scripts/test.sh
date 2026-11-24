@@ -644,7 +644,7 @@ expect_contains "recurrence single miss not recurring" "no patterns are recurrin
 "$CMA" miss "y" --surface auth --fm fm-1 >/dev/null
 expect_contains "recurrence detects pattern"     "2x" "$CMA" stats --recurrence
 expect_contains "recurrence default scope all time" "all time" "$CMA" stats --recurrence
-expect_contains "recurrence frames as not closing" "not closing the loop" "$CMA" stats --recurrence
+expect_contains "recurrence counts repeated pairs" "same surface and fm" "$CMA" stats --recurrence
 expect_contains "recurrence --window scopes header"  "trailing 7 days" "$CMA" stats --recurrence --window 7
 expect_exit     "recurrence --window 0 rejected"     1 "$CMA" stats --recurrence --window 0
 

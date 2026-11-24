@@ -40,7 +40,9 @@ Capture a failure:
 
 ```bash
 cma miss "fix removed the error message instead of addressing the defect" \
-    --surface infra --fm "<failure-shape>"
+    --surface infra --fm "<failure-shape>" \
+    --files src/parser.py \
+    --corrected "fix the defect the error was reporting"
 ```
 
 For richer capture (texture preservation), add the situational fields:
@@ -53,7 +55,7 @@ cma miss "missed validation in middleware" \
     --excerpt-from /tmp/conversation-excerpt.txt
 ```
 
-`--corrected` is shown on the next matching edit as an Instead line. `--intended` is kept for `cma stats --behavior` and is not shown on that edit. Surfacing matches the file basename, then falls back to auth, payments, or db. It does not match by situation.
+`--corrected` is shown on the next matching edit as an Instead line. `--intended` is kept for `cma stats --behavior` and is not shown on that edit. Surfacing matches the file basename, then falls back to auth, payments, or db. A miss with no `--files` is not shown on the next edit of that file, unless the surface is one of those three. It does not match by situation.
 
 The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog, tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 
@@ -127,10 +129,10 @@ This merges the SessionStart and PreToolUse blocks into `~/.claude/settings.json
 Verify the per-action hook fires by feeding it the payload Claude Code would send (run from the directory you cloned into):
 
 ```bash
-cma miss "example: skipped the token expiry check" --surface auth
+cma miss "example: skipped the token expiry check" --surface auth --files src/auth/login.ts
 echo '{"tool_name":"Edit","tool_input":{"file_path":"src/auth/login.ts"}}' \
     | bash cma/hooks/claude-code-pre-tool-use.sh
-# {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "Relevant prior captures ..."}}
+# additionalContext starts with "Previous failures that matched this edit."
 ```
 
 No output means no capture matched or `cma` is not on the `PATH` the hook sees. Then restart Claude Code so it picks up the new settings.
@@ -168,7 +170,7 @@ Together the two hooks cover both ends of the action-time injection theme: primi
 
 ### Shell (zsh, bash)
 
-`hooks/cma-pre` is a wrapper for shell environments. Surface detection uses the same heuristics as the Claude Code hook, so behavior is consistent across integrations.
+`hooks/cma-pre` is a wrapper for shell environments. It uses the same three surfaces as the Claude Code hook (auth, payments, db) and does not read a filename out of the command, so a miss stored only against a file is shown by the Claude hook and not by this wrapper.
 
 **zsh** (native preexec). Add to `~/.zshrc`:
 
