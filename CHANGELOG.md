@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 
 - `CMA_EVAL=1` records a per-session arm for the Claude Code hooks. The off arm writes `eval_shadow.jsonl` and does not show captures. `cma eval status` counts repeats and withholds the comparison until 30 repeats. The effect on repeat failures is still unmeasured. See `docs/EVALUATION.md`.
+- The README no longer says cma captures failures as they happen, or that surfacing matches by situation. A capture is written when you record it. The next edit matches the file basename, then auth, payments, or db.
 - `cma surface` prints a corrected action as an `Instead` line and does not print the rejected impulse. The PreToolUse hook tells the assistant to follow that line. A miss with no corrected action is unchanged.
 - The PreToolUse hook looks up the file name first. It falls back to a surface only for auth, payments, and db, and only when that file has no capture. It does not treat every component, markdown file, route, or test as one bucket, and it does not treat the word session as auth, or the filename author as auth. The shell hook uses the same three surfaces. A broad bucket was showing that bucket's latest misses on unrelated files.
 
