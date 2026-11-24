@@ -1,6 +1,8 @@
 # Evaluation proposal
 
-Status: proposal. Nothing described here is built.
+Status: the session log is implemented. The comparison has not been run.
+
+Set `CMA_EVAL=1` in the environment of the Claude Code hooks. At session start the arm is chosen once per session id (a coin flip, or `--force` when you are wiring a test) and appended to `eval_sessions.jsonl`. Each PreToolUse call appends an `eval_touch` record. The on arm shows captures as the hook does today and stamps `session_id` on the surface event. The off arm runs the same query, appends the match to `eval_shadow.jsonl`, and prints nothing. `cma eval status` counts repeats from those files. It prints the rates and, until both arms together hold 30 repeats, says the comparison is not a result yet. A prevention is not the outcome. No body of sessions has been scored, so whether a warning reduces repeats is still unmeasured.
 
 ## What is and is not measured today
 

@@ -957,6 +957,70 @@ else
     fail=$((fail + 1))
 fi
 
+# Eval mode. The arm is forced so the test does not depend on the coin flip.
+# Off: show nothing, write a shadow, do not write a surface event.
+reset
+"$CMA" miss "auth issue example" --surface auth --fm fm-1 >/dev/null
+"$CMA" eval arm --session eval-off --force off >/dev/null
+ev_before=$(events_count)
+hook_out=$(CMA_EVAL=1 bash "$HOOK" <<'EOF'
+{"session_id":"eval-off","tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}
+EOF
+)
+if [[ -z "$hook_out" && "$(events_count)" == "$ev_before" && -f "$CMA_DIR/eval_shadow.jsonl" ]]; then
+    printf "PASS  %s\n" "eval off arm shows nothing and writes a shadow"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q events=%s)\n" "eval off arm shows nothing and writes a shadow" "$hook_out" "$(events_count)"
+    fail=$((fail + 1))
+fi
+expect_contains "shadow is not a surface event" "No surface events recorded yet." "$CMA" stats --leaks
+
+# On: show the capture, stamp the session, do not write a shadow.
+reset
+"$CMA" miss "auth issue example" --surface auth --fm fm-1 >/dev/null
+"$CMA" eval arm --session eval-on --force on >/dev/null
+hook_out=$(CMA_EVAL=1 bash "$HOOK" <<'EOF'
+{"session_id":"eval-on","tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}
+EOF
+)
+stamped=$(python3 -c '
+import json, os, sys
+p = os.path.join(sys.argv[1], "surface_events.jsonl")
+lines = open(p).read().splitlines() if os.path.exists(p) else []
+ok = any(json.loads(l).get("session_id") == "eval-on" for l in lines if l.strip())
+shadow = os.path.exists(os.path.join(sys.argv[1], "eval_shadow.jsonl"))
+print("ok" if ok and not shadow else "fail")
+' "$CMA_DIR")
+if [[ "$hook_out" == *"auth issue example"* && "$stamped" == "ok" ]]; then
+    printf "PASS  %s\n" "eval on arm shows the capture and stamps the session"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q stamped=%s)\n" "eval on arm shows the capture and stamps the session" "$hook_out" "$stamped"
+    fail=$((fail + 1))
+fi
+
+# A repeat is a later miss of a shape the session touched. Under 30, status refuses a result.
+reset
+"$CMA" miss "first auth miss" --surface auth --fm fm-1 >/dev/null
+"$CMA" eval arm --session eval-rep --force off >/dev/null
+"$CMA" surface --surface auth --shadow --session eval-rep >/dev/null
+"$CMA" miss "second auth miss" --surface auth --fm fm-1 >/dev/null
+expect_contains "eval status counts the off-arm repeat" "Repeats: 0 on, 1 off" "$CMA" eval status
+expect_contains "eval status withholds the comparison" "Comparison is not a result yet: 1 repeats, floor 30." "$CMA" eval status
+
+# The same session id keeps the arm it was given.
+reset
+first=$("$CMA" eval arm --session stable --force on)
+second=$("$CMA" eval arm --session stable --force off)
+if [[ "$first" == "on" && "$second" == "on" ]]; then
+    printf "PASS  %s\n" "eval arm stays on the first record"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (first=%q second=%q)\n" "eval arm stays on the first record" "$first" "$second"
+    fail=$((fail + 1))
+fi
+
 # ---------------------------------------------------------------------------
 # SessionStart hook
 # ---------------------------------------------------------------------------
@@ -971,6 +1035,34 @@ if [[ -z "$out" ]]; then
     pass=$((pass + 1))
 else
     printf "FAIL  %s (out=%q)\n" "session-start silent on empty data" "$out"
+    fail=$((fail + 1))
+fi
+
+# Eval records the arm at session start and does not change the priming.
+reset
+out=$(CMA_EVAL=1 bash "$SS_HOOK" <<'EOF'
+{"session_id":"ss-eval"}
+EOF
+)
+arm_line=$(python3 -c '
+import json, os, sys
+p = os.path.join(sys.argv[1], "eval_sessions.jsonl")
+if not os.path.exists(p):
+    print("missing")
+    raise SystemExit
+for line in open(p):
+    rec = json.loads(line)
+    if rec.get("type") == "eval_session" and rec.get("session_id") == "ss-eval":
+        print(rec.get("arm") or "blank")
+        break
+else:
+    print("missing")
+' "$CMA_DIR")
+if [[ -z "$out" && ( "$arm_line" == "on" || "$arm_line" == "off" ) ]]; then
+    printf "PASS  %s\n" "session-start records an eval arm and stays silent"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q arm=%q)\n" "session-start records an eval arm and stays silent" "$out" "$arm_line"
     fail=$((fail + 1))
 fi
 

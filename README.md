@@ -102,7 +102,7 @@ Every number above is a count of records you wrote, or a rate computed from thos
 - A **leak** is a miss you captured after a warning for the same surface and failure mode had been surfaced.
 - The **loop closure rate** is evidenced preventions divided by evidenced preventions plus leaks. It is self-reported, and the output labels it that way: it moves with what you choose to record, and it does not compare against what would have happened without the warning.
 
-What works and is checked by the test suite: capture, action-time surfacing, the surface-event log, and the joins that produce these counts. What is not yet measured: whether surfaced warnings reduce repeat failures. [EVALUATION.md](docs/EVALUATION.md) proposes how to measure that.
+What works and is checked by the test suite: capture, action-time surfacing, the surface-event log, and the joins that produce these counts. What is not yet measured: whether surfaced warnings reduce repeat failures. [EVALUATION.md](docs/EVALUATION.md) specifies that comparison. `CMA_EVAL=1` records the arm and the off-arm shadow, and `cma eval status` counts repeats. It withholds the comparison until 30 repeats, and no such run has been scored.
 
 ## Action-time injection
 

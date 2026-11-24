@@ -30,11 +30,23 @@
 
 set -uo pipefail
 
-# Drain stdin (Claude Code may pass JSON; we do not need to parse it for
-# this hook since the work is pulling priming context, not responding to
-# tool input).
+# Drain stdin. When CMA_EVAL=1, record this session's arm before any work.
+# The arm does not change what this hook prints. Both arms get the same priming.
+stdin_payload=""
 if [[ ! -t 0 ]]; then
-    cat > /dev/null
+    stdin_payload=$(cat)
+fi
+if [[ "${CMA_EVAL:-}" == "1" && -n "$stdin_payload" ]] && command -v cma >/dev/null 2>&1; then
+    session_id=$(python3 -c 'import json, sys
+try:
+    data = json.loads(sys.argv[1])
+except Exception:
+    data = {}
+sid = data.get("session_id") if isinstance(data, dict) else ""
+print(sid or "")' "$stdin_payload" 2>/dev/null || true)
+    if [[ -n "${session_id:-}" ]]; then
+        cma eval arm --session "$session_id" >/dev/null 2>&1 || true
+    fi
 fi
 
 # Stage 3: query, failure-isolated. If cma missing, silent exit.

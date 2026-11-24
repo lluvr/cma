@@ -13,7 +13,9 @@ $CMA_DIR/
 ├── rejections.jsonl          Captures of eliminated options (cma reject)
 ├── preventions.jsonl         Captures of caught warnings (cma prevented)
 ├── core.jsonl                Distilled learnings + retirements (cma distill)
-└── surface_events.jsonl      Surface query events (logged by cma surface)
+├── surface_events.jsonl      Surface query events (logged by cma surface)
+├── eval_sessions.jsonl       Eval arm and tool-call records (cma eval)
+└── eval_shadow.jsonl         Off-arm matches that were computed and not shown
 ```
 
 All files are JSON Lines (JSONL): one JSON object per line, append-only, never edited in place. The format is durable, recoverable line by line, and parseable by any JSON-aware tool.
@@ -165,7 +167,36 @@ Records a `cma surface` invocation and what it matched. Written automatically by
 }
 ```
 
-`matched` may be empty (the surface query found no records). Empty events are still recorded as evidence that surfacing was attempted.
+`matched` may be empty (the surface query found no records). Empty events are still recorded as evidence that surfacing was attempted. When the Claude Code hook is running under `CMA_EVAL=1` and the session is in the on arm, the event also carries `session_id`.
+
+### 2.9 Eval session and shadow
+
+Written only while `CMA_EVAL=1` (or by `cma eval` / `cma surface --shadow`). These files are how `cma eval status` compares arms. They are not surface events, and `cma stats --leaks` does not read them. A shadow is a warning that was not shown, so counting it as a leak would treat the off arm as if the warning had fired.
+
+`eval_sessions.jsonl` holds two record types. `eval_session` is appended once per session id. `eval_touch` is appended once per PreToolUse call in that session. Lines are append-only. The tool-call count is the number of `eval_touch` records, not a field rewritten in place.
+
+```json
+{
+  "schema_version": "1.0",
+  "type": "eval_session",
+  "id": "20260505-...",
+  "timestamp": "2026-05-05T...",
+  "session_id": "session-1",
+  "arm": "off"
+}
+```
+
+```json
+{
+  "schema_version": "1.0",
+  "type": "eval_touch",
+  "id": "20260505-...",
+  "timestamp": "2026-05-05T...",
+  "session_id": "session-1"
+}
+```
+
+`eval_shadow.jsonl` has the same fields as a surface event, with `type` `eval_shadow` and `session_id` set. A line is written only when the query matched at least one capture.
 
 ## 3. Schema versioning policy
 

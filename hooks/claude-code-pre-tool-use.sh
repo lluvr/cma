@@ -44,12 +44,14 @@ stdin_json, env_tool_name, env_tool_input = sys.argv[1:]
 
 tool_name = ""
 tool_input = {}
+session_id = ""
 
 # Parse stdin JSON (Claude Code's current hook format)
 if stdin_json:
     try:
         data = json.loads(stdin_json)
         tool_name = data.get("tool_name", "") or tool_name
+        session_id = data.get("session_id") or ""
         ti = data.get("tool_input", {})
         if isinstance(ti, dict):
             tool_input = ti
@@ -69,6 +71,22 @@ if not tool_input and env_tool_input:
         tool_input = json.loads(env_tool_input)
     except json.JSONDecodeError:
         pass
+
+# CMA_EVAL=1 records an arm for this session before any surfacing.
+# The off arm still computes the match, writes a shadow, and shows nothing.
+# Missing session id keeps today's behavior: show the warning.
+arm = ""
+if os.environ.get("CMA_EVAL") == "1" and session_id:
+    def _cma_line(argv):
+        try:
+            result = subprocess.run(argv, capture_output=True, text=True, timeout=5)
+        except Exception:
+            return ""
+        if result.returncode != 0:
+            return ""
+        return result.stdout.strip()
+    arm = _cma_line(["cma", "eval", "arm", "--session", session_id])
+    _cma_line(["cma", "eval", "touch", "--session", session_id])
 
 # Only surface for tools that touch files or run commands
 relevant_tools = {"Edit", "Write", "MultiEdit", "NotebookEdit", "Bash"}
@@ -131,9 +149,16 @@ def run_surface(argv):
 # Query without logging first, so a surface event is only recorded when
 # this hook actually hands captures to the assistant. A miss-free query
 # is not a warning and should not count as one in leak detection.
+# The off arm writes a shadow instead of a surface event, and prints nothing.
+if arm == "off":
+    run_surface(args + ["--shadow", "--session", session_id])
+    sys.exit(0)
+log_args = list(args)
+if arm == "on" and session_id:
+    log_args.extend(["--session", session_id])
 if not run_surface(args + ["--no-log"]):
     sys.exit(0)
-output = run_surface(args)
+output = run_surface(log_args)
 if not output:
     sys.exit(0)
 

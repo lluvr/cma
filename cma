@@ -103,9 +103,10 @@ EOF
             ;;
         surface)
             cat <<'EOF'
-cma surface [--surface <s>] [--file <f>] [--type <t>] [--limit <n>]
+cma surface [--surface <s>] [--file <f>] [--type <t>] [--limit <n>] [--session <id>] [--shadow]
 
 Bring relevant prior captures into view for the current context.
+--shadow writes eval_shadow.jsonl and does not write a surface event.
 EOF
             ;;
         distill)
@@ -281,13 +282,16 @@ cmd_prevented() {
 
 cmd_surface() {
     local surface="" file="" type="" limit="10" log_event=true
+    local shadow=false session_id=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --surface) need_value surface "$@"; surface="$2"; shift 2 ;;
             --file) need_value surface "$@"; file="$2"; shift 2 ;;
             --type) need_value surface "$@"; type="$2"; shift 2 ;;
             --limit) need_value surface "$@"; limit="$2"; shift 2 ;;
+            --session) need_value surface "$@"; session_id="$2"; shift 2 ;;
             --no-log) log_event=false; shift ;;
+            --shadow) shadow=true; shift ;;
             *) echo "cma surface: unknown flag: $1" >&2; usage_for surface; exit 1 ;;
         esac
     done
@@ -298,8 +302,10 @@ cmd_surface() {
 
     local log_arg="log"
     $log_event || log_arg="nolog"
+    local shadow_arg="plain"
+    $shadow && shadow_arg="shadow"
 
-    python3 - "$CMA_DIR" "$surface" "$file" "$type" "$limit" "$log_arg" <<'PYEOF'
+    python3 - "$CMA_DIR" "$surface" "$file" "$type" "$limit" "$log_arg" "$shadow_arg" "$session_id" <<'PYEOF'
 import json, os, sys, time
 from glob import glob
 
@@ -317,14 +323,22 @@ class _CleanOut:
         self._stream.flush()
 sys.stdout = _CleanOut(sys.stdout)
 
-data_dir, surface_filter, file_filter, type_filter, limit_str, log_arg = sys.argv[1:]
+data_dir, surface_filter, file_filter, type_filter, limit_str, log_arg, shadow_arg, session_id = sys.argv[1:]
 limit = int(limit_str) if limit_str else 10
 should_log = (log_arg == "log")
+# A shadow is what the off arm would have shown. It must not land in
+# surface_events.jsonl, or a warning that was never shown becomes a leak.
+is_shadow = (shadow_arg == "shadow")
 
 captures = []
+_skip_logs = {
+    "surface_events.jsonl",
+    "eval_shadow.jsonl",
+    "eval_sessions.jsonl",
+}
 for path in sorted(glob(os.path.join(data_dir, "*.jsonl"))):
-    # Don't include surface_events.jsonl in the captures-to-surface set
-    if os.path.basename(path) == "surface_events.jsonl":
+    # Don't include the event logs in the captures-to-surface set.
+    if os.path.basename(path) in _skip_logs:
         continue
     corrupted = 0
     with open(path) as f:
@@ -377,14 +391,15 @@ filtered.sort(key=lambda r: r.get("timestamp", ""), reverse=True)
 filtered = filtered[:limit]
 
 # Log the surface event so cma stats --leaks can later detect failures
-# that occurred despite a relevant warning being surfaced.
-if should_log:
+# that occurred despite a relevant warning being surfaced. A shadow
+# writes a separate file and only when something would have been shown.
+if is_shadow or should_log:
     from datetime import datetime, timezone
     _now = datetime.now(timezone.utc)
     event_id = "{}-{}".format(_now.strftime("%Y%m%d-%H%M%S"), os.urandom(4).hex())
     event = {
         "schema_version": "1.0",
-        "type": "surface_event",
+        "type": "eval_shadow" if is_shadow else "surface_event",
         "id": event_id,
         "timestamp": _now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "filter_surface": surface_filter,
@@ -401,10 +416,16 @@ if should_log:
             for r in filtered
         ],
     }
-    log_path = os.path.join(data_dir, "surface_events.jsonl")
-    fd = os.open(log_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
-    with os.fdopen(fd, "a") as f:
-        f.write(json.dumps(event) + "\n")
+    if session_id:
+        event["session_id"] = session_id
+    if is_shadow and not filtered:
+        event = None
+    if event is not None:
+        log_name = "eval_shadow.jsonl" if is_shadow else "surface_events.jsonl"
+        log_path = os.path.join(data_dir, log_name)
+        fd = os.open(log_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+        with os.fdopen(fd, "a") as f:
+            f.write(json.dumps(event) + "\n")
 
 if not filtered:
     print("No captures match.")
@@ -1456,6 +1477,8 @@ Files in this directory:
   preventions.jsonl    Captures of caught warnings
   core.jsonl           Distilled learnings (and retirements)
   surface_events.jsonl Surface query events (logged by cma surface)
+  eval_sessions.jsonl  Eval arm and tool-call records (cma eval)
+  eval_shadow.jsonl    What the off arm would have shown (cma surface --shadow)
 
 All files are append-only JSONL. Back up by copying this directory.
 
@@ -1468,6 +1491,231 @@ Schema version: $SCHEMA_VERSION
 EOF
     echo "Initialized cma data directory at $CMA_DIR"
     echo "See $CMA_DIR/README.md for layout."
+}
+
+cmd_eval() {
+    local sub="${1:-}"
+    if [[ -n "$sub" ]]; then
+        shift
+    fi
+    local session_id="" force=""
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --session) need_value eval "$@"; session_id="$2"; shift 2 ;;
+            --force) need_value eval "$@"; force="$2"; shift 2 ;;
+            *) echo "cma eval: unknown flag: $1" >&2; exit 1 ;;
+        esac
+    done
+    case "$sub" in
+        arm|touch|status) ;;
+        *)
+            echo "cma eval: use arm, touch, or status" >&2
+            echo "  cma eval arm --session <id> [--force on|off]" >&2
+            echo "  cma eval touch --session <id>" >&2
+            echo "  cma eval status" >&2
+            exit 1
+            ;;
+    esac
+    if [[ "$sub" != "status" && -z "$session_id" ]]; then
+        echo "cma eval: --session requires a value" >&2
+        exit 1
+    fi
+    if [[ -n "$force" && "$force" != "on" && "$force" != "off" ]]; then
+        echo "cma eval: --force requires on or off" >&2
+        exit 1
+    fi
+
+    python3 - "$CMA_DIR" "$sub" "$session_id" "$force" <<'PYEOF'
+import json, os, random, sys
+from datetime import datetime, timezone
+
+data_dir, sub, session_id, force = sys.argv[1:]
+path = os.path.join(data_dir, "eval_sessions.jsonl")
+
+def now_id():
+    _now = datetime.now(timezone.utc)
+    return (
+        "{}-{}".format(_now.strftime("%Y%m%d-%H%M%S"), os.urandom(4).hex()),
+        _now.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+    )
+
+def append(rec):
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+    with os.fdopen(fd, "a") as f:
+        f.write(json.dumps(rec) + "\n")
+
+def load(file_path):
+    out = []
+    if not os.path.exists(file_path):
+        return out
+    with open(file_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                out.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return out
+
+def norm_ts(ts):
+    if not ts:
+        return ""
+    return ts if "." in ts else ts.replace("Z", ".000000Z")
+
+if sub == "arm":
+    for rec in load(path):
+        if rec.get("type") == "eval_session" and rec.get("session_id") == session_id:
+            print(rec.get("arm", ""))
+            sys.exit(0)
+    arm = force if force in ("on", "off") else random.SystemRandom().choice(("on", "off"))
+    rec_id, ts = now_id()
+    append({
+        "schema_version": "1.0",
+        "type": "eval_session",
+        "id": rec_id,
+        "timestamp": ts,
+        "session_id": session_id,
+        "arm": arm,
+    })
+    print(arm)
+    sys.exit(0)
+
+if sub == "touch":
+    known = False
+    for rec in load(path):
+        if rec.get("type") == "eval_session" and rec.get("session_id") == session_id:
+            known = True
+            break
+    if not known:
+        sys.exit(0)
+    rec_id, ts = now_id()
+    append({
+        "schema_version": "1.0",
+        "type": "eval_touch",
+        "id": rec_id,
+        "timestamp": ts,
+        "session_id": session_id,
+    })
+    sys.exit(0)
+
+sessions = [r for r in load(path) if r.get("type") == "eval_session"]
+sessions.sort(key=lambda r: norm_ts(r.get("timestamp")))
+touches = [r for r in load(path) if r.get("type") == "eval_touch"]
+misses = load(os.path.join(data_dir, "misses.jsonl"))
+events = load(os.path.join(data_dir, "surface_events.jsonl"))
+shadows = load(os.path.join(data_dir, "eval_shadow.jsonl"))
+
+def pair(rec):
+    surface = rec.get("surface") or ""
+    fm = rec.get("fm") or ""
+    if not surface or not fm:
+        return None
+    return (surface, fm)
+
+touched = {}
+for ev in events + shadows:
+    sid = ev.get("session_id") or ""
+    if not sid:
+        continue
+    for matched in ev.get("matched") or []:
+        p = pair(matched)
+        if p:
+            touched.setdefault(sid, set()).add(p)
+
+arms = ("on", "off")
+n_sessions = {a: 0 for a in arms}
+n_tools = {a: 0 for a in arms}
+n_info = {a: 0 for a in arms}
+n_repeats = {a: 0 for a in arms}
+seen = {}
+for s in sessions:
+    sid = s.get("session_id") or ""
+    if not sid or sid in seen:
+        continue
+    if s.get("arm") not in arms:
+        continue
+    seen[sid] = s
+
+for s in seen.values():
+    arm = s["arm"]
+    n_sessions[arm] += 1
+    start = norm_ts(s.get("timestamp"))
+    prior = set()
+    for m in misses:
+        if norm_ts(m.get("timestamp")) < start:
+            p = pair(m)
+            if p:
+                prior.add(p)
+    if touched.get(s["session_id"], set()) & prior:
+        n_info[arm] += 1
+
+touch_arm = {}
+for s in seen.values():
+    touch_arm[s["session_id"]] = s["arm"]
+for t in touches:
+    arm = touch_arm.get(t.get("session_id") or "")
+    if arm:
+        n_tools[arm] += 1
+
+ordered = sorted(seen.values(), key=lambda r: norm_ts(r.get("timestamp")))
+
+def session_for(miss_ts):
+    chosen = None
+    for s in ordered:
+        if norm_ts(s.get("timestamp")) <= miss_ts:
+            chosen = s
+        else:
+            break
+    return chosen
+
+counted = set()
+for m in misses:
+    p = pair(m)
+    if not p:
+        continue
+    miss_ts = norm_ts(m.get("timestamp"))
+    s = session_for(miss_ts)
+    if s is None:
+        continue
+    start = norm_ts(s.get("timestamp"))
+    if miss_ts < start:
+        continue
+    prior = False
+    for earlier in misses:
+        if earlier is m:
+            continue
+        if norm_ts(earlier.get("timestamp")) < start and pair(earlier) == p:
+            prior = True
+            break
+    if not prior:
+        continue
+    if p not in touched.get(s.get("session_id"), set()):
+        continue
+    mid = m.get("id") or miss_ts + p[0] + p[1]
+    if mid in counted:
+        continue
+    counted.add(mid)
+    n_repeats[s["arm"]] += 1
+
+def rate(arm):
+    if n_info[arm] == 0:
+        return "n/a"
+    return "{:.2f}".format(n_repeats[arm] / n_info[arm])
+
+total_repeats = n_repeats["on"] + n_repeats["off"]
+print("Eval sessions: {} on, {} off".format(n_sessions["on"], n_sessions["off"]))
+print("Tool calls: {} on, {} off".format(n_tools["on"], n_tools["off"]))
+print("Informative sessions (touched a captured shape): {} on, {} off".format(
+    n_info["on"], n_info["off"]))
+print("Repeats: {} on, {} off".format(n_repeats["on"], n_repeats["off"]))
+print("Repeat rate per informative session: {} on, {} off".format(rate("on"), rate("off")))
+if total_repeats < 30:
+    print("Comparison is not a result yet: {} repeats, floor 30.".format(total_repeats))
+else:
+    print("Both arms together hold {} repeats. Read the rates above. A prevention is not in this count.".format(total_repeats))
+PYEOF
 }
 
 cmd_help() {
@@ -1485,6 +1733,13 @@ Operations:
   cma distill <learning> [--scope <s>] [--surface <s>] | --retire <p> | --review
   cma stats [--rejections] [--leaks] [--preventions] [--recurrence] [--behavior]
   cma stats --evidence [--window <days>]
+  cma eval arm --session <id> [--force on|off]
+  cma eval touch --session <id>
+  cma eval status
+                          With CMA_EVAL=1 the Claude Code hooks record an
+                          arm per session. The off arm writes a shadow and
+                          does not show captures. status counts repeats and
+                          withholds the comparison until 30 of them.
 
 Setup:
   cma init                Create the data directory with a README
@@ -1518,6 +1773,7 @@ case "${1:-}" in
     prevented)   shift; cmd_prevented "$@" ;;
     surface)     shift; cmd_surface "$@" ;;
     distill)     shift; cmd_distill "$@" ;;
+    eval)        shift; cmd_eval "$@" ;;
     stats)       shift; cmd_stats "$@" ;;
     id)            shift; cmd_id "$@" ;;
     init)          shift; cmd_init "$@" ;;
