@@ -1,5 +1,5 @@
 """
-cma-mcp: Model Context Protocol server for the cma compound practice loop.
+cma-mcp: MCP server that runs the cma command on PATH and can show a note on a later edit.
 
 This file is the entry point. It wires together:
 
@@ -67,7 +67,7 @@ from cma_subprocess import CmaError, cma_version, run_cma
 # `cma-mcp-X.Y.Z` tag must align character-for-character; the
 # publish workflow's verify-tag step hard-fails on mismatch.
 SERVER_NAME = "cma-mcp"
-SERVER_VERSION = "0.1.5"
+SERVER_VERSION = "0.1.6"
 
 # Protocol versions this server speaks, newest first. The wire surface
 # it uses (initialize, tools/list, tools/call, resources/list,

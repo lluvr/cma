@@ -4,7 +4,7 @@ message: >-
   cite it using the metadata below. The MCP distribution wrapper
   (cma-mcp, in this repository under cma-mcp/) is a separately
   citeable artifact; see the references block.
-title: "cma: executable compound practice loop"
+title: "cma: notes you write, shown again on a later edit"
 type: software
 authors:
   - family-names: Lucic
@@ -13,11 +13,11 @@ authors:
 repository-code: "https://github.com/lluvr/cma"
 url: "https://github.com/lluvr/cma"
 abstract: >-
-  cma runs the compound practice loop on your local machine: it
-  captures failures, surfaces relevant prior context at the moment
-  of action, tracks decisions and rejected alternatives, detects
-  recurrence, and captures preventions. Action-time injection ships
-  for Claude Code (PreToolUse and SessionStart hooks) and shell
+  cma stores notes you choose to write and can show a matching note
+  on a later edit. A file name is matched first, then auth, payments,
+  or db. The counts are notes you recorded. Whether a note changes
+  the next failure is unmeasured. Action-time display ships for
+  Claude Code (PreToolUse and SessionStart hooks) and shell
   environments (zsh native preexec, bash via bash-preexec). cma is
   methodology-agnostic at the substrate level; vocabulary lives in
   the methodology, not in cma.
@@ -27,11 +27,11 @@ keywords:
   - decision-tracking
   - prevention
 license: Apache-2.0
-version: "1.1.0"
-date-released: "2026-05-25"
+version: "1.2.0"
+date-released: "2026-11-24"
 references:
   - type: software
-    title: "cma-mcp: Model Context Protocol distribution for the cma compound practice loop"
+    title: "cma-mcp: MCP server for the cma command on PATH"
     authors:
       - family-names: Lucic
         given-names: Lovro
@@ -39,8 +39,7 @@ references:
     url: "https://github.com/lluvr/cma/tree/main/cma-mcp"
     license: Apache-2.0
     notes: >-
-      Lives in this repository under cma-mcp/. Brings the same
-      compound practice loop to MCP-compatible AI clients (Claude
-      Desktop, Cursor, Cline, Continue.dev) by wrapping cma's CLI
-      as a subprocess. See cma-mcp/CITATION.cff for its citable
-      form.
+      Lives in this repository under cma-mcp/. Runs the cma command
+      for MCP-compatible AI clients (Claude Desktop, Cursor, Cline,
+      Continue.dev). The result matches the cma binary on PATH.
+      See cma-mcp/CITATION.cff for its citable form.

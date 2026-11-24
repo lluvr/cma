@@ -19,8 +19,12 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-11-24
+
 ### Changed
 
+- Package description, citation, and the server docstring no longer call this a compound practice loop. The server runs the `cma` command on PATH and can show a note on a later edit. It does not measure whether that note changes the next failure. An older `cma` earlier on PATH is the one that runs.
+- `cma_stats` is titled as counts of notes you recorded.
 - Server instructions tell the client to pass `files` on `cma_miss` when the user corrects the last action. The next edit finds that miss by file name. A miss without `files` is not shown on that edit.
 - `cma_miss` field text matches that replay. `files` is the path whose basename brings the miss back. `corrected` is the Instead line the next edit shows. `intended` stays on the behavior view and is not shown on that edit.
 

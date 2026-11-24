@@ -8,6 +8,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-24
+
 ### Added
 
 - `CMA_EVAL=1` records a per-session arm for the Claude Code hooks. The off arm writes `eval_shadow.jsonl` and does not show captures. `cma eval status` counts repeats and withholds the comparison until 30 repeats. The effect on repeat failures is still unmeasured. See `docs/EVALUATION.md`.
@@ -34,6 +36,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Changed
 
+- `cma --version` reports 1.2.0. The help banner and the citation no longer call this a compound practice loop. A capture is a note you write. The next edit can show it. Whether that note changes the next failure is unmeasured.
 - The README and `docs/` now state that the prevention, leak, and closure-rate numbers are self-reported counts, and that whether surfaced warnings reduce repeat failures is not yet measured. `docs/EVALUATION.md` proposes how to measure it.
 - Repository home moved to a personal account (`lluvr/cma`). Self-references, badges, and issue/security links updated; author and publisher framing is now personal (organization publisher attribution dropped).
 - Zenodo DOI references removed from `CITATION.cff` pending re-issuance under the new account; `SECURITY.md`'s publisher-identity claim softened accordingly.

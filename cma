@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 SCHEMA_VERSION="1.0"
 CMA_DIR="${CMA_DIR:-$HOME/.cma}"
 
@@ -1747,7 +1747,7 @@ PYEOF
 
 cmd_help() {
     cat <<EOF
-cma $VERSION - compound practice loop
+cma $VERSION - notes you write, shown on a later edit
 
 Captures (write):
   cma miss <description> [--surface <s>] [--fm <fm>] [--files <f>]

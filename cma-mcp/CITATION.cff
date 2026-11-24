@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: >-
   If you use cma-mcp in academic, applied, or compliance work,
   please cite it using the metadata below.
-title: "cma-mcp: Model Context Protocol distribution for the compound practice loop"
+title: "cma-mcp: MCP server for the cma command on PATH"
 type: software
 authors:
   - family-names: Lucic
@@ -10,14 +10,11 @@ authors:
     orcid: "https://orcid.org/0009-0008-9976-6933"
 url: "https://pypi.org/project/cma-mcp/"
 abstract: >-
-  cma-mcp is the Model Context Protocol server that exposes the cma
-  compound practice loop to any MCP-compatible AI client (Claude
-  Desktop, Cursor, Cline, Continue.dev, and others). The server is a
-  thin distribution wrapper around the canonical cma reference
-  implementation, the command-line tool it invokes as a subprocess.
-  cma-mcp's contribution is reach: bringing the same
-  capture-and-surface discipline to environments where the
-  cma CLI's shell hooks do not run.
+  cma-mcp is an MCP server that runs the cma command on PATH. It
+  stores nothing itself. The notes, the file match, and the counts
+  are whatever that cma binary does. An older cma earlier on PATH
+  is the one that runs. It does not measure whether a note changes
+  the next failure.
 keywords:
   - mcp
   - model-context-protocol
@@ -27,15 +24,15 @@ keywords:
   - prevention
   - cma
 license: Apache-2.0
-version: "0.1.5"
-date-released: "2026-07-16"
+version: "0.1.6"
+date-released: "2026-11-24"
 identifiers:
   - type: url
     value: "https://pypi.org/project/cma-mcp/"
     description: "PyPI distribution"
 references:
   - type: software
-    title: "cma: executable compound practice loop"
+    title: "cma: notes you write, shown again on a later edit"
     authors:
       - family-names: Lucic
         given-names: Lovro

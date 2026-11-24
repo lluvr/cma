@@ -436,10 +436,10 @@ CMA_SURFACE = {
 
 CMA_STATS = {
     "name": "cma_stats",
-    "title": "Compound-practice evidence dashboard",
+    "title": "Counts of the notes you recorded",
     "description": (
-        "Compute the evidence dashboard for compound practice over "
-        "time. Wraps `cma stats`.\n\n"
+        "Show the counts of notes recorded over a trailing window. "
+        "Wraps `cma stats`.\n\n"
         "Views:\n"
         "- `default`: summary (totals, recent activity, top surfaces, "
         "  top failure shapes, prevention rate, recurrence trends).\n"

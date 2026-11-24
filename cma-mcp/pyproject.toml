@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cma-mcp"
-version = "0.1.5"
-description = "Model Context Protocol server for the cma compound practice loop. Subprocess wrapper around the canonical bash cma binary; methodology-agnostic substrate; three-section payload (analysis + agent_guidance + provenance) on every response."
+version = "0.1.6"
+description = "MCP server that runs the cma command on PATH. It can show a note you wrote on a later edit. It does not measure whether that note changes the next failure."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"

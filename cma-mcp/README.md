@@ -3,10 +3,10 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/cma-mcp/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-The Model Context Protocol layer for cma, an executable compound
-practice loop: capture failures, surface them at the moment of action,
-track decisions and rejections, and count the repeats you report as
-prevented and the ones that recurred anyway.
+The Model Context Protocol layer for cma. cma stores notes you choose
+to write, and can show a matching note on a later edit. The counts
+are records you wrote. Whether a note changes the next failure is
+unmeasured.
 
 cma-mcp wraps the canonical `cma` command-line tool and exposes its
 seven primitives to MCP-compatible AI clients. It does not reimplement
