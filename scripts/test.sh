@@ -1009,6 +1009,19 @@ reset
 expect_contains "eval status counts the off-arm repeat" "Repeats: 0 on, 1 off" "$CMA" eval status
 expect_contains "eval status withholds the comparison" "Comparison is not a result yet: 1 repeats, floor 30." "$CMA" eval status
 
+# A path that merely contains "session" is not auth. The miss recorded
+# against the file name still surfaces when the keyword label matches nothing.
+reset
+"$CMA" miss "hook file miss" --surface hooks --fm fm-1 --files claude-code-session-start.sh >/dev/null
+hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/repo/hooks/claude-code-session-start.sh"}}' | bash "$HOOK" 2>/dev/null)
+if [[ "$hook_out" == *"hook file miss"* ]]; then
+    printf "PASS  %s\n" "hook falls through to the file when the label matches nothing"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "hook falls through to the file when the label matches nothing" "$hook_out"
+    fail=$((fail + 1))
+fi
+
 # The same session id keeps the arm it was given.
 reset
 first=$("$CMA" eval arm --session stable --force on)

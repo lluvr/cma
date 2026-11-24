@@ -1565,21 +1565,38 @@ def norm_ts(ts):
     return ts if "." in ts else ts.replace("Z", ".000000Z")
 
 if sub == "arm":
-    for rec in load(path):
-        if rec.get("type") == "eval_session" and rec.get("session_id") == session_id:
-            print(rec.get("arm", ""))
-            sys.exit(0)
-    arm = force if force in ("on", "off") else random.SystemRandom().choice(("on", "off"))
-    rec_id, ts = now_id()
-    append({
-        "schema_version": "1.0",
-        "type": "eval_session",
-        "id": rec_id,
-        "timestamp": ts,
-        "session_id": session_id,
-        "arm": arm,
-    })
-    print(arm)
+    import fcntl
+    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        raw = os.read(fd, 1024 * 1024 * 8)
+        for line in raw.decode("utf-8", "replace").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if rec.get("type") == "eval_session" and rec.get("session_id") == session_id:
+                print(rec.get("arm", ""))
+                sys.exit(0)
+        arm = force if force in ("on", "off") else random.SystemRandom().choice(("on", "off"))
+        rec_id, ts = now_id()
+        rec = {
+            "schema_version": "1.0",
+            "type": "eval_session",
+            "id": rec_id,
+            "timestamp": ts,
+            "session_id": session_id,
+            "arm": arm,
+        }
+        os.lseek(fd, 0, os.SEEK_END)
+        os.write(fd, (json.dumps(rec) + "\n").encode())
+        print(arm)
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
     sys.exit(0)
 
 if sub == "touch":

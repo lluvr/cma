@@ -104,7 +104,9 @@ elif tool_name == "Bash":
 # Heuristic surface detection from file path or command
 def detect_surface(text):
     t = text.lower()
-    if any(k in t for k in ("auth", "login", "session", "jwt", "oauth", "password", "credential")):
+    # "session" is not a signal. It appears in filenames that are not auth,
+    # and a wrong label suppresses the file match below.
+    if any(k in t for k in ("auth", "login", "jwt", "oauth", "password", "credential")):
         return "auth"
     if any(k in t for k in ("payment", "stripe", "billing", "checkout")):
         return "payments"
@@ -122,16 +124,16 @@ def detect_surface(text):
 
 surface = detect_surface(file_path or command)
 
-# Build cma surface query.
-# Prefer surface filter when detected (broader: catches captures from any file
-# in the same surface). Fall back to file filter when no surface heuristic
-# matches. Combining both with AND is too strict in practice.
-args = ["cma", "surface", "--limit", "3"]
+# Prefer a detected surface, then the file name. A surface label that
+# matches nothing must not hide a miss recorded against this file.
+# Combining both with AND is too strict in practice.
+base = ["cma", "surface", "--limit", "3"]
+queries = []
 if surface:
-    args.extend(["--surface", surface])
-elif file_path:
-    args.extend(["--file", os.path.basename(file_path)])
-else:
+    queries.append(base + ["--surface", surface])
+if file_path:
+    queries.append(base + ["--file", os.path.basename(file_path)])
+if not queries:
     sys.exit(0)
 
 def run_surface(argv):
@@ -146,18 +148,23 @@ def run_surface(argv):
         return ""
     return out
 
-# Query without logging first, so a surface event is only recorded when
-# this hook actually hands captures to the assistant. A miss-free query
-# is not a warning and should not count as one in leak detection.
-# The off arm writes a shadow instead of a surface event, and prints nothing.
-if arm == "off":
-    run_surface(args + ["--shadow", "--session", session_id])
+def first_query():
+    for query in queries:
+        if run_surface(query + ["--no-log"]):
+            return query
+    return None
+
+# Log only the query that actually matched, so a miss-free probe is not
+# a warning. The off arm writes a shadow instead and prints nothing.
+matched = first_query()
+if matched is None:
     sys.exit(0)
-log_args = list(args)
+if arm == "off":
+    run_surface(matched + ["--shadow", "--session", session_id])
+    sys.exit(0)
+log_args = list(matched)
 if arm == "on" and session_id:
     log_args.extend(["--session", session_id])
-if not run_surface(args + ["--no-log"]):
-    sys.exit(0)
 output = run_surface(log_args)
 if not output:
     sys.exit(0)
