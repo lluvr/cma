@@ -63,36 +63,50 @@ Captures are written to `~/.cma/` as JSON Lines files (one record per line, appe
 
 Run `cma --help` for the full command surface.
 
-## The compound loop in four commands
+## Four commands, end to end
 
-cma is built on a chain: captured failures become surfaced warnings, surfaced warnings change what you do next, and the record of both can be computed over. cma does the capturing, the surfacing, and the computing. Whether the warnings change behavior is the part it does not yet measure: the numbers it reports are counts of what you recorded (see [What the numbers are](#what-the-numbers-are)). The full chain in one walkthrough:
+A miss, the surface that shows it again, a prevention linked to it, and the counts. The first line points cma at a scratch directory, so the example does not write into your own `~/.cma`.
 
 ```bash
-# 1. Capture a failure so future similar work can see it.
+export CMA_DIR="$(mktemp -d)"
+
+# 1. Capture a failure so a later edit can show it.
 cma miss "claimed verified without testing the cross-tenant path" \
     --surface auth --fm "<failure-shape>"
 
 # 2. Show the auth notes. The PreToolUse hook does this for a file
 #    whose basename matches, or for auth, payments, and db when that
-#    file has no capture. Manual invocation works too.
+#    file has no capture.
 cma surface --surface auth
 
-# 3. The warning fires. If it changed what you did, record that
-#    and link it to the original miss so cma can attribute it.
-#    `cma id miss` returns the most recent miss id; use it to chain
-#    without scrolling back through terminal output.
+# 3. If the note changed what you did, record that and link it to
+#    the miss. `cma id miss` prints the most recent miss id.
 cma prevented "almost claimed verified again; ran the cross-tenant test instead" \
     --miss-id "$(cma id miss --surface auth)"
 
-# 4. Read the evidence.
+# 4. Read the counts.
 cma stats --evidence
-#    Preventions captured:        1
-#      of which linked to a miss: 1
-#      of which evidenced:        1
-#    Leaks:                       0
-#    Loop closure rate:           100%  (1/1)
-#      self-attested: 1 evidenced prevention(s) you recorded, 0 leak(s)
 ```
+
+The last command prints:
+
+```text
+Prevention notes and leaks (trailing 30 days)
+
+  Preventions captured:        1
+    of which linked to a miss: 1
+    of which evidenced:        1
+  Leaks:                       0
+  Loop closure rate:           100%  (1/1)
+    self-attested: 1 evidenced prevention(s) you recorded, 0 leak(s)
+
+  Loop closure rate is a count of notes you recorded: evidenced
+  preventions over those preventions plus leaks. It is not a
+  measurement that a later edit changed. The on/off comparison
+  in docs/EVALUATION.md has not been run.
+```
+
+The 100% is one note you wrote about one warning. `scripts/test.sh` runs the block above and fails if this output drifts. Run `unset CMA_DIR` to go back to your own data.
 
 `cma stats --evidence --json` emits the structured record for downstream consumers.
 
@@ -126,13 +140,15 @@ cma install-hook --claude-code
 
 This merges the SessionStart and PreToolUse blocks into `~/.claude/settings.json` (or `./.claude/settings.json` with `--scope project`). It is idempotent, preserves any other hooks you have configured, and writes a backup of the prior file at `settings.json.bak`. Preview without writing via `--dry-run`.
 
-Verify the per-action hook fires by feeding it the payload Claude Code would send (run from the directory you cloned into):
+Verify the per-action hook fires by feeding it the payload Claude Code would send. Run this from inside the clone; it uses a scratch data directory, as above:
 
 ```bash
+export CMA_DIR="$(mktemp -d)"
 cma miss "example: skipped the token expiry check" --surface auth --files src/auth/login.ts
 echo '{"tool_name":"Edit","tool_input":{"file_path":"src/auth/login.ts"}}' \
-    | bash cma/hooks/claude-code-pre-tool-use.sh
+    | bash hooks/claude-code-pre-tool-use.sh
 # additionalContext starts with "Previous failures that matched this edit."
+unset CMA_DIR
 ```
 
 No output means no capture matched or `cma` is not on the `PATH` the hook sees. Then restart Claude Code so it picks up the new settings.
@@ -253,9 +269,11 @@ On commodity Linux and macOS the hot operations (`cma-pre --check`, `cma surface
 
 ## Roadmap
 
-The 1.0 surface is locked (see [DESIGN.md](docs/DESIGN.md)) and all seven primitives are functional. Action-time injection ships for Claude Code (PreToolUse and SessionStart hooks) and for shell environments (zsh native preexec, bash via bash-preexec). Both follow the five-stage architecture in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+What ships: the seven commands store notes, the Claude Code hooks and the shell hook show a stored note on a later matching edit or command, and the counts above are joins over those notes. The command surface is specified in [DESIGN.md](docs/DESIGN.md).
 
-Beyond 1.0: counterfactual capture analysis tooling, per-project data scoping, recency-weighted surface ranking. See [CHANGELOG.md](CHANGELOG.md) for the full pending list.
+What is not known: whether a shown note changes the next edit. [EVALUATION.md](docs/EVALUATION.md) specifies the on/off comparison. `CMA_EVAL=1` records the arms. No run has been scored, so no result is claimed.
+
+What cma does not do: capture a correction by itself. A correction becomes an Instead line only when someone records it with `--files` and `--corrected`. Notes carry no project id, so two files that share a basename share a note.
 
 ## License
 

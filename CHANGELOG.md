@@ -8,6 +8,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+
+- The Claude Code PreToolUse hook no longer dies on a large edit. It passed the whole payload, including a Write's file body, to Python as one argument, and past the kernel's 128 KiB per-argument limit that failed with "Argument list too long" (exit 126) and showed no note. The payload now stays on stdin. A test writes a 300,000-character file.
+- `cma miss --help`, and the same for `decision`, `reject`, and `prevented`, prints usage and exits 0. It used to save a note whose description was `--help`. A `--flag` in the description's place is an error and writes nothing. A description may still start with a single dash, such as `-5% on the retry path`.
+
+### Changed
+
+- `cma stats` opens with `Notes recorded` and `cma stats --evidence` with `Prevention notes and leaks`, in place of `Compound practice summary` and `Compound practice evidence`. The JSON output and the schema are unchanged.
+- The README walkthrough is "Four commands, end to end". It and the hook demo run in a scratch `CMA_DIR`, so trying them does not write sample notes into `~/.cma`. The walkthrough shows the full `cma stats --evidence` output, including the paragraph under the 100%. The hook demo runs from inside the clone (`bash hooks/claude-code-pre-tool-use.sh`).
+- `scripts/test.sh` runs both README examples and fails if the walkthrough output drifts from the README or the hook demo stops running.
+- The roadmap says what ships, that the on/off comparison has not been scored, and that cma does not capture a correction by itself or scope notes by project.
+
 ## [1.2.1] - 2026-11-26
 
 ### Fixed

@@ -114,6 +114,23 @@ expect_exit     "unknown command exits 1"        1 "$CMA" garbage
 
 reset
 expect_exit "miss with no description exits 1"   1 "$CMA" miss
+
+# A flag in the description's place is help or a typo, never a note.
+for kind in miss decision reject prevented; do
+    expect_exit "$kind --help exits 0" 0 "$CMA" "$kind" --help
+    expect_contains "$kind --help prints usage" "cma $kind <description>" "$CMA" "$kind" --help
+    expect_exit "$kind with a flag first exits 1" 1 "$CMA" "$kind" --surface auth
+done
+expect_exit "a description may start with a single dash" 0 "$CMA" miss "-5% on the retry path"
+flag_notes=$(cat "$CMA_DIR"/*.jsonl 2>/dev/null | grep -c '"description": "-\(-help\|-surface\|h\)"')
+if [[ "$flag_notes" == 0 ]]; then
+    printf "PASS  %s\n" "help and misplaced flags write no note"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (%s notes)\n" "help and misplaced flags write no note" "$flag_notes"
+    fail=$((fail + 1))
+fi
+
 expect_exit "miss with description succeeds"     0 "$CMA" miss "test miss"
 expect_exit "miss with all flags succeeds"       0 "$CMA" miss "t" --surface docs --fm test --files a.md
 expect_exit "miss with unknown flag exits 1"     1 "$CMA" miss "t" --bogus value
@@ -913,6 +930,23 @@ else
     fail=$((fail + 1))
 fi
 
+# A large Write still surfaces. The payload carries the whole file body,
+# and a payload passed as an argument fails past the kernel's 128 KiB
+# per-argument limit ("Argument list too long", exit 126).
+hook_out=$(python3 -c "
+import json
+print(json.dumps({'tool_name': 'Write', 'tool_input': {
+    'file_path': '/x/auth/y.ts', 'content': 'x' * 300000}}))
+" | bash "$HOOK" 2>&1)
+hook_rc=$?
+if [[ "$hook_rc" == 0 && "$hook_out" == *"auth issue example"* ]]; then
+    printf "PASS  %s\n" "hook surfaces on a Write larger than 128 KiB"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (rc=%s out=%q)\n" "hook surfaces on a Write larger than 128 KiB" "$hook_rc" "${hook_out:0:200}"
+    fail=$((fail + 1))
+fi
+
 # Output is the documented PreToolUse JSON shape, and nothing else.
 hook_out=$(echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/auth/y.ts"}}' | bash "$HOOK" 2>/dev/null)
 hook_json_ok=$(python3 -c "
@@ -1376,6 +1410,50 @@ fi
 reset
 PATH="$NO_TIMEOUT_BIN" CMA_FM_CLASSIFIER='echo portable-fm' "$CMA" miss "classified" >/dev/null
 expect_contains "classifier runs without GNU timeout" '"fm": "portable-fm"' cat "$CMA_DIR/misses.jsonl"
+
+# ---------------------------------------------------------------------------
+# README examples run as written
+# ---------------------------------------------------------------------------
+# The walkthrough block runs with a cma on PATH, and its output must contain
+# the text block the README prints under it. The hook demo runs from the
+# repository root. A README that drifts from the code fails here.
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+readme_blocks() {
+    python3 - "$REPO_ROOT/README.md" "$1" <<'PYEOF'
+import re, sys
+text = open(sys.argv[1]).read()
+which = sys.argv[2]
+if which == "walkthrough":
+    section = text.split("## Four commands, end to end", 1)[1]
+    blocks = re.findall(r"```(bash|text)\n(.*?)```", section, re.S)
+    print(blocks[0][1] if blocks[0][0] == "bash" else "")
+elif which == "expected":
+    section = text.split("## Four commands, end to end", 1)[1]
+    blocks = re.findall(r"```(bash|text)\n(.*?)```", section, re.S)
+    print(blocks[1][1], end="")
+else:
+    section = text.split("Verify the per-action hook fires", 1)[1]
+    print(re.search(r"```bash\n(.*?)```", section, re.S).group(1))
+PYEOF
+}
+walk_out=$(cd "$REPO_ROOT" && bash -c "$(readme_blocks walkthrough)" 2>&1)
+walk_expected=$(readme_blocks expected)
+if [[ -n "$walk_expected" && "$walk_out" == *"$walk_expected"* ]]; then
+    printf "PASS  %s\n" "README walkthrough prints the output it shows"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s\n--- expected\n%s\n--- got\n%s\n" "README walkthrough prints the output it shows" "$walk_expected" "$walk_out"
+    fail=$((fail + 1))
+fi
+hook_demo_out=$(cd "$REPO_ROOT" && bash -c "$(readme_blocks hook)" 2>&1)
+if [[ "$hook_demo_out" == *"Previous failures that matched this edit."* ]]; then
+    printf "PASS  %s\n" "README hook demo runs from the clone"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (out=%q)\n" "README hook demo runs from the clone" "$hook_demo_out"
+    fail=$((fail + 1))
+fi
 
 # ---------------------------------------------------------------------------
 # Summary

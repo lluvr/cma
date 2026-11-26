@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# cma - Compound practice loop
+# cma - notes you write, shown on a later edit
 # https://github.com/lluvr/cma
 #
 # Specification: see docs/DESIGN.md
@@ -27,6 +27,17 @@ need_value() {
         echo "cma $1: $2 requires a value" >&2
         exit 1
     fi
+}
+
+# The description is the first argument. A flag in that place is a request
+# for help or a typo, never a note: "cma miss --help" used to save a miss
+# whose description was "--help". A single dash still starts a description,
+# so "-5% on the retry path" is a note.
+check_description() {
+    case "$2" in
+        -h|--help) usage_for "$1"; exit 0 ;;
+        --*) echo "cma $1: the description comes first, got flag: $2" >&2; usage_for "$1"; exit 1 ;;
+    esac
 }
 
 # Run a command under a time limit. GNU `timeout` is missing on stock
@@ -192,6 +203,7 @@ PYEOF
 
 cmd_miss() {
     if [[ $# -eq 0 ]]; then usage_for miss; exit 1; fi
+    check_description miss "$1"
     if [[ -z "$1" ]]; then echo "cma miss: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" fm="" files=""
@@ -233,6 +245,7 @@ cmd_miss() {
 
 cmd_decision() {
     if [[ $# -eq 0 ]]; then usage_for decision; exit 1; fi
+    check_description decision "$1"
     if [[ -z "$1" ]]; then echo "cma decision: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" applies_when=""
@@ -249,6 +262,7 @@ cmd_decision() {
 
 cmd_reject() {
     if [[ $# -eq 0 ]]; then usage_for reject; exit 1; fi
+    check_description reject "$1"
     if [[ -z "$1" ]]; then echo "cma reject: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local surface="" revisit_when=""
@@ -265,6 +279,7 @@ cmd_reject() {
 
 cmd_prevented() {
     if [[ $# -eq 0 ]]; then usage_for prevented; exit 1; fi
+    check_description prevented "$1"
     if [[ -z "$1" ]]; then echo "cma prevented: description must be non-empty" >&2; exit 1; fi
     local description="$1"; shift
     local miss_id="" warning_id=""
@@ -832,7 +847,7 @@ if output_format == "json":
     print(json.dumps(out, indent=2))
     sys.exit(0)
 
-print("Compound practice evidence (trailing {} days)".format(window_days))
+print("Prevention notes and leaks (trailing {} days)".format(window_days))
 print()
 print("  Preventions captured:        {}".format(prevented_count))
 print("    of which linked to a miss: {}".format(linked))
@@ -1246,7 +1261,7 @@ PYEOF
     fi
 
     # Default summary
-    echo "Compound practice summary"
+    echo "Notes recorded"
     echo ""
     local total=0
     for type in misses decisions rejections preventions core; do
