@@ -24,8 +24,8 @@ keywords:
   - prevention
   - cma
 license: Apache-2.0
-version: "0.1.6"
-date-released: "2026-11-24"
+version: "0.1.7"
+date-released: "2026-11-26"
 identifiers:
   - type: url
     value: "https://pypi.org/project/cma-mcp/"

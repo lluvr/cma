@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cma-mcp"
-version = "0.1.6"
+version = "0.1.7"
 description = "MCP server that runs the cma command on PATH. It can show a note you wrote on a later edit. It does not measure whether that note changes the next failure."
 readme = "README.md"
 requires-python = ">=3.10"

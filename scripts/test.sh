@@ -102,7 +102,7 @@ wait_for_next_second() {
 # ---------------------------------------------------------------------------
 
 expect_exit     "version flag exits 0"           0 "$CMA" --version
-expect_contains "version flag prints version"    "1.2.0" "$CMA" --version
+expect_contains "version flag prints version"    "1.2.1" "$CMA" --version
 expect_exit     "help flag exits 0"              0 "$CMA" --help
 expect_exit     "no args exits 0 (shows help)"   0 "$CMA"
 expect_contains "help lists all seven primitives" "cma surface" "$CMA" --help

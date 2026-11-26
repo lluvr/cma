@@ -19,6 +19,12 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-11-26
+
+### Changed
+
+- `cma_surface` says a file filter matches that file's own name. A longer name that only contains the filter does not match. The match is performed by the `cma` binary on PATH. cma 1.2.1 does this. An older binary earlier on PATH still matches a longer name that contains the filter.
+
 ## [0.1.6] - 2026-11-24
 
 ### Changed
