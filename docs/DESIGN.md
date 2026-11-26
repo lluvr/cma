@@ -40,7 +40,7 @@ cma miss <description>
 
 **Output:** `Captured miss <id>`. It does not scan prior misses or increment a weight.
 
-**Surfacing trigger:** The Claude Code hook matches the file basename first. If that file has no capture, it falls back to auth, payments, or db. Keyword overlap is not implemented. A miss with no `--files` is silent on the next edit of that file unless the surface is one of those three.
+**Surfacing trigger:** The Claude Code hook matches the file's own name first. A capture stored as `src/parser.py` surfaces for `parser.py`. A capture stored as `MyButton.tsx` does not surface for `Button.tsx`. If that file has no capture, the hook falls back to auth, payments, or db. Keyword overlap is not implemented. A miss with no `--files` is silent on the next edit of that file unless the surface is one of those three. Two files that share a basename still share a note.
 
 ### cma decision
 

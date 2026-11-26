@@ -1082,6 +1082,22 @@ else
     fail=$((fail + 1))
 fi
 
+# A longer name that merely contains the file name is a different file.
+# A relative path still surfaces for its basename.
+reset
+"$CMA" miss "other button" --surface ui --fm fm-1 --files MyButton.tsx >/dev/null
+"$CMA" miss "the button" --surface ui --fm fm-1 --files src/Button.tsx >/dev/null
+"$CMA" miss "pay file" --surface auth --fm fm-1 --files pay.ts >/dev/null
+hit=$("$CMA" surface --file Button.tsx --no-log)
+miss=$("$CMA" surface --file y.ts --no-log)
+if [[ "$hit" == *"the button"* && "$hit" != *"other button"* && "$miss" != *"pay file"* ]]; then
+    printf "PASS  %s\n" "surface matches the file's own name, not a longer name"
+    pass=$((pass + 1))
+else
+    printf "FAIL  %s (hit=%q miss=%q)\n" "surface matches the file's own name, not a longer name" "$hit" "$miss"
+    fail=$((fail + 1))
+fi
+
 # When the file has its own capture, the narrow-surface bucket stays out.
 reset
 "$CMA" miss "broad auth miss" --surface auth --fm fm-1 >/dev/null

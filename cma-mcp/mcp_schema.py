@@ -382,8 +382,9 @@ CMA_SURFACE = {
     "title": "Surface prior captures for a file or a surface",
     "description": (
         "Show prior captures for a file or a surface. A miss matches "
-        "when the file filter is contained in its files field, or when "
-        "the surface matches exactly. A decision also matches when a "
+        "when the file filter is that file's own name, or when "
+        "the surface matches exactly. A longer name that only contains "
+        "the filter does not match. A decision also matches when a "
         "word in applies_when appears in the filter. Wraps `cma surface`.\n\n"
         "This call has a side effect: cma writes a record to "
         "surface_events.jsonl with the filters used and the matched "
@@ -415,8 +416,8 @@ CMA_SURFACE = {
                 "type": "string",
                 "maxLength": MAX_SHORT_FIELD,
                 "description": (
-                    "Filter by file path (or basename). Matches "
-                    "captures whose `files` field includes this value."
+                    "Filter by file path or basename. Matches a capture "
+                    "whose stored path has this file's own name."
                 ),
             },
             "type": {

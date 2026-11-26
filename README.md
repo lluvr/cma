@@ -11,13 +11,13 @@ Record a failure against the file where it happened. The next edit of that file 
 
 cma stores failures, decisions, and ruled-out paths on your machine. With the Claude Code hook installed, the next edit of a file shows the captures that name that file. It does not watch the work and capture by itself. Whether a warning changes the next edit is unmeasured.
 
-cma is methodology-agnostic. It owns the data substrate (how captures are stored, surfaced, and joined into computable evidence) and stays out of the vocabulary you use to classify them. Pair it with whatever failure-mode catalog your practice already uses.
+cma is methodology-agnostic. It stores the notes and stays out of the vocabulary you use to classify them. Pair it with whatever failure-mode catalog your practice already uses.
 
 ## Status
 
-cma 1.0 reference implementation. All seven primitives fully functional: `cma miss`, `cma decision`, `cma reject`, `cma prevented`, `cma surface`, `cma distill` (default + `--review` + `--retire`), and `cma stats` (default + `--rejections` + `--preventions` + `--recurrence` + `--leaks` + `--behavior`). Action-time injection (Claude Code hook + shell wrapper). Texture preservation on misses. The test suite covers functional paths, edge cases, JSON validity, the leak-detection join, hook integration, and shell wrapper modes.
+The commands `miss`, `decision`, `reject`, `prevented`, `surface`, `distill`, and `stats` store notes and can show a stored note on a later edit. A corrected note is shown as an Instead line. The numbers those commands print are counts of notes you recorded. Whether a warning changes the next edit is unmeasured. The test suite covers capture, surfacing, and the joins that produce those counts.
 
-The full surface is specified in [DESIGN.md](docs/DESIGN.md). Additive features (action-time injection, texture preservation, counterfactual capture, recurrence detection) layer on without changing the locked surface.
+The command surface is specified in [DESIGN.md](docs/DESIGN.md).
 
 ## Quick start
 
@@ -55,7 +55,7 @@ cma miss "missed validation in middleware" \
     --excerpt-from /tmp/conversation-excerpt.txt
 ```
 
-`--corrected` is shown on the next matching edit as an Instead line. `--intended` is kept for `cma stats --behavior` and is not shown on that edit. Surfacing matches the file basename, then falls back to auth, payments, or db. A miss with no `--files` is not shown on the next edit of that file, unless the surface is one of those three. It does not match by situation.
+`--corrected` is shown on the next matching edit as an Instead line. `--intended` is kept for `cma stats --behavior` and is not shown on that edit. Surfacing matches that file's own name, then falls back to auth, payments, or db. A capture stored as `src/parser.py` surfaces for `parser.py`. A capture stored as `MyButton.tsx` does not surface for `Button.tsx`. A miss with no `--files` is not shown on the next edit of that file, unless the surface is one of those three. It does not match by situation. Two files that share a basename, in different projects, still share a note.
 
 The `--fm` value is an opaque string from your perspective; cma stores it without interpretation. When using a methodology with a canonical failure-mode catalog, tag with the methodology's canonical names so analysis tooling can interpret them. cma is methodology-agnostic; the catalog and its meaning live in the methodology, not in cma.
 

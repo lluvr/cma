@@ -137,7 +137,7 @@ _GUIDANCE_CAPTURE = {
 _GUIDANCE_SURFACE = {
     "what_this_tool_does": (
         "Returns captures whose surface equals the filter, whose "
-        "files field contains the file filter, or, for a decision, "
+        "stored path names the file filter, or, for a decision, "
         "whose applies_when contains a word in the filter. With no "
         "filter, the newest records. The query is logged to "
         "surface_events.jsonl so leak detection can later flag a "

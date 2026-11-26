@@ -8,6 +8,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+
+- `cma surface --file` matches a file's own name. A capture stored as `src/parser.py` still surfaces for `parser.py`. A capture stored as `MyButton.tsx` does not surface for `Button.tsx`, and `pay.ts` does not surface for `y.ts`.
+
+### Changed
+
+- The Status section no longer calls this a finished 1.0 reference implementation. The commands store and replay notes. Whether a warning changes the next edit is unmeasured.
+
 ## [1.2.0] - 2026-11-24
 
 ### Added

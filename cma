@@ -71,8 +71,9 @@ cma miss <description>
 
 Capture a failure. The description is required; remaining flags are optional.
 `--corrected` is shown on the next matching edit as an Instead line.
-`--intended` is not. Surfacing matches the file basename, then auth,
-payments, or db. It does not match by situation.
+`--intended` is not. Surfacing matches that file's own name, then auth,
+payments, or db. A longer name that only contains it does not match.
+It does not match by situation.
 EOF
             ;;
         decision)
@@ -382,11 +383,29 @@ def matches(rec):
 
     if surface_filter and rec.get("surface") != surface_filter:
         return False
-    if file_filter:
-        files = rec.get("files", "")
-        if file_filter not in files:
-            return False
+    if file_filter and not _file_named(file_filter, rec.get("files", "")):
+        return False
     return True
+
+def _file_named(file_filter, files_field):
+    """True when the filter names this file, not a longer name that contains it.
+
+    The hook sends the basename. A capture may store a relative path.
+    `parser.py` matches `src/parser.py`. `Button.tsx` does not match
+    `MyButton.tsx`, and `y.ts` does not match `pay.ts`.
+    """
+    raw = str(file_filter).replace("\\", "/").rstrip("/")
+    want = os.path.basename(raw)
+    if not want:
+        return False
+    for token in re.split(r"[\s,]+", str(files_field or "")):
+        token = token.strip().strip("'\"")
+        if not token:
+            continue
+        path = token.replace("\\", "/").rstrip("/")
+        if path == raw or os.path.basename(path) == want:
+            return True
+    return False
 
 filtered = [r for r in captures if matches(r)]
 filtered.sort(key=lambda r: r.get("timestamp", ""), reverse=True)
