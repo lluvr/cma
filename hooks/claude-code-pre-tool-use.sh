@@ -29,18 +29,16 @@ set -uo pipefail
 
 # Read hook payload: prefer stdin JSON (current Claude Code format),
 # fall back to env vars (older convention used by some hooks).
-stdin_payload=""
-if [[ ! -t 0 ]]; then
-    stdin_payload=$(cat)
-fi
-
-env_tool_name="${CLAUDE_TOOL_NAME:-}"
-env_tool_input="${CLAUDE_TOOL_INPUT:-}"
-
-python3 - "$stdin_payload" "$env_tool_name" "$env_tool_input" <<'PYEOF'
+#
+# The payload stays on stdin. A Write carries the whole file body, and
+# passing that as an argument fails past the kernel's 128 KiB limit per
+# argument, so the script goes in -c and Python reads stdin itself.
+read -r -d '' HOOK_PY <<'PYEOF'
 import json, os, re, sys, subprocess
 
-stdin_json, env_tool_name, env_tool_input = sys.argv[1:]
+stdin_json = "" if sys.stdin.isatty() else sys.stdin.read()
+env_tool_name = os.environ.get("CLAUDE_TOOL_NAME", "")
+env_tool_input = os.environ.get("CLAUDE_TOOL_INPUT", "")
 
 tool_name = ""
 tool_input = {}
@@ -194,3 +192,5 @@ print(json.dumps({
     }
 }))
 PYEOF
+
+python3 -c "$HOOK_PY"
