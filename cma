@@ -29,14 +29,17 @@ need_value() {
     fi
 }
 
-# The description is the first argument. A flag in that place is a request
-# for help or a typo, never a note: "cma miss --help" used to save a miss
-# whose description was "--help". A single dash still starts a description,
-# so "-5% on the retry path" is a note.
+# The description is the first argument. Help, or one of cma's own flags,
+# in that place is never a note: "cma miss --help" used to save a miss
+# whose description was "--help". Any other text is a description, so
+# "--no-verify skipped the hook" and "-5% on the retry path" are notes.
 check_description() {
     case "$2" in
         -h|--help) usage_for "$1"; exit 0 ;;
-        --*) echo "cma $1: the description comes first, got flag: $2" >&2; usage_for "$1"; exit 1 ;;
+        --surface|--fm|--files|--excerpt|--excerpt-from|--intended|--corrected|--applies-when|--revisit-when|--miss-id|--warning-id)
+            echo "cma $1: the description comes first, got flag: $2" >&2
+            usage_for "$1"
+            exit 1 ;;
     esac
 }
 

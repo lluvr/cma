@@ -33,7 +33,7 @@ set -uo pipefail
 # The payload stays on stdin. A Write carries the whole file body, and
 # passing that as an argument fails past the kernel's 128 KiB limit per
 # argument, so the script goes in -c and Python reads stdin itself.
-read -r -d '' HOOK_PY <<'PYEOF'
+IFS= read -r -d '' HOOK_PY <<'PYEOF' || true
 import json, os, re, sys, subprocess
 
 stdin_json = "" if sys.stdin.isatty() else sys.stdin.read()

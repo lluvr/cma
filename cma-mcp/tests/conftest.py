@@ -26,6 +26,16 @@ if str(_REPO_ROOT) not in sys.path:
 # ── env isolation ─────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def _cma_dir_outside_home(tmp_path_factory, monkeypatch):
+    """
+    Every test gets its own CMA_DIR unless it sets one. Without this,
+    tests that run the cma binary fell back to ~/.cma and created it in
+    the home directory of whoever ran the suite.
+    """
+    monkeypatch.setenv("CMA_DIR", str(tmp_path_factory.mktemp("cma-home")))
+
+
 @pytest.fixture
 def isolated_cma_dir(tmp_path, monkeypatch):
     """

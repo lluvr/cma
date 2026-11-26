@@ -11,7 +11,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Fixed
 
 - The Claude Code PreToolUse hook no longer dies on a large edit. It passed the whole payload, including a Write's file body, to Python as one argument, and past the kernel's 128 KiB per-argument limit that failed with "Argument list too long" (exit 126) and showed no note. The payload now stays on stdin. A test writes a 300,000-character file.
-- `cma miss --help`, and the same for `decision`, `reject`, and `prevented`, prints usage and exits 0. It used to save a note whose description was `--help`. A `--flag` in the description's place is an error and writes nothing. A description may still start with a single dash, such as `-5% on the retry path`.
+- `cma miss --help`, and the same for `decision`, `reject`, and `prevented`, prints usage and exits 0. It used to save a note whose description was `--help`. One of cma's own flags in the description's place, such as `cma miss --surface auth`, is an error and writes nothing. Any other text is still a description, so `--no-verify skipped the pre-commit hook` and `-5% on the retry path` are notes.
+- The cma-mcp test suite no longer creates `~/.cma` in the home directory of whoever runs it. Every test gets its own `CMA_DIR`.
 
 ### Changed
 

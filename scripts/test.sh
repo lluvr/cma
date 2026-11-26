@@ -122,6 +122,8 @@ for kind in miss decision reject prevented; do
     expect_exit "$kind with a flag first exits 1" 1 "$CMA" "$kind" --surface auth
 done
 expect_exit "a description may start with a single dash" 0 "$CMA" miss "-5% on the retry path"
+expect_exit "a description may start with another double-dash word" 0 "$CMA" miss "--no-verify skipped the pre-commit hook"
+expect_exit "prevented with --miss-id first exits 1" 1 "$CMA" prevented --miss-id x
 flag_notes=$(cat "$CMA_DIR"/*.jsonl 2>/dev/null | grep -c '"description": "-\(-help\|-surface\|h\)"')
 if [[ "$flag_notes" == 0 ]]; then
     printf "PASS  %s\n" "help and misplaced flags write no note"
@@ -1437,7 +1439,11 @@ else:
     print(re.search(r"```bash\n(.*?)```", section, re.S).group(1))
 PYEOF
 }
-walk_out=$(cd "$REPO_ROOT" && bash -c "$(readme_blocks walkthrough)" 2>&1)
+# The examples call mktemp; point it inside the test's own data dir so the
+# trap removes what they create.
+README_TMP="$CMA_DIR/readme-tmp"
+mkdir -p "$README_TMP"
+walk_out=$(cd "$REPO_ROOT" && TMPDIR="$README_TMP" bash -c "$(readme_blocks walkthrough)" 2>&1)
 walk_expected=$(readme_blocks expected)
 if [[ -n "$walk_expected" && "$walk_out" == *"$walk_expected"* ]]; then
     printf "PASS  %s\n" "README walkthrough prints the output it shows"
@@ -1446,7 +1452,7 @@ else
     printf "FAIL  %s\n--- expected\n%s\n--- got\n%s\n" "README walkthrough prints the output it shows" "$walk_expected" "$walk_out"
     fail=$((fail + 1))
 fi
-hook_demo_out=$(cd "$REPO_ROOT" && bash -c "$(readme_blocks hook)" 2>&1)
+hook_demo_out=$(cd "$REPO_ROOT" && TMPDIR="$README_TMP" bash -c "$(readme_blocks hook)" 2>&1)
 if [[ "$hook_demo_out" == *"Previous failures that matched this edit."* ]]; then
     printf "PASS  %s\n" "README hook demo runs from the clone"
     pass=$((pass + 1))
